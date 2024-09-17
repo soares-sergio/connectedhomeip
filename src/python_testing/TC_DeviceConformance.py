@@ -165,7 +165,7 @@ class DeviceConformanceTests(BasicCompositionTests):
                     location = AttributePathLocation(endpoint_id=endpoint_id, cluster_id=cluster_id, attribute_id=attribute_id)
                     if attribute_id not in self.xml_clusters[cluster_id].attributes.keys():
                         # TODO: Consolidate the range checks with IDM-10.1 once that lands
-                        if attribute_id <= 0x4FFF:
+                        if (attribute_id & 0xFFFF0000) != 0:
                             # manufacturer attribute
                             record_error(location=location, problem='Standard attribute found on device, but not in spec')
                         continue
@@ -192,7 +192,7 @@ class DeviceConformanceTests(BasicCompositionTests):
                         location = CommandPathLocation(endpoint_id=endpoint_id, cluster_id=cluster_id, command_id=command_id)
                         if command_id not in xml_commands_dict:
                             # TODO: Consolidate range checks with IDM-10.1 once that lands
-                            if command_id <= 0xFF:
+                            if (command_id & 0xFFFF0000) != 0:
                                 # manufacturer command
                                 continue
                             record_error(location=location, problem='Standard command found on device, but not in spec')
