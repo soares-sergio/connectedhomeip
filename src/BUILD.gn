@@ -109,6 +109,8 @@ if (chip_build_tests) {
       # with ember
       # Disabled on EFR32 since "include <random>" fails with `::fabs` not defined
       tests += [ "${chip_root}/src/data-model-providers/codegen/tests" ]
+      tests += [ "${chip_root}/src/data-model-providers/codedriven/tests" ]
+      tests += [ "${chip_root}/examples/any-device-app/tests" ]
     }
 
     if (chip_device_platform != "efr32") {

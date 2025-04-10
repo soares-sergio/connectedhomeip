@@ -49,6 +49,7 @@ class HostFuzzingType(Enum):
 class HostApp(Enum):
     ALL_CLUSTERS = auto()
     ALL_CLUSTERS_MINIMAL = auto()
+    ANY_DEVICE = auto()
     CHIP_TOOL = auto()
     CHIP_TOOL_DARWIN = auto()
     THERMOSTAT = auto()
@@ -97,6 +98,8 @@ class HostApp(Enum):
             return 'all-clusters-app/linux'
         elif self == HostApp.ALL_CLUSTERS_MINIMAL:
             return 'all-clusters-minimal-app/linux'
+        elif self == HostApp.ANY_DEVICE:
+            return 'any-device-app/linux'
         elif self == HostApp.CHIP_TOOL:
             return 'chip-tool'
         elif self == HostApp.CHIP_TOOL_DARWIN:
@@ -183,6 +186,9 @@ class HostApp(Enum):
         elif self == HostApp.ALL_CLUSTERS_MINIMAL:
             yield 'chip-all-clusters-minimal-app'
             yield 'chip-all-clusters-minimal-app.map'
+        elif self == HostApp.ANY_DEVICE:
+            yield 'chip-any-device-app'
+            yield 'chip-any-device-app.map'
         elif self == HostApp.CHIP_TOOL:
             yield 'chip-tool'
             yield 'chip-tool.map'

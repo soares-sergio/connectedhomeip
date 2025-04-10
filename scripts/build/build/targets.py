@@ -110,6 +110,7 @@ def BuildHostTarget():
                    app=HostApp.RPC_CONSOLE).OnlyIfRe(f'{native_board_name}-'),
         TargetPart('all-clusters', app=HostApp.ALL_CLUSTERS),
         TargetPart('all-clusters-minimal', app=HostApp.ALL_CLUSTERS_MINIMAL),
+        TargetPart('any-device', app=HostApp.ANY_DEVICE),
         TargetPart('chip-tool', app=HostApp.CHIP_TOOL),
         TargetPart('thermostat', app=HostApp.THERMOSTAT),
         # TODO: controllers depending on a datamodel is odd. For now fix compile dependencies on ember.
