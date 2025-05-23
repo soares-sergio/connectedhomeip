@@ -52,9 +52,8 @@ using DataModel::ServerClusterEntry;
  * - The CodeDrivenDataModelProvider stores raw pointers to EndpointProviderInterface instances.
  *   It does NOT take ownership. Callers must ensure these instances outlive the provider.
  * - Modifications to the endpoint list (AddEndpoint, RemoveEndpoint) are not thread-safe and should
- *   ideally be performed before Startup(). Read operations after Startup() are generally safe if the
- *   underlying EndpointProviderInterface and ServerClusterInterface implementations are also thread-safe
- *   for reads.
+ *   ideally be performed in main() or within the chip main loop thread
+ *   (e.g., via ScheduleWork on the CHIP main loop).
  */
 class CodeDrivenDataModelProvider : public DataModel::Provider
 {
@@ -90,9 +89,11 @@ public:
 
     void Temporary_ReportAttributeChanged(const AttributePathParams & path) override;
 
-    // Data model tree construction
-    // NOTE: This stores pointers to EndpointProviderInterface instances. The provider does not take ownership.
-    // It's critical to ensure that the objects pointed to outlive the CodeDrivenDataModelProvider.
+    /* Lifecycle Management:
+     * The CodeDrivenDataModelProvider stores pointers to EndpointProviderInterface, but does NOT take ownership.
+     * It is crucial that the lifetime of any EndpointProviderInterface instance outlives the
+     * CodeDrivenDataModelProvider it is registered with.
+     */
     CHIP_ERROR AddEndpoint(EndpointProviderInterface & endpointProvider);
     CHIP_ERROR RemoveEndpoint(EndpointId endpointId);
 

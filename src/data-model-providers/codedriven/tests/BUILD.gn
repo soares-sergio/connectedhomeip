@@ -14,16 +14,10 @@
 import("//build_overrides/chip.gni")
 import("${chip_root}/build/chip/chip_test_suite.gni")
 
-config("includes") {
-  include_dirs = [ "." ]
-}
-
 chip_test_suite("tests") {
   output_name = "libCodeDrivenDataModelProviderTests"
 
   test_sources = [ "TestCodeDrivenDataModelProvider.cpp" ]
-
-  include_dirs = [ "." ]
 
   cflags = [ "-Wconversion" ]
 

@@ -275,8 +275,32 @@ CHIP_ERROR CodeDrivenDataModelProvider::AddEndpoint(EndpointProviderInterface & 
     {
         return CHIP_ERROR_DUPLICATE_KEY_ID;
     }
-    // TODO(sergiosoares): Do we need to Startup clusters here?
     mEndpointProviders.push_back(&endpointProvider);
+
+    // If the provider has already been started, we need to startup the clusters for this new endpoint.
+    if (mServerClusterContext.has_value())
+    {
+        ReadOnlyBufferBuilder<ServerClusterInterface *> serverClusterBuilder;
+        ReturnErrorOnFailure(endpointProvider.ServerClusterInterfaces(serverClusterBuilder));
+        auto serverClusters = serverClusterBuilder.TakeBuffer();
+
+        for (auto * serverCluster : serverClusters)
+        {
+            CHIP_ERROR err = serverCluster->Startup(*mServerClusterContext);
+            if (err != CHIP_NO_ERROR)
+            {
+                // Log startup failure for the specific cluster
+                VerifyOrReturnError(!serverCluster->GetPaths().empty(), CHIP_ERROR_INCORRECT_STATE);
+                const ConcreteClusterPath path = serverCluster->GetPaths().front();
+                ChipLogError(DataManagement,
+                             "Cluster %u/" ChipLogFormatMEI " on newly added Endpoint %u startup failed: %" CHIP_ERROR_FORMAT,
+                             path.mEndpointId, ChipLogValueMEI(path.mClusterId), endpointProvider.GetEndpointEntry().id,
+                             err.Format());
+                // Continue trying to start other clusters, but return an error indicating partial failure.
+                return CHIP_ERROR_HAD_FAILURES; // Or a more specific error if desired
+            }
+        }
+    }
     return CHIP_NO_ERROR;
 }
 
@@ -286,7 +310,22 @@ CHIP_ERROR CodeDrivenDataModelProvider::RemoveEndpoint(EndpointId endpointId)
     {
         if ((*it)->GetEndpointEntry().id == endpointId)
         {
-            // TODO(sergiosoares): Do we need to Shutdown removed endpoint/clusters here?
+            // If the provider is still active (i.e., mServerClusterContext has a value, meaning Startup was called
+            // and Shutdown hasn't been called or it was called and Startup was called again),
+            // we need to shutdown the clusters of the endpoint being removed.
+            if (mServerClusterContext.has_value())
+            {
+                ReadOnlyBufferBuilder<ServerClusterInterface *> serverClusterBuilder;
+                CHIP_ERROR err = (*it)->ServerClusterInterfaces(serverClusterBuilder); // Non-const call okay here
+                if (err == CHIP_NO_ERROR)
+                {
+                    auto serverClusters = serverClusterBuilder.TakeBuffer();
+                    for (auto * serverCluster : serverClusters)
+                    {
+                        serverCluster->Shutdown(); // Current API swallows errors
+                    }
+                } // else, log error or handle as appropriate if ServerClusterInterfaces can fail significantly
+            }
             mEndpointProviders.erase(it);
             return CHIP_NO_ERROR;
         }

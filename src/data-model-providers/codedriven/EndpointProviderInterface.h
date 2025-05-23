@@ -30,28 +30,64 @@ using SemanticTag = chip::app::Clusters::Descriptor::Structs::SemanticTagStruct:
 /**
  * @brief Defines the interface for an object that can provide information about a Matter endpoint.
  *
- * This interface is used by the CodeDrivenDataModelProvider to discover the structure and capabilities
- * of an endpoint, including its device types, client clusters, server clusters, and semantic tags.
+ * This interface is used describe the structure and capabilities of an endpoint, including its device
+ * types, client clusters, server clusters, and semantic tags.
  *
  * Implementations of this interface are responsible for providing instances of ServerClusterInterface
  * for each server cluster they expose.
- *
- * Lifecycle Management:
- * Instances of EndpointProviderInterface are typically registered with a CodeDrivenDataModelProvider.
- * The CodeDrivenDataModelProvider stores pointers to these instances but does NOT take ownership.
- * It is crucial that the lifetime of any EndpointProviderInterface instance outlives the
- * CodeDrivenDataModelProvider it is registered with.
  */
 class EndpointProviderInterface
 {
 public:
     virtual ~EndpointProviderInterface() = default;
 
-    virtual const DataModel::EndpointEntry & GetEndpointEntry() const                                       = 0;
-    virtual CHIP_ERROR SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out)                               = 0;
-    virtual CHIP_ERROR DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out)                 = 0;
-    virtual CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out)                               = 0;
-    virtual ServerClusterInterface * GetServerCluster(ClusterId clusterId)                                  = 0;
+    /**
+     * @brief Retrieves the basic information about the endpoint.
+     *
+     * @return A constant reference to the DataModel::EndpointEntry struct containing
+     *         the endpoint ID, parent endpoint ID, and composition pattern.
+     */
+    virtual const DataModel::EndpointEntry & GetEndpointEntry() const = 0;
+
+    /**
+     * @brief Populates the provided ReadOnlyBufferBuilder with the semantic tags for this endpoint.
+     *
+     * @param[out] out The ReadOnlyBufferBuilder to fill with SemanticTagStruct instances.
+     * @return CHIP_NO_ERROR on success, or an error code if the operation fails (e.g., buffer too small).
+     */
+    virtual CHIP_ERROR SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) = 0;
+
+    /**
+     * @brief Populates the provided ReadOnlyBufferBuilder with the device types for this endpoint.
+     *
+     * @param[out] out The ReadOnlyBufferBuilder to fill with DataModel::DeviceTypeEntry instances.
+     * @return CHIP_NO_ERROR on success, or an error code if the operation fails (e.g., buffer too small).
+     */
+    virtual CHIP_ERROR DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) = 0;
+
+    /**
+     * @brief Populates the provided ReadOnlyBufferBuilder with the client cluster IDs for this endpoint.
+     *
+     * @param[out] out The ReadOnlyBufferBuilder to fill with ClusterId instances.
+     * @return CHIP_NO_ERROR on success, or an error code if the operation fails (e.g., buffer too small).
+     */
+    virtual CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) = 0;
+
+    /**
+     * @brief Retrieves a pointer to the ServerClusterInterface for the given cluster ID.
+     *
+     * @param clusterId The ID of the server cluster to retrieve.
+     * @return A pointer to the ServerClusterInterface if found, otherwise nullptr.
+     */
+    virtual ServerClusterInterface * GetServerCluster(ClusterId clusterId) = 0;
+
+    /**
+     * @brief Populates the provided ReadOnlyBufferBuilder with pointers to all ServerClusterInterface instances
+     *        hosted on this endpoint.
+     *
+     * @param[out] out The ReadOnlyBufferBuilder to fill with ServerClusterInterface pointers.
+     * @return CHIP_NO_ERROR on success, or an error code if the operation fails (e.g., buffer too small).
+     */
     virtual CHIP_ERROR ServerClusterInterfaces(ReadOnlyBufferBuilder<ServerClusterInterface *> & out) const = 0;
 };
 
