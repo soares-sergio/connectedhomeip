@@ -51,7 +51,9 @@ chip_test_suite("tests") {
   output_name = "libCodegenDataModelProviderTests"
 
   test_sources = [
+    "TestCodeDrivenModelViaMocks.cpp",
     "TestCodegenModelViaMocks.cpp",
+    "TestCodegenServerCluster.cpp",
     "TestEmberAttributeDataBuffer.cpp",
     "TestServerClusterInterfaceRegistry.cpp",
   ]
@@ -62,5 +64,6 @@ chip_test_suite("tests") {
     ":mock_model",
     "${chip_root}/src/app/data-model-provider:string-builder-adapters",
     "${chip_root}/src/app/server-cluster/testing",
+    "${chip_root}/src/data-model-providers/codedriven:provider",
   ]
 }

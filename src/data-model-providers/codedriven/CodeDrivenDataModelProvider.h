@@ -1,0 +1,109 @@
+/*
+ *    Copyright (c) 2025 Project CHIP Authors
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+#pragma once
+
+#include <app/CommandHandlerInterface.h>
+#include <app/ConcreteCommandPath.h>
+#include <app/data-model-provider/ActionReturnStatus.h>
+#include <app/data-model-provider/MetadataTypes.h>
+#include <app/data-model-provider/Provider.h>
+#include <app/server-cluster/ServerClusterInterface.h>
+#include <data-model-providers/codedriven/EndpointProviderInterface.h>
+#include <lib/support/ReadOnlyBuffer.h>
+#include <list>
+
+namespace chip {
+namespace app {
+
+using DataModel::ClusterInfo;
+using DataModel::ServerClusterEntry;
+
+/**
+ * @brief An implementation of DataModel::Provider that constructs the data model
+ *        programmatically by aggregating EndpointProviderInterface instances.
+ *
+ * This provider allows applications to define their Matter device structure (endpoints,
+ * clusters, attributes, commands) in code rather than relying solely on static
+ * code generation (like ZAP). It manages a list of EndpointProviderInterface objects,
+ * each representing an endpoint on the device.
+ *
+ * Expected Usage:
+ * 1. Implement EndpointProviderInterface for each distinct endpoint type or instance.
+ * 2. Instantiate these EndpointProviderInterface implementations.
+ * 3. Create an instance of CodeDrivenDataModelProvider.
+ * 4. Add the endpoint provider instances to the CodeDrivenDataModelProvider using AddEndpoint().
+ * 5. Call Startup() on the CodeDrivenDataModelProvider.
+ *
+ * Lifecycle and Thread Safety:
+ * - The CodeDrivenDataModelProvider stores raw pointers to EndpointProviderInterface instances.
+ *   It does NOT take ownership. Callers must ensure these instances outlive the provider.
+ * - Modifications to the endpoint list (AddEndpoint, RemoveEndpoint) are not thread-safe and should
+ *   ideally be performed in main() or within the chip main loop thread
+ *   (e.g., via ScheduleWork on the CHIP main loop).
+ */
+class CodeDrivenDataModelProvider : public DataModel::Provider
+{
+public:
+    /// Generic model implementations
+
+    CHIP_ERROR Startup(DataModel::InteractionModelContext context) override;
+    CHIP_ERROR Shutdown() override;
+
+    DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
+                                                AttributeValueEncoder & encoder) override;
+    DataModel::ActionReturnStatus WriteAttribute(const DataModel::WriteAttributeRequest & request,
+                                                 AttributeValueDecoder & decoder) override;
+
+    void ListAttributeWriteNotification(const ConcreteAttributePath & aPath, DataModel::ListWriteOperation opType) override;
+    std::optional<DataModel::ActionReturnStatus> InvokeCommand(const DataModel::InvokeRequest & request,
+                                                               TLV::TLVReader & input_arguments, CommandHandler * handler) override;
+
+    void SetPersistentStorageDelegate(PersistentStorageDelegate * delegate) { mPersistentStorageDelegate = delegate; }
+    PersistentStorageDelegate * GetPersistentStorageDelegate() { return mPersistentStorageDelegate; }
+
+    /// attribute tree iteration
+    CHIP_ERROR Endpoints(ReadOnlyBufferBuilder<DataModel::EndpointEntry> & out) override;
+    CHIP_ERROR SemanticTags(EndpointId endpointId,
+                            ReadOnlyBufferBuilder<Clusters::Descriptor::Structs::SemanticTagStruct::Type> & out) override;
+    CHIP_ERROR DeviceTypes(EndpointId endpointId, ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) override;
+    CHIP_ERROR ClientClusters(EndpointId endpointId, ReadOnlyBufferBuilder<ClusterId> & out) override;
+    CHIP_ERROR ServerClusters(EndpointId endpointId, ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> & out) override;
+    CHIP_ERROR GeneratedCommands(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<CommandId> & out) override;
+    CHIP_ERROR AcceptedCommands(const ConcreteClusterPath & path,
+                                ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & out) override;
+    CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
+
+    void Temporary_ReportAttributeChanged(const AttributePathParams & path) override;
+
+    /* Lifecycle Management:
+     * The CodeDrivenDataModelProvider stores pointers to EndpointProviderInterface, but does NOT take ownership.
+     * It is crucial that the lifetime of any EndpointProviderInterface instance outlives the
+     * CodeDrivenDataModelProvider it is registered with.
+     */
+    CHIP_ERROR AddEndpoint(EndpointProviderInterface & endpointProvider);
+    CHIP_ERROR RemoveEndpoint(EndpointId endpointId);
+
+private:
+    EndpointProviderInterface * GetEndpointProvider(EndpointId endpointId);
+
+    std::list<EndpointProviderInterface *> mEndpointProviders;
+    std::optional<ServerClusterContext> mServerClusterContext;
+    PersistentStorageDelegate * mPersistentStorageDelegate = nullptr;
+};
+
+} // namespace app
+} // namespace chip
