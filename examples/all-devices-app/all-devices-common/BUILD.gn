@@ -31,6 +31,7 @@ source_set("app-data-model") {
 
   deps = [
     "${chip_root}/src/app/data-model-provider",
+    "${chip_root}/src/app/persistence:default",
     "${chip_root}/src/data-model-providers/codedriven",
   ]
 }

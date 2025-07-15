@@ -7,6 +7,7 @@
 #include <lib/core/CHIPPersistentStorageDelegate.h>
 
 // #include <app/server/Server.h>
+#include <app/persistence/DefaultAttributePersistenceProvider.h>
 #include <platform/KeyValueStoreManager.h>
 #include <platform/KvsPersistentStorageDelegate.h>
 
@@ -26,46 +27,6 @@ using chip::app::CodeDrivenDataModelProvider;
 using chip::app::DataModel::EndpointCompositionPattern;
 using chip::app::DataModel::Provider;
 
-class ContactSensorAppDataModelProvider : public CodeDrivenDataModelProvider
-{
-public:
-    ContactSensorAppDataModelProvider(chip::PersistentStorageDelegate & persistentStorageDelegate) :
-        CodeDrivenDataModelProvider(persistentStorageDelegate)
-    {
-        // TODO(sergiosoares): initialize data model here
-        // mEndpoint0.AddServerCluster(mEndpoint0Clusters);
-        // mEndpoint1.AddServerCluster(mEndpoint1Clusters);
-        // AddEndpoint(mEndpoint0);
-        // AddEndpoint(mEndpoint1);
-    }
-
-private:
-    // ServerClusterShim mEndpoint0Clusters{ { 0, 1 }, { 0, 2 } }; // TODO(sergiosoares): fix paths
-    // ServerClusterShim mEndpoint1Clusters{ { 1, 3 }, { 1, 4 } }; // TODO(sergiosoares): fix paths
-    // SpanEndpoint mEndpoint0;
-    // Span mEndpoint1;
-};
-
-class LightingAppDataModelProvider : public CodeDrivenDataModelProvider
-{
-public:
-    LightingAppDataModelProvider(chip::PersistentStorageDelegate & persistentStorageDelegate) :
-        CodeDrivenDataModelProvider(persistentStorageDelegate)
-    {
-        // // TODO(sergiosoares): initialize data model here
-        // mEndpoint0.AddServerCluster(mEndpoint0Clusters);
-        // mEndpoint1.AddServerCluster(mEndpoint1Clusters);
-        // AddEndpoint(mEndpoint0);
-        // AddEndpoint(mEndpoint1);
-    }
-
-private:
-    // CodegenServerCluster mEndpoint0Clusters{ { 0, 1 }, { 0, 2 } }; // TODO(sergiosoares): fix paths
-    // CodegenServerCluster mEndpoint1Clusters{ { 1, 3 }, { 1, 4 } }; // TODO(sergiosoares): fix paths
-    // DynamicEndpointProvider mEndpoint0;
-    // DynamicEndpointProvider mEndpoint1;
-};
-
 namespace {
 
 chip::PersistentStorageDelegate & GetAppPersistentStorageDelegate()
@@ -81,32 +42,20 @@ chip::PersistentStorageDelegate & GetAppPersistentStorageDelegate()
     return persistentStorageDelegate;
 }
 
+chip::app::AttributePersistenceProvider & GetAppAttributePersistenceProvider()
+{
+    static chip::app::DefaultAttributePersistenceProvider sAttributePersistenceProvider;
+    return sAttributePersistenceProvider;
+}
+
+CodeDrivenDataModelProvider dataModelProvider(GetAppPersistentStorageDelegate(), GetAppAttributePersistenceProvider());
+
 } // namespace
 
-CodeDrivenDataModelProvider & GetContactSensorDataModelProvider()
+CodeDrivenDataModelProvider & GetAppDataModelProvider()
 {
-    static ContactSensorAppDataModelProvider contactSensorAppDataModelProvider(GetAppPersistentStorageDelegate());
-    return contactSensorAppDataModelProvider;
+    return dataModelProvider;
 }
 
-CodeDrivenDataModelProvider & GetLightingDataModelProvider()
-{
-    static LightingAppDataModelProvider lightingAppDataModelProvider(GetAppPersistentStorageDelegate());
-    return lightingAppDataModelProvider;
-}
-
-CodeDrivenDataModelProvider & GetAppDataModelProvider(AppTypeEnum app)
-{
-    switch (app)
-    {
-    case AppTypeEnum::kContactSensorApp:
-        return GetContactSensorDataModelProvider();
-        break;
-    case AppTypeEnum::kLightingApp:
-        return GetLightingDataModelProvider();
-        break;
-    default:
-        assert(false && "Unexpected value in GetAppDataModelProvider() switch statement");
-        break;
-    }
-}
+// TODO: Implement a DeviceRegistrationInterface class with 2 pure virtual methods: Span<ServerClusterInterfaceRegistration>
+// GetServerClusterRegistrations() and GetEndpointRegistrations()

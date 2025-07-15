@@ -23,13 +23,4 @@
 
 using chip::app::CodeDrivenDataModelProvider;
 
-enum class AppTypeEnum : uint8_t {
-    kContactSensorApp = 0,
-    kLightingApp = 1,
-    kError = 2,
-};
-
-CodeDrivenDataModelProvider & GetAppDataModelProvider(AppTypeEnum app);
-
-CodeDrivenDataModelProvider & GetContactSensorDataModelProvider();
-CodeDrivenDataModelProvider & GetLightingDataModelProvider();
+CodeDrivenDataModelProvider & GetAppDataModelProvider();
