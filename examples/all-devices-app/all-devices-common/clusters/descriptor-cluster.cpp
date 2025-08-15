@@ -9,23 +9,14 @@ using namespace chip::app::Clusters::Descriptor::Attributes;
 using chip::Protocols::InteractionModel::Status;
 
 namespace chip::app::Clusters {
-namespace {
-
-constexpr DataModel::AttributeEntry kMandatoryAttributes[] = {
-    DeviceTypeList::kMetadataEntry,
-    ServerList::kMetadataEntry,
-    ClientList::kMetadataEntry,
-    PartsList::kMetadataEntry,
-};
-
-} // namespace
 
 CHIP_ERROR DescriptorCluster::Attributes(const ConcreteClusterPath & path,
                                          ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
 {
     AttributeListBuilder listBuilder(builder);
-    return listBuilder.Append(Span(kMandatoryAttributes), {});
+    return listBuilder.Append(Span(Descriptor::Attributes::kMandatoryMetadata), {});
 }
+
 DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                                AttributeValueEncoder & encoder)
 {
@@ -45,7 +36,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
         });
     case ServerList::Id: {
         ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> builder;
-        ReturnErrorOnFailure(mContext->provider->ServerClusters(mPath.mEndpointId, builder));
+        ReturnErrorOnFailure(mContext->provider.ServerClusters(mPath.mEndpointId, builder));
         ReadOnlyBuffer<DataModel::ServerClusterEntry> buffer = builder.TakeBuffer();
         return encoder.EncodeList([&buffer](const auto & itemEncoder) -> CHIP_ERROR {
             for (const auto & entry : buffer)
@@ -57,7 +48,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
     }
     case ClientList::Id: {
         ReadOnlyBufferBuilder<ClusterId> builder;
-        ReturnErrorOnFailure(mContext->provider->ClientClusters(mPath.mEndpointId, builder));
+        ReturnErrorOnFailure(mContext->provider.ClientClusters(mPath.mEndpointId, builder));
         ReadOnlyBuffer<ClusterId> buffer = builder.TakeBuffer();
         return encoder.EncodeList([&buffer](const auto & itemEncoder) -> CHIP_ERROR {
             for (const auto & clusterId : buffer)
