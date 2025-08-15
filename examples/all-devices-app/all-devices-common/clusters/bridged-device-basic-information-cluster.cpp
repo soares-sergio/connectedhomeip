@@ -26,8 +26,6 @@ DataModel::ActionReturnStatus BridgedDeviceBasicInformationCluster::ReadAttribut
         return encoder.Encode(BitFlags<BridgedDeviceBasicInformation::Feature>{ 0 }); // TODO: more features support
     case ClusterRevision::Id:
         return encoder.Encode(BridgedDeviceBasicInformation::kRevision);
-    case VendorName::Id:
-        return encoder.Encode("BridgeVendorNameHere"_span);
     case Reachable::Id:
         return encoder.Encode(true); // for now claim always reachable
     case UniqueID::Id:
