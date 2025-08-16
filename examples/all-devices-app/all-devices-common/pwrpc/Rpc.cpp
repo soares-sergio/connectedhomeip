@@ -27,8 +27,7 @@
 
 #include <map>
 
-// FIXME
-// #include "pigweed/rpc_services/Actions.h"
+#include "TestService.h"
 
 #define PW_TRACE_BUFFER_SIZE_BYTES 1024
 #include "pw_trace/trace.h"
@@ -49,7 +48,7 @@ namespace chip {
 namespace rpc {
 namespace {
 
-// Actions actions_service;
+TestService test_service;
 
 } // namespace
 
@@ -63,7 +62,7 @@ void SubscribeActions(RpcActionsSubscribeCallback subscriber)
 void RunRpcService()
 {
     pw::rpc::system_server::Init();
-    // pw::rpc::system_server::Server().RegisterService(actions_service);
+    pw::rpc::system_server::Server().RegisterService(test_service);
     pw::rpc::system_server::Start();
 }
 
