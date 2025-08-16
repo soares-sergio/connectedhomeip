@@ -1,6 +1,7 @@
 # Description
 
-Development iteration for a code-driven application. Focus on a bridge implementation.
+Development iteration for a code-driven application. Focus on a bridge
+implementation.
 
 ## Checking out
 
