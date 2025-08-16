@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package chip.rpc;
+
+import 'pw_protobuf_protos/common.proto';
+
+message PairingInfo {
+  uint32 code = 1;
+  uint32 discriminator = 2;
+  string qr_code = 3;
+  string qr_code_url = 4;
+}
+
+message DeviceInfo {
+  uint32 vendor_id = 1;
+  uint32 product_id = 2;
+  uint32 software_version = 3;
+  string serial_number = 4;
+  PairingInfo pairing_info = 5;
+  string software_version_string = 6;
+}
+
+service TestService {
+  rpc GetDeviceInfo(pw.protobuf.Empty) returns(DeviceInfo) {}
+}
