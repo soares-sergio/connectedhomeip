@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package chip.rpc;
+package all_devices.rpc;
 
 import 'pw_protobuf_protos/common.proto';
 

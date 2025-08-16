@@ -6,9 +6,11 @@
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 
-namespace chip::rpc {
+using namespace chip;
 
-pw::Status TestService::GetDeviceInfo(const pw_protobuf_Empty & request, chip_rpc_DeviceInfo & response)
+namespace all_devices::rpc {
+
+pw::Status TestService::GetDeviceInfo(const pw_protobuf_Empty & request, all_devices_rpc_DeviceInfo & response)
 {
     uint16_t vendor_id;
     if (DeviceLayer::GetDeviceInstanceInfoProvider()->GetVendorId(vendor_id) == CHIP_NO_ERROR)
@@ -79,4 +81,4 @@ pw::Status TestService::GetDeviceInfo(const pw_protobuf_Empty & request, chip_rp
     return pw::OkStatus();
 }
 
-} // namespace chip::rpc
+} // namespace all_devices::rpc

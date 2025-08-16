@@ -44,11 +44,10 @@ size_t pw_trace_GetTraceTimeTicksPerSecond()
     return 1000000;
 }
 
-namespace chip {
-namespace rpc {
+namespace chip::rpc {
 namespace {
 
-TestService test_service;
+all_devices::rpc::TestService test_service;
 
 } // namespace
 
@@ -75,5 +74,4 @@ int Init(uint16_t rpcServerPort)
     return err;
 }
 
-} // namespace rpc
-} // namespace chip
+} // namespace chip::rpc
