@@ -48,7 +48,7 @@ for a fast pip equivalent. Any venv will also work.
 uv venv out/console-env
 
 # Source according to your shell
-soutce out/console-env/bin/activate
+source out/console-env/bin/activate
 
 # install the console wheels
 uv pip install out/linux-x64-all-devices-app-boringssl/all_devices_rpc_console_wheels/*.whl
@@ -58,5 +58,10 @@ all-devices-console -s localhost:33000
 
 # Try something like:
 #  devices.rpcs.all_devices.rpc.TestService.GetDeviceInfo()
+#  devices.rpcs.all_devices.rpc.Bridge.ListDevices()
+#  devices.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=1)
+#
+#  from bridge_service.bridge_service_pb2 import CONTACT_SENSOR
+#  devices.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=CONTACT_SENSOR)
 
 ```
