@@ -108,7 +108,7 @@ void StartApplication()
 
     // FIXME: update DMP here!!!
     chip::app::CodegenDataModelProvider &dataModelProvider = CodegenDataModelProvider::Instance();
-    dataModelProvider.SetPersistentStorageDelegate(initParams.persistentStorageDelegate));
+    dataModelProvider.SetPersistentStorageDelegate(initParams.persistentStorageDelegate);
 
     CHIP_ERROR err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp0);
     if (err != CHIP_NO_ERROR)
