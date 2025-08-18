@@ -27,13 +27,14 @@
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <system/SystemLayer.h>
 
-#include <credentials/examples/DeviceAttestationCredsExample.h>
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
 #include <Rpc.h>
+#include <credentials/examples/DeviceAttestationCredsExample.h>
 
 // TODO: this should go away
 #include <data-model-providers/codegen/Instance.h>
+#include <server-cluster-shim/ServerClusterShim.h>
 
 using namespace chip;
 using namespace chip::app;
