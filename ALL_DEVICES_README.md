@@ -40,7 +40,8 @@ rm -f /tmp/chip_* \
 
 ## Console via PWRPC
 
-The following examples use [Uv](git@github.com:project-chip/connectedhomeip.git) for a fast pip equivalent. Any venv will also work.
+The following examples use [Uv](git@github.com:project-chip/connectedhomeip.git)
+for a fast pip equivalent. Any venv will also work.
 
 ```sh
 # create a Venv

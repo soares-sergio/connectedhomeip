@@ -11,7 +11,7 @@ message PairingInfo {
   string qr_code_url = 4;
 }
 
-message DeviceInfo {
+message MatterDeviceInfo {
   uint32 vendor_id = 1;
   uint32 product_id = 2;
   uint32 software_version = 3;
@@ -21,5 +21,5 @@ message DeviceInfo {
 }
 
 service TestService {
-  rpc GetDeviceInfo(pw.protobuf.Empty) returns(DeviceInfo) {}
+  rpc GetDeviceInfo(pw.protobuf.Empty) returns(MatterDeviceInfo) {}
 }

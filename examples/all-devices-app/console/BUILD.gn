@@ -37,6 +37,7 @@ pw_python_package("all_devices_rpc") {
     "$dir_pw_rpc/py",
     "$dir_pw_system/py",
     "$dir_pw_tokenizer/py",
+    "${chip_root}/examples/all-devices-app/all-devices-common/pwrpc:bridge_service.python",
     "${chip_root}/examples/all-devices-app/all-devices-common/pwrpc:test_service.python",
   ]
 }

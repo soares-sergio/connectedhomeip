@@ -36,9 +36,9 @@ executable("all-devices-app") {
 
   deps = [
     "${chip_root}/examples/all-devices-app/all-devices-common",
+    "${chip_root}/examples/all-devices-app/all-devices-common:server-cluster-shim",
     "${chip_root}/examples/all-devices-app/all-devices-common/clusters",
     "${chip_root}/examples/all-devices-app/all-devices-common/pwrpc",
-    "${chip_root}/examples/all-devices-app/all-devices-common:server-cluster-shim",
     "${chip_root}/examples/all-devices-app/console:all_devices_rpc_wheel",
     "${chip_root}/examples/common/tracing:commandline",
     "${chip_root}/examples/platform/linux:linux-commissionable-data-provider",

@@ -10,7 +10,7 @@ using namespace chip;
 
 namespace all_devices::rpc {
 
-pw::Status TestService::GetDeviceInfo(const pw_protobuf_Empty & request, all_devices_rpc_DeviceInfo & response)
+pw::Status TestService::GetDeviceInfo(const pw_protobuf_Empty & request, all_devices_rpc_MatterDeviceInfo & response)
 {
     uint16_t vendor_id;
     if (DeviceLayer::GetDeviceInstanceInfoProvider()->GetVendorId(vendor_id) == CHIP_NO_ERROR)
