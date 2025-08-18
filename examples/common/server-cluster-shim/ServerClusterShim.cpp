@@ -31,6 +31,7 @@
 #include <app/util/attribute-storage.h>
 #include <app/util/attribute-table-detail.h>
 #include <app/util/attribute-table.h>
+#include <app/util/DataModelHandler.h>
 #include <crypto/RandUtils.h>
 #include <data-model-providers/codegen/EmberAttributeDataBuffer.h>
 #include <lib/support/BitFlags.h>
@@ -172,6 +173,10 @@ bool PathsContainsOrLogError(const ConcreteClusterPath & path, ServerClusterInte
 }
 
 } // namespace
+
+void ServerClusterShim::InitEmberShims() {
+    InitDataModelHandler();
+}
 
 ServerClusterShim::~ServerClusterShim() {}
 

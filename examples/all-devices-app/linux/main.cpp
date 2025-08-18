@@ -155,6 +155,8 @@ void InitNetworkCommissioning()
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodeDrivenDataModelProvider(PersistentStorageDelegate * delegate)
 {
+    ServerClusterShim::InitEmberShims();
+
     static chip::app::DefaultAttributePersistenceProvider attributePersistenceProvider;
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
