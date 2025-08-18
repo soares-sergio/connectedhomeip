@@ -26,12 +26,12 @@
 #include <app/GlobalAttributes.h>
 #include <app/RequiredPrivilege.h>
 #include <app/data-model-provider/MetadataTypes.h>
+#include <app/util/DataModelHandler.h>
 #include <app/util/IMClusterCommandHandler.h>
 #include <app/util/attribute-storage-detail.h>
 #include <app/util/attribute-storage.h>
 #include <app/util/attribute-table-detail.h>
 #include <app/util/attribute-table.h>
-#include <app/util/DataModelHandler.h>
 #include <crypto/RandUtils.h>
 #include <data-model-providers/codegen/EmberAttributeDataBuffer.h>
 #include <lib/support/BitFlags.h>
@@ -174,7 +174,8 @@ bool PathsContainsOrLogError(const ConcreteClusterPath & path, ServerClusterInte
 
 } // namespace
 
-void ServerClusterShim::InitEmberShims() {
+void ServerClusterShim::InitEmberShims()
+{
     InitDataModelHandler();
 }
 

@@ -205,7 +205,6 @@ void InitNetworkCommissioning()
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
 
-
     err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp1);
     if (err != CHIP_NO_ERROR)
     {
