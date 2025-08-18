@@ -18,6 +18,7 @@
 
 #include <AppMain.h>
 #include <platform/CHIPDeviceConfig.h>
+#include <server-cluster-shim/ServerClusterShim.h>
 
 using namespace chip;
 using namespace chip::app;

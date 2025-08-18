@@ -16,6 +16,7 @@ import("//build_overrides/chip.gni")
 import("//build_overrides/pigweed.gni")
 
 import("${chip_root}/build/chip/tools.gni")
+import("${chip_root}/examples/common/pigweed/rpc_config.gni")
 import("${chip_root}/src/app/common_flags.gni")
 
 import("$dir_pw_build/target_types.gni")
@@ -35,9 +36,10 @@ executable("all-devices-app") {
 
   deps = [
     "${chip_root}/examples/all-devices-app/all-devices-common",
-    "${chip_root}/examples/all-devices-app/console:all_devices_rpc_wheel",
+    "${chip_root}/examples/all-devices-app/all-devices-common:server-cluster-shim",
     "${chip_root}/examples/all-devices-app/all-devices-common/clusters",
     "${chip_root}/examples/all-devices-app/all-devices-common/pwrpc",
+    "${chip_root}/examples/all-devices-app/console:all_devices_rpc_wheel",
     "${chip_root}/examples/platform/linux:app-main",
     "${chip_root}/src/lib",
   ]

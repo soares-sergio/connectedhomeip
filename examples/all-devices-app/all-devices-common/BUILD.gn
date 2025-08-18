@@ -21,6 +21,14 @@ chip_data_model("all-devices-common") {
   is_server = true
 }
 
+source_set("server-cluster-shim") {
+  sources = [
+    "${chip_root}/examples/common/server-cluster-shim/ServerClusterShim.cpp",
+    "${chip_root}/examples/common/server-cluster-shim/ServerClusterShim.h",
+  ]
+  deps = [ ":all-devices-common" ]
+}
+
 source_set("app-data-model") {
   sources = [
     "AppDataModel.cpp",
