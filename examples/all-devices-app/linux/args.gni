@@ -15,8 +15,8 @@
 # CHIPProjectConfig.h
 
 import("//build_overrides/chip.gni")
-import("${chip_root}/config/standalone/args.gni")
 import("//build_overrides/pigweed.gni")
+import("${chip_root}/config/standalone/args.gni")
 
 chip_device_project_config_include = "<CHIPProjectAppConfig.h>"
 chip_project_config_include = "<CHIPProjectAppConfig.h>"
@@ -46,4 +46,6 @@ pw_build_LINK_DEPS = [
   "$dir_pw_log:impl",
 ]
 
+# This makes examples/platform/linux to set "PW_RPC_ENABLED" and that calls methods in
+# pwrpc. TODO: coupling here is VERY high ... this is awkard...
 chip_enable_pw_rpc = true

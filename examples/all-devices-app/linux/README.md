@@ -12,54 +12,54 @@ details.
 
 <hr>
 
--   [Matter Linux Contact Sensor Example](#matter-linux-contact-sensor-example)
-    -   [Building](#building)
-    -   [Commandline arguments](#commandline-arguments)
-    -   [Running the Complete Example on Raspberry Pi 4](#running-the-complete-example-on-raspberry-pi-4)
-    -   [Running RPC Console](#running-rpc-console)
-    -   [Device Tracing](#device-tracing)
+- [Matter Linux Contact Sensor Example](#matter-linux-contact-sensor-example)
+  - [Building](#building)
+  - [Commandline arguments](#commandline-arguments)
+  - [Running the Complete Example on Raspberry Pi 4](#running-the-complete-example-on-raspberry-pi-4)
+  - [Running RPC Console](#running-rpc-console)
+  - [Device Tracing](#device-tracing)
 
 <hr>
 
 ## Building
 
--   Install tool chain
+- Install tool chain
 
-          $ sudo apt-get install git gcc g++ python pkg-config libssl-dev libdbus-1-dev libglib2.0-dev ninja-build python3-venv python3-dev unzip
+          sudo apt-get install git gcc g++ python pkg-config libssl-dev libdbus-1-dev libglib2.0-dev ninja-build python3-venv python3-dev unzip
 
--   Build the example application:
+- Build the example application:
 
-          $ cd ~/connectedhomeip/examples/contact-sensor-app/linux
-          $ git submodule update --init
-          $ source third_party/connectedhomeip/scripts/activate.sh
-          $ gn gen out/debug
-          $ ninja -C out/debug
+          cd ~/connectedhomeip/examples/contact-sensor-app/linux
+          git submodule update --init
+          source third_party/connectedhomeip/scripts/activate.sh
+          gn gen out/debug
+          ninja -C out/debug
 
--   To delete generated executable, libraries and object files use:
+- To delete generated executable, libraries and object files use:
 
-          $ cd ~/connectedhomeip/examples/contact-sensor-app/linux
-          $ rm -rf out/
+          cd ~/connectedhomeip/examples/contact-sensor-app/linux
+          rm -rf out/
 
--   Build the example with pigweed RPC
+- Build the example with pigweed RPC
 
-          $ cd ~/connectedhomeip/examples/contact-sensor-app/linux
-          $ git submodule update --init
-          $ source third_party/connectedhomeip/scripts/activate.sh
-          $ gn gen out/debug --args='import("//with_pw_rpc.gni")'
-          $ ninja -C out/debug
+          cd ~/connectedhomeip/examples/contact-sensor-app/linux
+          git submodule update --init
+          source third_party/connectedhomeip/scripts/activate.sh
+          gn gen out/debug --args='import("//with_pw_rpc.gni")'
+          ninja -C out/debug
 
 ## Commandline arguments
 
--   `--wifi`
+- `--wifi`
 
     Enables WiFi management feature. Required for WiFi commissioning.
 
--   `--thread`
+- `--thread`
 
     Enables Thread management feature, requires ot-br-posix dbus daemon running.
     Required for Thread commissioning.
 
--   `--ble-controller <selector>`
+- `--ble-controller <selector>`
 
     Use the specific Bluetooth controller for BLE advertisement and connections.
     For details on controller selection refer to
@@ -67,7 +67,7 @@ details.
 
 ## Running the Complete Example on Raspberry Pi 4
 
--   Prerequisites
+- Prerequisites
 
     1. A Raspberry Pi 4 board
     2. A USB Bluetooth Dongle, Ubuntu desktop will send Bluetooth advertisement,
@@ -75,41 +75,41 @@ details.
        to install `pi-bluetooth` via APT.
     3. Ubuntu 20.04 or newer image for ARM64 platform.
 
--   Building
+- Building
 
     Follow [Building](#building) section of this document.
 
--   Running
+- Running
 
-    -   [Optional] Plug USB Bluetooth dongle
+  - [Optional] Plug USB Bluetooth dongle
 
-        -   Plug USB Bluetooth dongle and find its bluetooth controller selector
+    - Plug USB Bluetooth dongle and find its bluetooth controller selector
             as described in
             [Linux BLE Settings](/platforms/linux/ble_settings.md).
 
-    -   Run Linux Contact Sensor App
+  - Run Linux Contact Sensor App
 
               $ cd ~/connectedhomeip/examples/contact-sensor-app/linux
               $ sudo out/debug/chip-contact-sensor-app --ble-controller [bluetooth controller number]
               # In this example, the device we want to use is hci1
               $ sudo out/debug/contact-sensor-app --ble-controller 1
 
-    -   Test the device using ChipDeviceController on your laptop / workstation
+  - Test the device using ChipDeviceController on your laptop / workstation
         etc.
 
 ## Running RPC Console
 
--   As part of building the example with RPCs enabled the chip_rpc python
+- As part of building the example, the all_devices_rpc python
     interactive console is installed into your venv. The python wheel files are
-    also created in the output folder: out/debug/chip_rpc_console_wheels. To
+    also created in the output folder: out/debug/all_devices_rpc_console_wheels. To
     install the wheel files without rebuilding:
-    `pip3 install out/debug/chip_rpc_console_wheels/*.whl`
+    `pip3 install out/debug/all_devices_rpc_console_wheels/*.whl`
 
--   To use the chip-rpc console after it has been installed run:
-    `chip-console -s localhost:33000 -o /<YourFolder>/pw_log.out`
+- To use the chip-rpc console after it has been installed run:
+    `all-devices-console -s localhost:33000 -o /<YourFolder>/pw_log.out`
 
--   Then you can Get the contact sensor status using the RPCs:
-    `rpcs.chip.rpc.BooleanState.Get()`
+- Then you can Get the contact sensor status using the RPCs:
+    `rpcs.chip.rpc.TestService.GetDeviceInfo()`
 
 ## Device Tracing
 
