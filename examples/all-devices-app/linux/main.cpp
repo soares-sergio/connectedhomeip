@@ -17,7 +17,9 @@
  */
 
 #include <TracingCommandLineArgument.h>
+#include <app-common/zap-generated/ids/Clusters.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
+#include <app/server-cluster/ServerClusterInterfaceRegistry.h>
 #include <app/server/Dnssd.h>
 #include <app/server/Server.h>
 #include <platform/CHIPDeviceConfig.h>
@@ -43,6 +45,35 @@ using namespace chip::DeviceLayer;
 using namespace chip::app::Clusters;
 
 namespace {
+
+ServerClusterShim
+    serverClusterShimEp0({ // Endpoint 0
+                           { 0, Descriptor::Id },
+                           { 0, AccessControl::Id },
+                           /* { 0, BasicInformation::Id },
+                           { 0, OtaSoftwareUpdateRequestor::Id },
+                           { 0, WiFiNetworkDiagnostics::Id },
+                           { 0, chip::app::Clusters::NetworkCommissioning::Id }, // Spelled out to avoid ambigous namespace error.
+                           { 0, GeneralCommissioning::Id },
+                           { 0, DiagnosticLogs::Id },
+                           { 0, GeneralDiagnostics::Id },
+                           { 0, SoftwareDiagnostics::Id },
+                           { 0, ThreadNetworkDiagnostics::Id },
+                           { 0, EthernetNetworkDiagnostics::Id },
+                           { 0, AdministratorCommissioning::Id },
+                           { 0, OperationalCredentials::Id },
+                           { 0, GroupKeyManagement::Id },
+                           { 0, UserLabel::Id }*/ });
+
+ServerClusterShim serverClusterShimEp1({ // Endpoint 1
+                                         { 1, Identify::Id },
+                                         { 1, Descriptor::Id },
+                                         { 1, BooleanState::Id } });
+
+ServerClusterRegistration serverClusterShimRegistrationEp0(serverClusterShimEp0);
+ServerClusterRegistration serverClusterShimRegistrationEp1(serverClusterShimEp1);
+
+// TODO: add a Span of these registrations
 
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
 Optional<Clusters::NetworkCommissioning::Instance> sWiFiNetworkCommissioningInstance;
@@ -76,8 +107,25 @@ void StartApplication()
     VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
 
     // FIXME: update DMP here!!!
-    initParams.dataModelProvider = app::CodegenDataModelProviderInstance(initParams.persistentStorageDelegate);
+    // Register shim
+    chip::app::CodegenDataModelProvider * dataModelProvider = static_cast<chip::app::CodegenDataModelProvider *>(
+        chip::app::CodegenDataModelProviderInstance(initParams.persistentStorageDelegate));
 
+    CHIP_ERROR err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp0);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp1);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    initParams.dataModelProvider             = dataModelProvider;
     initParams.operationalServicePort        = CHIP_PORT;
     initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
     initParams.interfaceId                   = Inet::InterfaceId::Null();
@@ -86,7 +134,7 @@ void StartApplication()
     tracing_setup.EnableTracingFor("json:log");
 
     // Init ZCL Data Model and CHIP App Server
-    CHIP_ERROR err = Server::GetInstance().Init(initParams);
+    err = Server::GetInstance().Init(initParams);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Server init failed: %" CHIP_ERROR_FORMAT, err.Format());
