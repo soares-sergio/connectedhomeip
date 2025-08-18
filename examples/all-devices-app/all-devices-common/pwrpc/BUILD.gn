@@ -33,6 +33,8 @@ pw_proto_library("bridge_service") {
 
 source_set("pwrpc") {
   sources = [
+    "BridgeService.cpp",
+    "BridgeService.h",
     "Rpc.cpp",
     "Rpc.h",
     "SystemRpcServer.cpp",

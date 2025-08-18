@@ -46,6 +46,7 @@ from pw_hdlc import rpc
 
 # Protos
 # isort: off
+from bridge_service import bridge_service_pb2
 from test_service import test_service_pb2
 
 
@@ -112,6 +113,7 @@ def show_console(
         json_logfile="",
         rpc_logging=False,
         compiled_protos=[
+            bridge_service_pb2,
             test_service_pb2,
         ],
     )

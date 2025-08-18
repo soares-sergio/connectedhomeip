@@ -33,6 +33,6 @@ message DeviceList {
 
 service Bridge {
   rpc AddDevice(AddDeviceRequest) returns(pw.protobuf.Empty) {}
-  rpc List(pw.protobuf.Empty) returns(DeviceList) {}
+  rpc ListDevices(pw.protobuf.Empty) returns(DeviceList) {}
   rpc RemoveDevice(RemoveDeviceRequest) returns(pw.protobuf.Empty) {}
 }

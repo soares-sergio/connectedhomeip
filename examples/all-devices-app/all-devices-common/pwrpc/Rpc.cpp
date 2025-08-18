@@ -27,6 +27,7 @@
 
 #include <map>
 
+#include "BridgeService.h"
 #include "TestService.h"
 
 #define PW_TRACE_BUFFER_SIZE_BYTES 1024
@@ -48,19 +49,14 @@ namespace chip::rpc {
 namespace {
 
 all_devices::rpc::TestService test_service;
+all_devices::rpc::Bridge bridge;
 
 } // namespace
-
-#if defined(PW_RPC_ACTIONS_SERVICE) && PW_RPC_ACTIONS_SERVICE
-void SubscribeActions(RpcActionsSubscribeCallback subscriber)
-{
-    actions_service.SubscribeActions(subscriber);
-}
-#endif // defined(PW_RPC_ACTIONS_SERVICE) && PW_RPC_ACTIONS_SERVICE
 
 void RunRpcService()
 {
     pw::rpc::system_server::Init();
+    pw::rpc::system_server::Server().RegisterService(bridge);
     pw::rpc::system_server::Server().RegisterService(test_service);
     pw::rpc::system_server::Start();
 }
