@@ -107,25 +107,24 @@ void StartApplication()
     VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
 
     // FIXME: update DMP here!!!
-    // Register shim
-    chip::app::CodegenDataModelProvider * dataModelProvider = static_cast<chip::app::CodegenDataModelProvider *>(
-        chip::app::CodegenDataModelProviderInstance(initParams.persistentStorageDelegate));
+    chip::app::CodegenDataModelProvider &dataModelProvider = CodegenDataModelProvider::Instance();
+    dataModelProvider.SetPersistentStorageDelegate(initParams.persistentStorageDelegate));
 
-    CHIP_ERROR err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp0);
+    CHIP_ERROR err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp0);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
         chipDie();
     }
 
-    err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp1);
+    err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp1);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
         chipDie();
     }
 
-    initParams.dataModelProvider             = dataModelProvider;
+    initParams.dataModelProvider             = &dataModelProvider;
     initParams.operationalServicePort        = CHIP_PORT;
     initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
     initParams.interfaceId                   = Inet::InterfaceId::Null();
