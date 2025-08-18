@@ -132,24 +132,24 @@ void InitNetworkCommissioning()
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodegenDataModelProvider(PersistentStorageDelegate * delegate)
 {
-    chip::app::CodegenDataModelProvider * dataModelProvider =
-        static_cast<chip::app::CodegenDataModelProvider *>(chip::app::CodegenDataModelProviderInstance(delegate));
+    chip::app::CodegenDataModelProvider & dataModelProvider = CodegenDataModelProvider::Instance();
+    dataModelProvider.SetPersistentStorageDelegate(delegate);
 
-    CHIP_ERROR err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp0);
+    CHIP_ERROR err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp0);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
         chipDie();
     }
 
-    err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp1);
+    err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp1);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
         chipDie();
     }
 
-    return dataModelProvider;
+    return &dataModelProvider;
 }
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodeDrivenDataModelProvider(PersistentStorageDelegate * delegate)
@@ -197,7 +197,7 @@ void StartApplication()
     VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
 
     // FIXME: update DMP here!!!
-    // initParams.dataModelProvider             = PopulateCodegenDataModelProvider(initParams.persistentStorageDelegate);
+    // initParams.dataModelProvider = PopulateCodegenDataModelProvider(initParams.persistentStorageDelegate);
     initParams.dataModelProvider             = PopulateCodeDrivenDataModelProvider(initParams.persistentStorageDelegate);
     initParams.operationalServicePort        = CHIP_PORT;
     initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
