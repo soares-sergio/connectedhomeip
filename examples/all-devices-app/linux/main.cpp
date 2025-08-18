@@ -19,10 +19,12 @@
 #include <TracingCommandLineArgument.h>
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
+#include <app/persistence/DefaultAttributePersistenceProvider.h>
 #include <app/server-cluster/ServerClusterInterfaceRegistry.h>
 #include <app/server/Dnssd.h>
 #include <app/server/Server.h>
-#include <platform/CHIPDeviceConfig.h>
+#include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
+#include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
 #include <platform/CommissionableDataProvider.h>
 #include <platform/Linux/NetworkCommissioningDriver.h>
 #include <platform/PlatformManager.h>
@@ -46,11 +48,38 @@ using namespace chip::app::Clusters;
 
 namespace {
 
+DataModel::DeviceTypeEntry deviceTypesEp0[] = {
+    { 0x0016, 3 }, // ma_rootdevice, version 3
+    { 0x0012, 1 }, // ma_otarequestor, version 1
+};
+
+DataModel::DeviceTypeEntry deviceTypesEp1[] = {
+    { 0x0015, 2 }, // ma_contactsensor, version 2
+};
+
+ClusterId clientClustersEp0[] = { OtaSoftwareUpdateProvider::Id };
+
+SpanEndpoint endpoint0 = SpanEndpoint::Builder()
+                             .SetClientClusters(chip::Span<const ClusterId>(clientClustersEp0))
+                             .SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp0))
+                             .Build();
+SpanEndpoint endpoint1 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp1)).Build();
+
+EndpointInterfaceRegistration endpointRegistration0(endpoint0,
+                                                    { .id                 = 0,
+                                                      .parentId           = kInvalidEndpointId,
+                                                      .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
+
+EndpointInterfaceRegistration endpointRegistration1(endpoint1,
+                                                    { .id                 = 1,
+                                                      .parentId           = kInvalidEndpointId,
+                                                      .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
+
 ServerClusterShim
     serverClusterShimEp0({ // Endpoint 0
                            { 0, Descriptor::Id },
                            { 0, AccessControl::Id },
-                           /* { 0, BasicInformation::Id },
+                           { 0, BasicInformation::Id },
                            { 0, OtaSoftwareUpdateRequestor::Id },
                            { 0, WiFiNetworkDiagnostics::Id },
                            { 0, chip::app::Clusters::NetworkCommissioning::Id }, // Spelled out to avoid ambigous namespace error.
@@ -63,7 +92,7 @@ ServerClusterShim
                            { 0, AdministratorCommissioning::Id },
                            { 0, OperationalCredentials::Id },
                            { 0, GroupKeyManagement::Id },
-                           { 0, UserLabel::Id }*/ });
+                           { 0, UserLabel::Id } });
 
 ServerClusterShim serverClusterShimEp1({ // Endpoint 1
                                          { 1, Identify::Id },
@@ -101,15 +130,10 @@ void InitNetworkCommissioning()
     EnableWiFiNetworkCommissioning(kRootEndpointId);
 }
 
-void StartApplication()
+[[maybe_unused]] chip::app::DataModel::Provider * PopulateCodegenDataModelProvider(PersistentStorageDelegate * delegate)
 {
-    static chip::CommonCaseDeviceServerInitParams initParams;
-    VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
-
-    // FIXME: update DMP here!!!
-    // Register shim
-    chip::app::CodegenDataModelProvider * dataModelProvider = static_cast<chip::app::CodegenDataModelProvider *>(
-        chip::app::CodegenDataModelProviderInstance(initParams.persistentStorageDelegate));
+    chip::app::CodegenDataModelProvider * dataModelProvider =
+        static_cast<chip::app::CodegenDataModelProvider *>(chip::app::CodegenDataModelProviderInstance(delegate));
 
     CHIP_ERROR err = dataModelProvider->Registry().Register(serverClusterShimRegistrationEp0);
     if (err != CHIP_NO_ERROR)
@@ -125,7 +149,56 @@ void StartApplication()
         chipDie();
     }
 
-    initParams.dataModelProvider             = dataModelProvider;
+    return dataModelProvider;
+}
+
+[[maybe_unused]] chip::app::DataModel::Provider * PopulateCodeDrivenDataModelProvider(PersistentStorageDelegate * delegate)
+{
+    static chip::app::DefaultAttributePersistenceProvider attributePersistenceProvider;
+    static chip::app::CodeDrivenDataModelProvider dataModelProvider =
+        chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
+
+    // Add Cluster registrations
+    CHIP_ERROR err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp0);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp1);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    // Add Endpoint Registrations
+    err = dataModelProvider.AddEndpoint(endpointRegistration0);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register Endpoint 0: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    err = dataModelProvider.AddEndpoint(endpointRegistration1);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register Endpoint 1: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    return &dataModelProvider;
+}
+
+void StartApplication()
+{
+    static chip::CommonCaseDeviceServerInitParams initParams;
+    VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
+
+    // FIXME: update DMP here!!!
+    // initParams.dataModelProvider             = PopulateCodegenDataModelProvider(initParams.persistentStorageDelegate);
+    initParams.dataModelProvider             = PopulateCodeDrivenDataModelProvider(initParams.persistentStorageDelegate);
     initParams.operationalServicePort        = CHIP_PORT;
     initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
     initParams.interfaceId                   = Inet::InterfaceId::Null();
@@ -134,7 +207,7 @@ void StartApplication()
     tracing_setup.EnableTracingFor("json:log");
 
     // Init ZCL Data Model and CHIP App Server
-    err = Server::GetInstance().Init(initParams);
+    CHIP_ERROR err = Server::GetInstance().Init(initParams);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Server init failed: %" CHIP_ERROR_FORMAT, err.Format());
