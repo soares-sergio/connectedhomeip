@@ -18,7 +18,13 @@
 
 #include <TracingCommandLineArgument.h>
 #include <app-common/zap-generated/ids/Clusters.h>
+#include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
+#include <app/clusters/basic-information/BasicInformationCluster.h>
+#include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
+#include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
+#include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
+#include <app/clusters/wifi-network-diagnostics-server/wifi-network-diagnostics-cluster.h>
 #include <app/persistence/DefaultAttributePersistenceProvider.h>
 #include <app/server-cluster/ServerClusterInterfaceRegistry.h>
 #include <app/server/Dnssd.h>
@@ -75,24 +81,19 @@ EndpointInterfaceRegistration endpointRegistration1(endpoint1,
                                                       .parentId           = kInvalidEndpointId,
                                                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
 
-ServerClusterShim
-    serverClusterShimEp0({ // Endpoint 0
-                           { 0, Descriptor::Id },
-                           { 0, AccessControl::Id },
-                           { 0, BasicInformation::Id },
-                           { 0, OtaSoftwareUpdateRequestor::Id },
-                           { 0, WiFiNetworkDiagnostics::Id },
-                           { 0, chip::app::Clusters::NetworkCommissioning::Id }, // Spelled out to avoid ambigous namespace error.
-                           { 0, GeneralCommissioning::Id },
-                           { 0, DiagnosticLogs::Id },
-                           { 0, GeneralDiagnostics::Id },
-                           { 0, SoftwareDiagnostics::Id },
-                           { 0, ThreadNetworkDiagnostics::Id },
-                           { 0, EthernetNetworkDiagnostics::Id },
-                           { 0, AdministratorCommissioning::Id },
-                           { 0, OperationalCredentials::Id },
-                           { 0, GroupKeyManagement::Id },
-                           { 0, UserLabel::Id } });
+ServerClusterShim serverClusterShimEp0({
+    // Endpoint 0
+    { 0, Descriptor::Id },
+    { 0, AccessControl::Id },
+    { 0, OtaSoftwareUpdateRequestor::Id },
+    { 0, chip::app::Clusters::NetworkCommissioning::Id }, // Spelled out to avoid ambigous namespace error.
+    { 0, GeneralCommissioning::Id },
+    { 0, DiagnosticLogs::Id },
+    { 0, ThreadNetworkDiagnostics::Id },
+    { 0, EthernetNetworkDiagnostics::Id },
+    { 0, OperationalCredentials::Id },
+    { 0, UserLabel::Id },
+});
 
 ServerClusterShim serverClusterShimEp1({ // Endpoint 1
                                          { 1, Identify::Id },
@@ -165,6 +166,43 @@ void InitNetworkCommissioning()
         ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
         chipDie();
     }
+
+    // register real code driven clusters
+    static AdministratorCommissioningWithBasicCommissioningWindowCluster clusterAdminCommissioning(0, {});
+    static ServerClusterRegistration serverClusterAdminCommissioning(clusterAdminCommissioning);
+    VerifyOrDie(dataModelProvider.AddCluster(serverClusterAdminCommissioning) == CHIP_NO_ERROR);
+
+    static ServerClusterRegistration basicInfo(BasicInformationCluster::Instance());
+    BasicInformationCluster()
+        .Instance()
+        .OptionalAttributes()
+        .Set<BasicInformation::Attributes::ManufacturingDate::Id>()
+        .Set<BasicInformation::Attributes::PartNumber::Id>()
+        .Set<BasicInformation::Attributes::ProductURL::Id>()
+        .Set<BasicInformation::Attributes::ProductLabel::Id>()
+        .Set<BasicInformation::Attributes::SerialNumber::Id>()
+        .Set<BasicInformation::Attributes::LocalConfigDisabled::Id>()
+        .Set<BasicInformation::Attributes::Reachable::Id>()
+        .Set<BasicInformation::Attributes::ProductAppearance::Id>();
+
+    VerifyOrDie(dataModelProvider.AddCluster(basicInfo) == CHIP_NO_ERROR);
+
+    static GeneralDiagnosticsCluster clusterGeneralDiagnostics({});
+    static ServerClusterRegistration generalDiagnostics(clusterGeneralDiagnostics);
+    VerifyOrDie(dataModelProvider.AddCluster(generalDiagnostics) == CHIP_NO_ERROR);
+
+    static GroupKeyManagementCluster clusterGroupKeyManagement;
+    static ServerClusterRegistration groupKeyManagement(clusterGroupKeyManagement);
+    VerifyOrDie(dataModelProvider.AddCluster(groupKeyManagement) == CHIP_NO_ERROR);
+
+    static SoftwareDiagnosticsServerCluster clusterSoftwareDiagnostics({});
+    static ServerClusterRegistration softwareDiagnostics(clusterSoftwareDiagnostics);
+    VerifyOrDie(dataModelProvider.AddCluster(softwareDiagnostics) == CHIP_NO_ERROR);
+
+    static WiFiDiagnosticsServerCluster clusterWifiDiagnostics(0, DeviceLayer::GetDiagnosticDataProvider(), {}, {});
+    static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
+    VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
+
 
     err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp1);
     if (err != CHIP_NO_ERROR)
