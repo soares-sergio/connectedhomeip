@@ -65,3 +65,45 @@ all-devices-console -s localhost:33000
 #  devices.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=CONTACT_SENSOR)
 
 ```
+
+### Validating tests in Jupyter Lab
+
+Install stuff:
+
+```sh
+pip install jupyterlab ipykernel jupyterlab-lsp python-lsp-server pprint pandas
+
+```
+
+Startup blurb:
+
+```
+%reset -f
+import os
+# TODO: fix your own directory if needed
+# os.chdir('/some/path/here/connectedhomeip')
+import importlib.util
+spec = importlib.util.find_spec('matter.ChipReplStartup')
+%run {spec.origin}
+```
+
+Commission:
+
+```
+devices = await devCtrl.DiscoverCommissionableNodes(filterType=matter.discovery.FilterType.LONG_DISCRIMINATOR, filter=3840, stopOnFirst=True, timeoutSecond=2)
+await devices[0].Commission(2, 20202021)
+```
+
+Subscribe:
+
+```
+import pprint
+def cb(data, tran):
+    if data.Path is not None:
+        value = tran.GetAttribute(data)
+        pprint.pp("Attribute: %s => %r" % (data.Path, value))
+    else:
+        pprint.pp("UNKNOWN: %r, %r" % (data, tran))
+sub = await devCtrl.ReadAttribute(2, '*', reportInterval=(0,30), autoResubscribe=False)
+sub.SetAttributeUpdateCallback(cb)
+```
