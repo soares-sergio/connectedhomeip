@@ -106,7 +106,8 @@ ServerClusterRegistration serverClusterShimRegistrationEp1(serverClusterShimEp1)
 // TODO: add a Span of these registrations
 
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
-Optional<Clusters::NetworkCommissioning::Instance> sWiFiNetworkCommissioningInstance;
+RegisteredServerCluster<NetworkCommissioningCluster> sWifiNetworkCommissioningCluster(kRootEndpointId, &sWiFiDriver);
+
 DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
 // To hold SPAKE2+ verifier, discriminator, passcode
@@ -118,19 +119,6 @@ void StopSignalHandler(int /* signal */)
 {
     Server::GetInstance().GenerateShutDownEvent();
     SystemLayer().ScheduleLambda([]() { PlatformMgr().StopEventLoopTask(); });
-}
-
-void EnableWiFiNetworkCommissioning(EndpointId endpoint)
-{
-    sWiFiNetworkCommissioningInstance.Emplace(endpoint, &sWiFiDriver);
-    sWiFiNetworkCommissioningInstance.Value().Init();
-}
-
-void InitNetworkCommissioning()
-{
-    // TODO: we may need to figure this out
-    sWiFiDriver.Set5gSupport(true);
-    EnableWiFiNetworkCommissioning(kRootEndpointId);
 }
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodegenDataModelProvider(PersistentStorageDelegate * delegate)
@@ -146,6 +134,13 @@ void InitNetworkCommissioning()
     }
 
     err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp1);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
+        chipDie();
+    }
+
+    err = dataModelProvider.Registry().Register(sWifiNetworkCommissioningCluster.Registration());
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
@@ -206,6 +201,8 @@ void InitNetworkCommissioning()
     static WiFiDiagnosticsServerCluster clusterWifiDiagnostics(0, DeviceLayer::GetDiagnosticDataProvider(), {}, {});
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
+
+    VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
     err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp1);
     if (err != CHIP_NO_ERROR)
@@ -283,7 +280,7 @@ void RunApplication()
 
     SetDeviceAttestationCredentialsProvider(Credentials::Examples::GetExampleDACProvider());
 
-    InitNetworkCommissioning();
+    sWiFiDriver.Set5gSupport(true);
 
     struct sigaction sa = {};
     sa.sa_handler       = StopSignalHandler;
