@@ -35,7 +35,8 @@ namespace app {
 namespace Clusters {
 
 DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
-                                                AttributeValueEncoder & encoder) {
+                                                                     AttributeValueEncoder & encoder)
+{
     VerifyOrDie(request.path.mClusterId == app::Clusters::OccupancySensing::Id);
 
     switch (request.path.mAttributeId)
@@ -54,7 +55,7 @@ DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataM
         return encoder.Encode(mHoldTime);
     }
     case Attributes::HoldTimeLimits::Id: {
-        //TODO add proper get for hold time limit struct
+        // TODO add proper get for hold time limit struct
         return encoder.Encode(mHoldTimeLimits);
     }
     default:
@@ -63,7 +64,8 @@ DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataM
 }
 
 DataModel::ActionReturnStatus OccupancySensingCluster::WriteAttribute(const DataModel::WriteAttributeRequest & request,
-                                                 AttributeValueDecoder & decoder) {
+                                                                      AttributeValueDecoder & decoder)
+{
     VerifyOrDie(request.path.mClusterId == app::Clusters::OccupancySensing::Id);
 
     switch (request.path.mAttributeId)
@@ -75,15 +77,17 @@ DataModel::ActionReturnStatus OccupancySensingCluster::WriteAttribute(const Data
         uint16_t newHoldTime;
         ReturnErrorOnFailure(decoder.Decode(newHoldTime));
 
-        //TODO take hold limits into account before setting the hold time. 
+        // TODO take hold limits into account before setting the hold time.
         return NotifyAttributeChangedIfSuccess(request.path.mAttributeId, SetHoldTime(request.path.mEndpointId, newHoldTime));
     }
-    default: 
+    default:
         return CHIP_NO_ERROR;
     }
 }
 
-CHIP_ERROR OccupancySensingCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) {
+CHIP_ERROR OccupancySensingCluster::Attributes(const ConcreteClusterPath & path,
+                                               ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
+{
     AttributeListBuilder listBuilder(builder);
     return listBuilder.Append(Span(OccupancySensing::Attributes::kMandatoryMetadata), {}, {});
 }
@@ -95,6 +99,6 @@ CHIP_ERROR OccupancySensingCluster::SetHoldTime(EndpointId endpointId, uint16_t 
     return CHIP_NO_ERROR;
 }
 
-}
-}
-}
+} // namespace Clusters
+} // namespace app
+} // namespace chip

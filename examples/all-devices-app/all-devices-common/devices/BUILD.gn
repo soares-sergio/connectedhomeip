@@ -5,8 +5,10 @@ source_set("devices") {
   sources = [
     "Device.cpp",
     "Device.h",
-    "Manager.h",
     "Manager.cpp",
+    "Manager.h",
+    "OccupancySensorDevice.cpp",
+    "OccupancySensorDevice.h",
   ]
 
   public_deps = [
@@ -18,4 +20,3 @@ source_set("devices") {
 
   public_configs = [ "${chip_root}/src:includes" ]
 }
-

@@ -27,10 +27,12 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
-class OccupancySensingCluster : public DefaultServerCluster 
+class OccupancySensingCluster : public DefaultServerCluster
 {
 public:
-    OccupancySensingCluster(BitFlags<OccupancySensing::Feature> features) : DefaultServerCluster({ kRootEndpointId, OccupancySensing::Id }), mFeatures(features) {}
+    OccupancySensingCluster(BitFlags<OccupancySensing::Feature> features) :
+        DefaultServerCluster({ kRootEndpointId, OccupancySensing::Id }), mFeatures(features)
+    {}
 
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                 AttributeValueEncoder & encoder) override;
@@ -42,12 +44,12 @@ public:
 
 private:
     CHIP_ERROR SetHoldTime(EndpointId endpointId, uint16_t newHoldTime);
-    
+
     BitFlags<OccupancySensing::Feature> mFeatures;
     uint16_t mHoldTime;
     OccupancySensing::Structs::HoldTimeLimitsStruct::Type mHoldTimeLimits;
 };
 
-}
-}
-}
+} // namespace Clusters
+} // namespace app
+} // namespace chip

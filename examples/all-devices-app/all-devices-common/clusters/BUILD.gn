@@ -3,7 +3,7 @@ import("//build_overrides/chip.gni")
 
 config("includes") {
   # allows includes like "clusters/..."
-  include_dirs = [".."]
+  include_dirs = [ ".." ]
 }
 
 source_set("descriptor") {
@@ -23,7 +23,7 @@ source_set("descriptor") {
 
   public_configs = [
     ":includes",
-    "${chip_root}/src:includes"
+    "${chip_root}/src:includes",
   ]
 }
 
@@ -44,7 +44,7 @@ source_set("bridged-device-basic-information") {
 
   public_configs = [
     ":includes",
-    "${chip_root}/src:includes"
+    "${chip_root}/src:includes",
   ]
 }
 
@@ -65,7 +65,7 @@ source_set("occupancy-sensor") {
 
   public_configs = [
     ":includes",
-    "${chip_root}/src:includes"
+    "${chip_root}/src:includes",
   ]
 }
 
