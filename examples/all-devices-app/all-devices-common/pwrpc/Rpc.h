@@ -17,12 +17,14 @@
  */
 #pragma once
 
+#include <devices/Manager.h>
+
 #include <cstdint>
 
 namespace chip {
 namespace rpc {
 
-int Init(uint16_t rpcServerPort);
+int Init(uint16_t rpcServerPort, app::DeviceManager & deviceManager);
 
 } // namespace rpc
 } // namespace chip

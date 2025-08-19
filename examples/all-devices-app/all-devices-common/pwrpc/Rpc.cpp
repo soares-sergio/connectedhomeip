@@ -22,6 +22,7 @@
 #include "pw_rpc_system_server/rpc_server.h"
 #include "pw_rpc_system_server/socket.h"
 
+#include <memory>
 #include <platform/PlatformManager.h>
 #include <thread>
 
@@ -49,23 +50,27 @@ namespace chip::rpc {
 namespace {
 
 all_devices::rpc::TestService test_service;
-all_devices::rpc::Bridge bridge;
+std::unique_ptr<all_devices::rpc::Bridge> bridge;
 
 } // namespace
 
-void RunRpcService()
+void RunRpcService(app::DeviceManager & deviceManager)
 {
+
+    VerifyOrDie(!bridge);
+    bridge = std::make_unique<all_devices::rpc::Bridge>(deviceManager);
+
     pw::rpc::system_server::Init();
-    pw::rpc::system_server::Server().RegisterService(bridge);
     pw::rpc::system_server::Server().RegisterService(test_service);
+    pw::rpc::system_server::Server().RegisterService(*bridge);
     pw::rpc::system_server::Start();
 }
 
-int Init(uint16_t rpcServerPort)
+int Init(uint16_t rpcServerPort, app::DeviceManager & deviceManager)
 {
     int err = 0;
     pw::rpc::system_server::set_socket_port(rpcServerPort);
-    std::thread rpc_service(RunRpcService);
+    std::thread rpc_service(RunRpcService, std::ref(deviceManager));
     rpc_service.detach();
     return err;
 }

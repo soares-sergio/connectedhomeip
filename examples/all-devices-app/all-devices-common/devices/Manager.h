@@ -34,9 +34,17 @@ public:
     std::list<Device *> AllDevices();
 
 private:
+    // contains full device information, specifically the device itself
+    // but also endpoint registration data
+    struct DeviceData
+    {
+        std::unique_ptr<Device> device;
+        std::unique_ptr<EndpointInterfaceRegistration> endpointRegistration;
+    };
+
     EndpointId mEndpointIdToAdd;
     CodeDrivenDataModelProvider & mDataModelProvider;
-    std::map<std::string, std::unique_ptr<Device>> mActiveDevices;
+    std::map<std::string, DeviceData> mActiveDevices;
 };
 
 } // namespace chip::app

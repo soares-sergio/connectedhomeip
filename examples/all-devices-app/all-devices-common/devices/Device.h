@@ -21,7 +21,7 @@ enum class BridgedDeviceType
 ///
 /// Current implementation assumes that a device is registered on a single
 /// endpoint.
-class Device
+class Device : public EndpointInterface
 {
 public:
     Device(std::string id) : mUniqueId(std::move(id)) {}
@@ -40,6 +40,11 @@ public:
     /// Will only be called if register has succeeded before
     virtual void UnRegister(CodeDrivenDataModelProvider & provider) = 0;
 
+    // Endpoint interface implementation
+    CHIP_ERROR SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) const override;
+    CHIP_ERROR DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) const override;
+    CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const override;
+
 protected:
     /// Internal registration functions for common device clusters
     /// Subclasses are expected to call these
@@ -49,6 +54,7 @@ protected:
 
     chip::EndpointId mEndpointId = kInvalidEndpointId;
     std::string mUniqueId;
+    Clusters::DescriptorCluster::DeviceType mDeviceType;
 
     // Common clusters..
     LazyRegisteredServerCluster<Clusters::DescriptorCluster> mDescriptorCluster;

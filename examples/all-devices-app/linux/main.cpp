@@ -227,6 +227,9 @@ void InitNetworkCommissioning()
         chipDie();
     }
 
+    static DeviceManager deviceManager(10 /* start endpoint id */, dataModelProvider);
+    rpc::Init(33000, deviceManager);
+
     return &dataModelProvider;
 }
 
@@ -335,7 +338,6 @@ CHIP_ERROR Initialize()
     DeviceLayer::SetCommissionableDataProvider(&gCommissionableDataProvider);
     DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
     ConfigurationMgr().LogDeviceConfig();
-    rpc::Init(33000);
 
     ReturnErrorOnFailure(DeviceLayer::PlatformMgrImpl().AddEventHandler(EventHandler, 0));
     ReturnErrorOnFailure(DeviceLayer::ConnectivityMgr().SetBLEDeviceName(nullptr));

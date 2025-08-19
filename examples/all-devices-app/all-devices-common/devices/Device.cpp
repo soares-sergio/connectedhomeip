@@ -14,6 +14,8 @@ CHIP_ERROR Device::RegisterBridgedNodeClusters(chip::EndpointId endpoint,
 {
     VerifyOrReturnError(mEndpointId == kInvalidEndpointId, CHIP_ERROR_INCORRECT_STATE);
 
+    mDeviceType = deviceType;
+
     /// std::initializer_list does not work well with std::forward, so use the
     /// vector constructor instead
     std::vector<DescriptorCluster::DeviceType> deviceTypes{ {
@@ -42,6 +44,38 @@ CHIP_ERROR Device::UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & p
 
     mEndpointId = kInvalidEndpointId;
 
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR Device::DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) const
+{
+    ReturnErrorOnFailure(out.EnsureAppendCapacity(2));
+
+    ReturnErrorOnFailure(out.Append(DataModel::DeviceTypeEntry{
+        .deviceTypeId       = kBridgedNodeDeviceType,
+        .deviceTypeRevision = kBridgedNodeDeviceTypeRevision,
+    }));
+
+    if (mDescriptorCluster.IsConstructed())
+    {
+        ReturnErrorOnFailure(out.Append(DataModel::DeviceTypeEntry{
+            .deviceTypeId       = mDeviceType.deviceType,
+            .deviceTypeRevision = static_cast<uint8_t>(mDeviceType.revision),
+        }));
+    }
+
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR Device::SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) const
+{
+    // no semantic tags
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR Device::ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const
+{
+    // no bindings
     return CHIP_NO_ERROR;
 }
 
