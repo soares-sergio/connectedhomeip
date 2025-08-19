@@ -1,5 +1,7 @@
 #include "Manager.h"
 
+#include <clusters/Descriptor/AttributeIds.h>
+#include <clusters/Descriptor/ClusterId.h>
 #include <lib/support/CodeUtils.h>
 
 #include <memory>
@@ -38,6 +40,14 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
             .parentId           = 0,                                                 //
             .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily //
         });
+
+    ReturnErrorOnFailure(mDataModelProvider.AddEndpoint(*endpointRegistration));
+
+    // TODO: this should NOT be needed, but as long as we use the SHIM, the descriptor cluster is
+    //       EMBER so we need to notify. See the notifications of emberAfEndpointChanged
+    mDataModelProvider.Temporary_ReportAttributeChanged(AttributePathParams{ mEndpointIdToAdd });
+    mDataModelProvider.Temporary_ReportAttributeChanged(
+        AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
 
     DeviceData deviceData = {
         .device               = std::move(device),
