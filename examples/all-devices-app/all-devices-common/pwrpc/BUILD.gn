@@ -58,6 +58,7 @@ source_set("pwrpc") {
     "$dir_pw_trace",
     "$dir_pw_trace_tokenized",
     "$dir_pw_trace_tokenized:trace_rpc_service",
+    "${chip_root}/examples/all-devices-app/all-devices-common/devices",
     "${chip_root}/src/platform",
     "${chip_root}/src/setup_payload",
     "${chip_root}/src/setup_payload:onboarding-codes-utils",

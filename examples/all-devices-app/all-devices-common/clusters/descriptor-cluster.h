@@ -23,6 +23,10 @@ public:
         DefaultServerCluster({ endpointId, Descriptor::Id }), mDeviceTypes(deviceTypes)
     {}
 
+    DescriptorCluster(EndpointId endpointId, std::vector<DeviceType> deviceTypes) :
+        DefaultServerCluster({ endpointId, Descriptor::Id }), mDeviceTypes(std::move(deviceTypes))
+    {}
+
     CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                 AttributeValueEncoder & encoder) override;
