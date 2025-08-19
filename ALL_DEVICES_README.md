@@ -57,12 +57,16 @@ uv pip install out/linux-x64-all-devices-app-boringssl/all_devices_rpc_console_w
 all-devices-console -s localhost:33000
 
 # Try something like:
-#  devices.rpcs.all_devices.rpc.TestService.GetDeviceInfo()
-#  devices.rpcs.all_devices.rpc.Bridge.ListDevices()
-#  devices.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=1)
+#  device.rpcs.all_devices.rpc.TestService.GetDeviceInfo()
+#  device.rpcs.all_devices.rpc.Bridge.ListDevices()
+
+# For occupancy sensor
+#  device.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=2)
+#  device.rpcs.all_devices.rpc.Bridge.UpdateDevice(unique_id="ABC", occupied=True)
+#  device.rpcs.all_devices.rpc.Bridge.RemoveDevice(unique_id="ABC")
 #
 #  from bridge_service.bridge_service_pb2 import CONTACT_SENSOR
-#  devices.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=CONTACT_SENSOR)
+#  device.rpcs.all_devices.rpc.Bridge.AddDevice(unique_id="ABC", device_type=CONTACT_SENSOR)
 
 ```
 
