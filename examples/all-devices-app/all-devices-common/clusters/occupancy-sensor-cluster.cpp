@@ -17,7 +17,6 @@
 
 #include "occupancy-sensor-cluster.h"
 
-#include <app-common/zap-generated/cluster-objects.h>
 #include <app/server-cluster/AttributeListBuilder.h>
 #include <app/server-cluster/DefaultServerCluster.h>
 #include <clusters/OccupancySensing/ClusterId.h>
@@ -43,8 +42,22 @@ DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataM
     {
     case Attributes::FeatureMap::Id:
         return encoder.Encode(mFeatures);
-    case GeneralDiagnostics::Attributes::ClusterRevision::Id:
+    case Attributes::ClusterRevision::Id:
         return encoder.Encode(OccupancySensing::kRevision);
+    case Attributes::Occupancy::Id: {
+        BitFlags<OccupancyBitmap> state;
+        state.Set(OccupancyBitmap::kOccupied, true);
+        return encoder.Encode(state);
+    }
+    case Attributes::OccupancySensorType::Id: {
+        const OccupancySensing::OccupancySensorTypeEnum type = OccupancySensing::OccupancySensorTypeEnum::kPir;
+        return encoder.Encode(type);
+     }
+    case Attributes::OccupancySensorTypeBitmap::Id: {
+        BitFlags<OccupancySensing::OccupancySensorTypeBitmap> state;
+        state.Set(OccupancySensing::OccupancySensorTypeBitmap::kPir, true);
+        return encoder.Encode(state);
+    }
     case Attributes::HoldTime::Id:
     case Attributes::PIROccupiedToUnoccupiedDelay::Id:
     case Attributes::UltrasonicOccupiedToUnoccupiedDelay::Id:
