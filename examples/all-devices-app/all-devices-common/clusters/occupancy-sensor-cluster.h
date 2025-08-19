@@ -30,8 +30,8 @@ namespace Clusters {
 class OccupancySensingCluster : public DefaultServerCluster
 {
 public:
-    OccupancySensingCluster(BitFlags<OccupancySensing::Feature> features) :
-        DefaultServerCluster({ kRootEndpointId, OccupancySensing::Id }), mFeatures(features)
+    OccupancySensingCluster(EndpointId endpointId, BitFlags<OccupancySensing::Feature> features) :
+        DefaultServerCluster({ endpointId, OccupancySensing::Id }), mFeatures(features)
     {}
 
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
