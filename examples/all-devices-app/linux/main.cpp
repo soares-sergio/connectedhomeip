@@ -87,7 +87,6 @@ ServerClusterShim serverClusterShimEp0({
     { 0, Descriptor::Id },
     { 0, AccessControl::Id },
     { 0, OtaSoftwareUpdateRequestor::Id },
-    { 0, chip::app::Clusters::NetworkCommissioning::Id }, // Spelled out to avoid ambigous namespace error.
     { 0, GeneralCommissioning::Id },
     { 0, DiagnosticLogs::Id },
     { 0, ThreadNetworkDiagnostics::Id },
