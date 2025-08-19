@@ -3,6 +3,7 @@
 #include <clusters/Descriptor/AttributeIds.h>
 #include <clusters/Descriptor/ClusterId.h>
 #include <lib/support/CodeUtils.h>
+#include <platform/PlatformManager.h>
 
 #include <memory>
 #include <string>
@@ -15,10 +16,13 @@ DeviceManager::DeviceManager(EndpointId startEndpointId, CodeDrivenDataModelProv
 
 DeviceManager::~DeviceManager()
 {
+    DeviceLayer::StackLock chipStackLock;
+
     for (auto const & [id, deviceData] : mActiveDevices)
     {
         deviceData.device->UnRegister(mDataModelProvider);
     }
+
     mDataModelProvider.Temporary_ReportAttributeChanged(
         AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
 }
@@ -32,6 +36,8 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
     {
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
+
+    DeviceLayer::StackLock chipStackLock;
 
     ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider));
 
@@ -87,6 +93,7 @@ CHIP_ERROR DeviceManager::RemoveDevice(const char * unique_id)
     auto it = mActiveDevices.find(unique_id);
     VerifyOrReturnError(it != mActiveDevices.end(), CHIP_ERROR_KEY_NOT_FOUND);
 
+    DeviceLayer::StackLock chipStackLock;
     it->second.device->UnRegister(mDataModelProvider);
     mActiveDevices.erase(it);
 
