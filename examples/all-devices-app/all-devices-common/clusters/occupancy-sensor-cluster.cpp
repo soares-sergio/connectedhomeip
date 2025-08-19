@@ -52,7 +52,7 @@ DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataM
     case Attributes::OccupancySensorType::Id: {
         const OccupancySensing::OccupancySensorTypeEnum type = OccupancySensing::OccupancySensorTypeEnum::kPir;
         return encoder.Encode(type);
-     }
+    }
     case Attributes::OccupancySensorTypeBitmap::Id: {
         BitFlags<OccupancySensing::OccupancySensorTypeBitmap> state;
         state.Set(OccupancySensing::OccupancySensorTypeBitmap::kPir, true);
@@ -83,16 +83,17 @@ DataModel::ActionReturnStatus OccupancySensingCluster::WriteAttribute(const Data
 
     switch (request.path.mAttributeId)
     {
-    case Attributes::HoldTime::Id:
-    case Attributes::PIROccupiedToUnoccupiedDelay::Id:
-    case Attributes::UltrasonicOccupiedToUnoccupiedDelay::Id:
-    case Attributes::PhysicalContactOccupiedToUnoccupiedDelay::Id: {
+    case Attributes::HoldTime::Id: {
         uint16_t newHoldTime;
         ReturnErrorOnFailure(decoder.Decode(newHoldTime));
-
-        // TODO take hold limits into account before setting the hold time.
-        return NotifyAttributeChangedIfSuccess(request.path.mAttributeId, SetHoldTime(request.path.mEndpointId, newHoldTime));
+        mHoldTime = newHoldTime;
+        NotifyAttributeChanged(request.path.mAttributeId);
+        return CHIP_NO_ERROR;
     }
+    case Attributes::PIROccupiedToUnoccupiedDelay::Id:
+    case Attributes::UltrasonicOccupiedToUnoccupiedDelay::Id:
+    case Attributes::PhysicalContactOccupiedToUnoccupiedDelay::Id:
+        return CHIP_ERROR_NOT_IMPLEMENTED;
     default:
         return CHIP_NO_ERROR;
     }
@@ -103,13 +104,6 @@ CHIP_ERROR OccupancySensingCluster::Attributes(const ConcreteClusterPath & path,
 {
     AttributeListBuilder listBuilder(builder);
     return listBuilder.Append(Span(OccupancySensing::Attributes::kMandatoryMetadata), {}, {});
-}
-
-CHIP_ERROR OccupancySensingCluster::SetHoldTime(EndpointId endpointId, uint16_t newHoldTime)
-{
-    VerifyOrReturnError(kInvalidEndpointId != endpointId, CHIP_ERROR_INVALID_ARGUMENT);
-    mHoldTime = newHoldTime;
-    return CHIP_NO_ERROR;
 }
 
 } // namespace Clusters

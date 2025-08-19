@@ -43,8 +43,6 @@ public:
     CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
 
 private:
-    CHIP_ERROR SetHoldTime(EndpointId endpointId, uint16_t newHoldTime);
-
     BitFlags<OccupancySensing::Feature> mFeatures;
     uint16_t mHoldTime;
     OccupancySensing::Structs::HoldTimeLimitsStruct::Type mHoldTimeLimits;
