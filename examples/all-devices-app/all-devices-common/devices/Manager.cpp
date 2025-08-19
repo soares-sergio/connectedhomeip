@@ -25,6 +25,7 @@ void DeviceManager::Clear()
 
     for (auto const & [id, deviceData] : mActiveDevices)
     {
+        mDataModelProvider.RemoveEndpoint(deviceData.endpointRegistration->GetEndpointEntry().id);
         deviceData.device->UnRegister(mDataModelProvider);
     }
 
@@ -99,6 +100,8 @@ CHIP_ERROR DeviceManager::RemoveDevice(const char * unique_id)
     VerifyOrReturnError(it != mActiveDevices.end(), CHIP_ERROR_KEY_NOT_FOUND);
 
     DeviceLayer::StackLock chipStackLock;
+
+    mDataModelProvider.RemoveEndpoint(it->second.endpointRegistration->GetEndpointEntry().id);
     it->second.device->UnRegister(mDataModelProvider);
     mActiveDevices.erase(it);
 
