@@ -14,6 +14,7 @@ public:
     pw::Status AddDevice(const all_devices_rpc_AddDeviceRequest & request, pw_protobuf_Empty & response);
     pw::Status RemoveDevice(const all_devices_rpc_RemoveDeviceRequest & request, pw_protobuf_Empty & response);
     pw::Status ListDevices(const pw_protobuf_Empty & request, all_devices_rpc_DeviceList & response);
+    pw::Status UpdateDevice(const all_devices_rpc_UpdateDeviceRequest & request, pw_protobuf_Empty & response);
 
 private:
     chip::app::DeviceManager & mDeviceManager;

@@ -34,6 +34,8 @@ public:
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
 
+    Clusters::OccupancySensingCluster & Cluster() { return mOccupancySensingCluster.Cluster(); }
+
 private:
     LazyRegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
     LazyRegisteredServerCluster<Clusters::OccupancySensingCluster> mOccupancySensingCluster;

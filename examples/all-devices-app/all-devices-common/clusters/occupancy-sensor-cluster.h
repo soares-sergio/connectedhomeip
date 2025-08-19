@@ -42,7 +42,12 @@ public:
 
     CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
 
+    /// Implementation
+    bool IsOccupied() const { return mIsOccupied; }
+    void SetOccupied(bool value);
+
 private:
+    bool mIsOccupied = false;
     BitFlags<OccupancySensing::Feature> mFeatures;
     uint16_t mHoldTime;
     OccupancySensing::Structs::HoldTimeLimitsStruct::Type mHoldTimeLimits;

@@ -1,11 +1,15 @@
 #include "BridgeService.h"
 #include "bridge_service/bridge_service.pb.h"
 
+#include <devices/Device.h>
 #include <devices/OccupancySensorDevice.h>
+#include <platform/PlatformManager.h>
 
 #include <lib/support/CHIPMemString.h>
 #include <lib/support/logging/CHIPLogging.h>
 #include <memory>
+
+using namespace chip;
 
 namespace all_devices::rpc {
 
@@ -14,6 +18,8 @@ pw::Status Bridge::AddDevice(const all_devices_rpc_AddDeviceRequest & request, p
     ChipLogProgress(AppServer, "Request to add device:");
     ChipLogProgress(AppServer, "  UniqueID: %s", request.unique_id);
     ChipLogProgress(AppServer, "  Type: %d", static_cast<int>(request.device_type));
+
+    DeviceLayer::StackLock chipStackLock;
 
     switch (request.device_type)
     {
@@ -36,6 +42,8 @@ pw::Status Bridge::AddDevice(const all_devices_rpc_AddDeviceRequest & request, p
 
 pw::Status Bridge::RemoveDevice(const all_devices_rpc_RemoveDeviceRequest & request, pw_protobuf_Empty & response)
 {
+    DeviceLayer::StackLock chipStackLock;
+
     ChipLogProgress(AppServer, "Request to remove device '%s'", request.unique_id);
     CHIP_ERROR err = mDeviceManager.RemoveDevice(request.unique_id);
     if (err != CHIP_NO_ERROR)
@@ -48,6 +56,8 @@ pw::Status Bridge::RemoveDevice(const all_devices_rpc_RemoveDeviceRequest & requ
 
 pw::Status Bridge::ListDevices(const pw_protobuf_Empty & request, all_devices_rpc_DeviceList & response)
 {
+    DeviceLayer::StackLock chipStackLock;
+
     ChipLogProgress(AppServer, "Request to list devices");
 
     response.devices_count = 0;
@@ -72,6 +82,27 @@ pw::Status Bridge::ListDevices(const pw_protobuf_Empty & request, all_devices_rp
             break;
         }
         response.devices_count++;
+    }
+
+    return pw::OkStatus();
+}
+
+pw::Status Bridge::UpdateDevice(const all_devices_rpc_UpdateDeviceRequest & request, pw_protobuf_Empty & response)
+{
+    DeviceLayer::StackLock chipStackLock;
+
+    ChipLogProgress(AppServer, "Searching for device '%s'", request.unique_id);
+
+    auto device = mDeviceManager.GetDevice(request.unique_id);
+    VerifyOrReturnError(device != nullptr, pw::Status::NotFound());
+
+    if (request.has_occupied)
+    {
+        VerifyOrReturnError(device->GetDeviceType() == chip::app::BridgedDeviceType::kOccupancySensor,
+                            pw::Status::InvalidArgument());
+
+        chip::app::OccupancySensorDevice * occ = static_cast<chip::app::OccupancySensorDevice *>(device);
+        occ->Cluster().SetOccupied(request.occupied);
     }
 
     return pw::OkStatus();

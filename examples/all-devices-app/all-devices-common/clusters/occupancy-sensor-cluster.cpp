@@ -33,6 +33,14 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
+void OccupancySensingCluster::SetOccupied(bool value)
+{
+    VerifyOrReturn(value != mIsOccupied);
+
+    mIsOccupied = value;
+    NotifyAttributeChanged(Attributes::Occupancy::Id);
+}
+
 DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                                      AttributeValueEncoder & encoder)
 {
@@ -46,7 +54,7 @@ DataModel::ActionReturnStatus OccupancySensingCluster::ReadAttribute(const DataM
         return encoder.Encode(OccupancySensing::kRevision);
     case Attributes::Occupancy::Id: {
         BitFlags<OccupancyBitmap> state;
-        state.Set(OccupancyBitmap::kOccupied, true);
+        state.Set(OccupancyBitmap::kOccupied, mIsOccupied);
         return encoder.Encode(state);
     }
     case Attributes::OccupancySensorType::Id: {

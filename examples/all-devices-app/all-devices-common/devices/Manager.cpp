@@ -21,8 +21,6 @@ DeviceManager::~DeviceManager()
 
 void DeviceManager::Clear()
 {
-    DeviceLayer::StackLock chipStackLock;
-
     for (auto const & [id, deviceData] : mActiveDevices)
     {
         mDataModelProvider.RemoveEndpoint(deviceData.endpointRegistration->GetEndpointEntry().id);
@@ -42,8 +40,6 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
     {
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
-
-    DeviceLayer::StackLock chipStackLock;
 
     ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider));
 
@@ -98,8 +94,6 @@ CHIP_ERROR DeviceManager::RemoveDevice(const char * unique_id)
 {
     auto it = mActiveDevices.find(unique_id);
     VerifyOrReturnError(it != mActiveDevices.end(), CHIP_ERROR_KEY_NOT_FOUND);
-
-    DeviceLayer::StackLock chipStackLock;
 
     mDataModelProvider.RemoveEndpoint(it->second.endpointRegistration->GetEndpointEntry().id);
     it->second.device->UnRegister(mDataModelProvider);
