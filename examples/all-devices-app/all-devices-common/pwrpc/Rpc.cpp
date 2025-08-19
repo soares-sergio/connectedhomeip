@@ -60,19 +60,26 @@ void RunRpcService(app::DeviceManager & deviceManager)
     VerifyOrDie(!bridge);
     bridge = std::make_unique<all_devices::rpc::Bridge>(deviceManager);
 
-    pw::rpc::system_server::Init();
     pw::rpc::system_server::Server().RegisterService(test_service);
     pw::rpc::system_server::Server().RegisterService(*bridge);
+
+    // Init may block on accept (it waits for the forst accept)
+    // Start will loop.
+    pw::rpc::system_server::Init();
     pw::rpc::system_server::Start();
 }
 
-int Init(uint16_t rpcServerPort, app::DeviceManager & deviceManager)
+void Start(uint16_t rpcServerPort, app::DeviceManager & deviceManager)
 {
-    int err = 0;
     pw::rpc::system_server::set_socket_port(rpcServerPort);
     std::thread rpc_service(RunRpcService, std::ref(deviceManager));
     rpc_service.detach();
-    return err;
+}
+
+void Stop()
+{
+    pw::rpc::system_server::Server().UnregisterService(test_service, *bridge);
+    bridge.reset();
 }
 
 } // namespace chip::rpc

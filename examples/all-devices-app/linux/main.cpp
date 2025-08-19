@@ -47,6 +47,12 @@
 #include <data-model-providers/codegen/Instance.h>
 #include <server-cluster-shim/ServerClusterShim.h>
 
+#if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
+#include <imgui_ui/ui.h>
+#include <imgui_ui/windows/connectivity.h>
+#include <imgui_ui/windows/qrcode.h>
+#endif
+
 using namespace chip;
 using namespace chip::app;
 using namespace chip::Platform;
@@ -54,6 +60,7 @@ using namespace chip::DeviceLayer;
 using namespace chip::app::Clusters;
 
 namespace {
+AppMainLoopImplementation * gMainLoopImplementation = nullptr;
 
 DataModel::DeviceTypeEntry deviceTypesEp0[] = {
     { 0x0016, 3 }, // ma_rootdevice, version 3
@@ -117,8 +124,15 @@ std::unique_ptr<DeviceManager> gDeviceManager;
 
 void StopSignalHandler(int /* signal */)
 {
-    Server::GetInstance().GenerateShutDownEvent();
-    SystemLayer().ScheduleLambda([]() { PlatformMgr().StopEventLoopTask(); });
+    if (gMainLoopImplementation != nullptr)
+    {
+        gMainLoopImplementation->SignalSafeStopMainLoop();
+    }
+    else
+    {
+        Server::GetInstance().GenerateShutDownEvent();
+        SystemLayer().ScheduleLambda([]() { PlatformMgr().StopEventLoopTask(); });
+    }
 }
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodegenDataModelProvider(PersistentStorageDelegate * delegate)
@@ -227,13 +241,15 @@ void StopSignalHandler(int /* signal */)
     }
 
     gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
-    rpc::Init(33000, *gDeviceManager);
+    rpc::Start(33000, *gDeviceManager);
 
     return &dataModelProvider;
 }
 
-void RunApplication()
+void RunApplication(AppMainLoopImplementation * mainLoop = nullptr)
 {
+    gMainLoopImplementation = mainLoop;
+
     static chip::CommonCaseDeviceServerInitParams initParams;
     VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
 
@@ -278,6 +294,11 @@ void RunApplication()
     VerifyOrDie(chip::DeviceLayer::GetDeviceInstanceInfoProvider()->GetProductId(payload.productID) == CHIP_NO_ERROR);
     PrintOnboardingCodes(payload);
 
+#if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
+    // This is a hack .. but keeping it for now to get imgui qrcode working
+    LinuxDeviceOptions::GetInstance().payload = payload;
+#endif
+
     SetDeviceAttestationCredentialsProvider(Credentials::Examples::GetExampleDACProvider());
 
     sWiFiDriver.Set5gSupport(true);
@@ -288,12 +309,18 @@ void RunApplication()
     sigaction(SIGINT, &sa, nullptr);
     sigaction(SIGTERM, &sa, nullptr);
 
-    DeviceLayer::PlatformMgr().RunEventLoop();
-
-    if (gDeviceManager)
+    if (mainLoop != nullptr)
     {
-        gDeviceManager->Clear(); // ensure no clusters referenced after execution
+        mainLoop->RunMainLoop();
     }
+    else
+    {
+        DeviceLayer::PlatformMgr().RunEventLoop();
+    }
+    gMainLoopImplementation = nullptr;
+
+    rpc::Stop();
+    gDeviceManager.reset();
     Server::GetInstance().Shutdown();
     DeviceLayer::PlatformMgr().Shutdown();
     tracing_setup.StopTracing();
@@ -366,7 +393,14 @@ int main(int argc, char * argv[])
     }
 
     ChipLogProgress(AppServer, "Hello from all-devices-app!");
+#if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
+    example::Ui::ImguiUi ui;
+    ui.AddWindow(std::make_unique<example::Ui::Windows::QRCode>());
+    ui.AddWindow(std::make_unique<example::Ui::Windows::Connectivity>());
+    RunApplication(&ui);
+#else
     RunApplication();
+#endif
 
     return 0;
 }

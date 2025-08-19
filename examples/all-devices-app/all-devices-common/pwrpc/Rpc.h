@@ -24,7 +24,8 @@
 namespace chip {
 namespace rpc {
 
-int Init(uint16_t rpcServerPort, app::DeviceManager & deviceManager);
+void Start(uint16_t rpcServerPort, app::DeviceManager & deviceManager);
+void Stop();
 
 } // namespace rpc
 } // namespace chip

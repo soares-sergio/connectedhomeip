@@ -18,6 +18,7 @@ import("//build_overrides/pigweed.gni")
 import("${chip_root}/build/chip/tools.gni")
 import("${chip_root}/examples/common/pigweed/rpc_config.gni")
 import("${chip_root}/src/app/common_flags.gni")
+import("${chip_root}/third_party/imgui/imgui.gni")
 
 import("$dir_pw_build/target_types.gni")
 
@@ -60,6 +61,14 @@ executable("all-devices-app") {
   ]
 
   output_dir = root_out_dir
+
+  if (chip_examples_enable_imgui_ui) {
+    deps += [
+      "${chip_root}/examples/common/imgui_ui",
+      "${chip_root}/examples/common/imgui_ui/windows:connectivity",
+      "${chip_root}/examples/common/imgui_ui/windows:qrcode",
+    ]
+  }
 }
 
 group("linux") {
