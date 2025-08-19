@@ -35,8 +35,11 @@ CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDriven
 
     ReturnErrorOnFailure(RegisterBridgedNodeClusters(endpoint, deviceType, provider));
 
+    mIdentifyCluster.Create(endpoint);
+    ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
+
     mOccupancySensingCluster.Create(endpoint, BitFlags<OccupancySensing::Feature>(0));
-    provider.AddCluster(mOccupancySensingCluster.Registration());
+    ReturnErrorOnFailure(provider.AddCluster(mOccupancySensingCluster.Registration()));
 
     return CHIP_NO_ERROR;
 }
@@ -48,6 +51,11 @@ void OccupancySensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
     {
         provider.RemoveCluster(&mOccupancySensingCluster.Cluster());
         mOccupancySensingCluster.Destroy();
+    }
+    if (mIdentifyCluster.IsConstructed())
+    {
+        provider.RemoveCluster(&mIdentifyCluster.Cluster());
+        mIdentifyCluster.Destroy();
     }
 }
 

@@ -16,6 +16,7 @@
  */
 #pragma once
 
+#include <clusters/identify-cluster.h>
 #include <clusters/occupancy-sensor-cluster.h>
 #include <devices/Device.h>
 
@@ -34,6 +35,7 @@ public:
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
 
 private:
+    LazyRegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
     LazyRegisteredServerCluster<Clusters::OccupancySensingCluster> mOccupancySensingCluster;
 };
 
