@@ -37,9 +37,28 @@ source_set("bridged-device-basic-information") {
   public_configs = [ "${chip_root}/src:includes" ]
 }
 
+source_set("occupancy-sensor") {
+  sources = [
+    "occupancy-sensor-cluster.cpp",
+    "occupancy-sensor-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/OccupancySensing",
+  ]
+
+  public_configs = [ "${chip_root}/src:includes" ]
+}
+
 group("clusters") {
   public_deps = [
     ":bridged-device-basic-information",
     ":descriptor",
+    ":occupancy-sensor",
   ]
 }
