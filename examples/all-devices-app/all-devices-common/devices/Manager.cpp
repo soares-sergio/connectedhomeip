@@ -16,6 +16,11 @@ DeviceManager::DeviceManager(EndpointId startEndpointId, CodeDrivenDataModelProv
 
 DeviceManager::~DeviceManager()
 {
+    Clear();
+}
+
+void DeviceManager::Clear()
+{
     DeviceLayer::StackLock chipStackLock;
 
     for (auto const & [id, deviceData] : mActiveDevices)

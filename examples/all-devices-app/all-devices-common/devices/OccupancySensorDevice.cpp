@@ -20,7 +20,7 @@ using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-constexpr DeviceTypeId kOccupancySensorDeviceType = 0x0107;
+constexpr DeviceTypeId kOccupancySensorDeviceType         = 0x0107;
 constexpr DeviceTypeId kOccupancySensorDeviceTypeRevision = 4;
 
 BridgedDeviceType OccupancySensorDevice::GetDeviceType() const
@@ -30,7 +30,8 @@ BridgedDeviceType OccupancySensorDevice::GetDeviceType() const
 
 CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = kOccupancySensorDeviceType, .revision = kOccupancySensorDeviceTypeRevision };
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = kOccupancySensorDeviceType,
+                                                       .revision   = kOccupancySensorDeviceTypeRevision };
 
     ReturnErrorOnFailure(RegisterBridgedNodeClusters(endpoint, deviceType, provider));
 
@@ -43,7 +44,8 @@ CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDriven
 void OccupancySensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     UnRegisterBridgedNodeClusters(provider);
-    if (mOccupancySensingCluster.IsConstructed()) {
+    if (mOccupancySensingCluster.IsConstructed())
+    {
         provider.RemoveCluster(&mOccupancySensingCluster.Cluster());
         mOccupancySensingCluster.Destroy();
     }

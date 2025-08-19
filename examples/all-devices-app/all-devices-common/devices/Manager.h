@@ -33,6 +33,9 @@ public:
     /// Returns pointers to all active devices maintained by this manager
     std::list<Device *> AllDevices();
 
+    // Removes all devices that are registered
+    void Clear();
+
 private:
     // contains full device information, specifically the device itself
     // but also endpoint registration data

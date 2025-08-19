@@ -31,6 +31,7 @@
 #include <app/server/Server.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
+#include <memory>
 #include <platform/CommissionableDataProvider.h>
 #include <platform/Linux/NetworkCommissioningDriver.h>
 #include <platform/PlatformManager.h>
@@ -111,6 +112,8 @@ DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
 // To hold SPAKE2+ verifier, discriminator, passcode
 LinuxCommissionableDataProvider gCommissionableDataProvider;
+
+std::unique_ptr<DeviceManager> gDeviceManager;
 
 void StopSignalHandler(int /* signal */)
 {
@@ -227,13 +230,13 @@ void InitNetworkCommissioning()
         chipDie();
     }
 
-    static DeviceManager deviceManager(10 /* start endpoint id */, dataModelProvider);
-    rpc::Init(33000, deviceManager);
+    gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
+    rpc::Init(33000, *gDeviceManager);
 
     return &dataModelProvider;
 }
 
-void StartApplication()
+void RunApplication()
 {
     static chip::CommonCaseDeviceServerInitParams initParams;
     VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
@@ -290,6 +293,11 @@ void StartApplication()
     sigaction(SIGTERM, &sa, nullptr);
 
     DeviceLayer::PlatformMgr().RunEventLoop();
+
+    if (gDeviceManager)
+    {
+        gDeviceManager->Clear(); // ensure no clusters referenced after execution
+    }
     Server::GetInstance().Shutdown();
     DeviceLayer::PlatformMgr().Shutdown();
     tracing_setup.StopTracing();
@@ -362,7 +370,7 @@ int main(int argc, char * argv[])
     }
 
     ChipLogProgress(AppServer, "Hello from all-devices-app!");
-    StartApplication();
+    RunApplication();
 
     return 0;
 }
