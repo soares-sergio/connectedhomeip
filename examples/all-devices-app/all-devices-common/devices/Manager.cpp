@@ -19,6 +19,8 @@ DeviceManager::~DeviceManager()
     {
         deviceData.device->UnRegister(mDataModelProvider);
     }
+    mDataModelProvider.Temporary_ReportAttributeChanged(
+        AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
 }
 
 CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
@@ -87,6 +89,10 @@ CHIP_ERROR DeviceManager::RemoveDevice(const char * unique_id)
 
     it->second.device->UnRegister(mDataModelProvider);
     mActiveDevices.erase(it);
+
+    mDataModelProvider.Temporary_ReportAttributeChanged(
+        AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
+
     return CHIP_NO_ERROR;
 }
 
