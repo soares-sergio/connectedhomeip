@@ -17,7 +17,7 @@
 #pragma once
 
 #include <clusters/identify-cluster.h>
-// #include <clusters/boolean-state-cluster.h>
+#include <clusters/boolean-state-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {
@@ -34,11 +34,11 @@ public:
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
 
-    // Clusters::BooleanStateCluster & Cluster() { return mBooleanStateCluster.Cluster(); }
+    Clusters::BooleanStateCluster & Cluster() { return mBooleanStateCluster.Cluster(); }
 
 private:
     LazyRegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
-    // LazyRegisteredServerCluster<Clusters::BooleanStateCluster> mBooleanStateCluster;
+    LazyRegisteredServerCluster<Clusters::BooleanStateCluster> mBooleanStateCluster;
 };
 
 }
