@@ -42,26 +42,15 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
     }
 
     ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider));
-
-    // auto bridgeNodeEndpointRegistration = std::make_unique<EndpointInterfaceRegistration>(
-    //     *device,
-    //     DataModel::EndpointEntry{
-    //         .id                 = mEndpointIdToAdd,                                  //
-    //         .parentId           = 1,                                                 //
-    //         .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily //
-    //     });
-
-    // mEndpointIdToAdd++;
     auto endpointRegistration = std::make_unique<EndpointInterfaceRegistration>(
         *device,
         DataModel::EndpointEntry{
-            // .parentId           = mEndpointIdToAdd,                                                 //
             .id                 = mEndpointIdToAdd,                                  //
+            //TODO: Fix the parentId. Devices should map to their respective bridged node device
             .parentId           = 0,                                                 //
             .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily //
         });
 
-    // ReturnErrorOnFailure(mDataModelProvider.AddEndpoint(*bridgeNodeEndpointRegistration));
     ReturnErrorOnFailure(mDataModelProvider.AddEndpoint(*endpointRegistration));
 
     // TODO: this should NOT be needed, but as long as we use the SHIM, the descriptor cluster is
@@ -75,9 +64,6 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
         .endpointRegistration = std::move(endpointRegistration),
     };
 
-    // Increment by 2 since every device will have an enpoint for its device type, and one for the bridge
-    // node device type. This will need to be changed for when we have multiple endpoints mapping to one
-    // bridge node device type.
     mEndpointIdToAdd++;
     mActiveDevices[deviceId] = std::move(deviceData);
 

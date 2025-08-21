@@ -30,11 +30,6 @@ BridgedDeviceType ContactSensorDevice::GetDeviceType() const
 
 CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
 {
-    // const DescriptorCluster::DeviceType deviceType = { .deviceType = kContactSensorDeviceType,
-    //                                                    .revision   = kContactSensorDeviceTypeRevision };
-
-    // ReturnErrorOnFailure(RegisterBridgedNodeClusters(endpoint, deviceType, provider));
-
     const DescriptorCluster::DeviceType deviceType = { .deviceType = kContactSensorDeviceType,
                                                        .revision   = kContactSensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType));

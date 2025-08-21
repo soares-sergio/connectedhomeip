@@ -32,6 +32,7 @@ public:
                                                 AttributeValueEncoder & encoder) override;
 
 private:
+    // TODO: is a parts list needed instead of using the old part list with read attribute code?
     std::vector<DeviceType> mDeviceTypes;
     CHIP_ERROR ReadPartsAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
 };

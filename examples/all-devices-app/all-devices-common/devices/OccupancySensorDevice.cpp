@@ -30,12 +30,6 @@ BridgedDeviceType OccupancySensorDevice::GetDeviceType() const
 
 CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
 {
-    // const DescriptorCluster::DeviceType deviceType = { .deviceType = kOccupancySensorDeviceType,
-    //                                                    .revision   = kOccupancySensorDeviceTypeRevision };
-    
-    // ReturnErrorOnFailure(RegisterBridgedNodeClusters(endpoint, deviceType, provider));
-    // endpoint++;     
-
     const DescriptorCluster::DeviceType deviceType = { .deviceType = kOccupancySensorDeviceType,
                                                        .revision   = kOccupancySensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType));

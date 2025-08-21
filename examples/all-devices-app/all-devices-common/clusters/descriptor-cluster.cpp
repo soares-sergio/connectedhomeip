@@ -93,8 +93,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
         });
     }
     case PartsList::Id:
-        return encoder.EncodeEmptyList();
-        // return ReadPartsAttribute(request.path.mEndpointId, encoder);
+        return ReadPartsAttribute(request.path.mEndpointId, encoder);
     default:
         return Status::UnsupportedAttribute;
     }
