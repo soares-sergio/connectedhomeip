@@ -69,6 +69,7 @@ DataModel::DeviceTypeEntry deviceTypesEp0[] = {
 
 DataModel::DeviceTypeEntry deviceTypesEp1[] = {
     { 0x0015, 2 }, // ma_contactsensor, version 2
+    // { 0x000E, 2 }, //aggregator
 };
 
 ClusterId clientClustersEp0[] = { OtaSoftwareUpdateProvider::Id };
@@ -105,7 +106,8 @@ ServerClusterShim serverClusterShimEp0({
 ServerClusterShim serverClusterShimEp1({ // Endpoint 1
                                          { 1, Identify::Id },
                                          { 1, Descriptor::Id },
-                                         { 1, BooleanState::Id } });
+                                        //  { 1, BooleanState::Id } 
+                                        });
 
 ServerClusterRegistration serverClusterShimRegistrationEp0(serverClusterShimEp0);
 ServerClusterRegistration serverClusterShimRegistrationEp1(serverClusterShimEp1);
