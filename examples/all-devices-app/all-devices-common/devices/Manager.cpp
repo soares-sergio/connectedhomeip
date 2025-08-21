@@ -3,7 +3,8 @@
 #include <clusters/Descriptor/AttributeIds.h>
 #include <clusters/Descriptor/ClusterId.h>
 #include <lib/support/CodeUtils.h>
-#include <platform/PlatformManager.h>
+#include <devices/BridgedNodeDevice.h>
+#include <devices/ContactSensorDevice.h>
 
 #include <memory>
 #include <string>
@@ -11,7 +12,7 @@
 namespace chip::app {
 
 DeviceManager::DeviceManager(EndpointId startEndpointId, CodeDrivenDataModelProvider & provider) :
-    mEndpointIdToAdd(startEndpointId), mDataModelProvider(provider)
+    mLastBridedNodeDeviceEp(startEndpointId), mEndpointIdToAdd(startEndpointId), mDataModelProvider(provider)
 {}
 
 DeviceManager::~DeviceManager()
@@ -42,12 +43,17 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
     }
 
     ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider));
+    // EndpointId endpointParentId = (device->GetDeviceType()==BridgedDeviceType::kBridgedNodeDevice) ? 1 : mEndpointIdToAdd-1; 
+    EndpointId endpointParentId = mLastBridedNodeDeviceEp;
+    if (device->GetDeviceType()==BridgedDeviceType::kBridgedNodeDevice) {
+        mLastBridedNodeDeviceEp = mEndpointIdToAdd;
+        endpointParentId = 1;
+    }
     auto endpointRegistration = std::make_unique<EndpointInterfaceRegistration>(
         *device,
         DataModel::EndpointEntry{
             .id                 = mEndpointIdToAdd,                                  //
-            //TODO: Fix the parentId. Devices should map to their respective bridged node device
-            .parentId           = 0,                                                 //
+            .parentId           = endpointParentId,                                                 //
             .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily //
         });
 

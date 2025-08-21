@@ -45,6 +45,7 @@ private:
         std::unique_ptr<EndpointInterfaceRegistration> endpointRegistration;
     };
 
+    EndpointId mLastBridedNodeDeviceEp;
     EndpointId mEndpointIdToAdd;
     CodeDrivenDataModelProvider & mDataModelProvider;
     std::map<std::string, DeviceData> mActiveDevices;
