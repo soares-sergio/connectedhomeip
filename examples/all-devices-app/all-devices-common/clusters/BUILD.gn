@@ -90,11 +90,33 @@ source_set("occupancy-sensor") {
   ]
 }
 
+source_set("boolean-state-cluster") {
+  sources = [
+    "boolean-state-cluster.cpp",
+    "boolean-state-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/OccupancySensing",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
 group("clusters") {
   public_deps = [
     ":bridged-device-basic-information",
     ":descriptor",
     ":identify",
     ":occupancy-sensor",
+    ":boolean-state-cluster",
   ]
 }

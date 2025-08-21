@@ -30,6 +30,7 @@ message DeviceList {
 message UpdateDeviceRequest {
   string unique_id = 1;
   optional bool occupied = 2; // Only for an occupancy sensor
+  optional bool contact = 3; // Only for an contact sensor
 }
 
 service Bridge {
