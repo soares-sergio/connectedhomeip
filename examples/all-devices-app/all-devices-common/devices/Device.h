@@ -12,6 +12,7 @@ namespace chip::app {
 /// know the device type.
 enum class BridgedDeviceType
 {
+    kBridgedNodeDevice,
     kContactSensor,
     kOccupancySensor,
 };
@@ -50,6 +51,7 @@ protected:
     /// Subclasses are expected to call these
     CHIP_ERROR RegisterBridgedNodeClusters(chip::EndpointId endpoint, const Clusters::DescriptorCluster::DeviceType & deviceType,
                                            CodeDrivenDataModelProvider & provider);
+    CHIP_ERROR RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, const Clusters::DescriptorCluster::DeviceType & deviceType);
     CHIP_ERROR UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider);
 
     chip::EndpointId mEndpointId = kInvalidEndpointId;
@@ -58,7 +60,7 @@ protected:
 
     // Common clusters..
     LazyRegisteredServerCluster<Clusters::DescriptorCluster> mDescriptorCluster;
-    LazyRegisteredServerCluster<Clusters::BridgedDeviceBasicInformationCluster> mBridgedDeviceInfoCluster;
+    // LazyRegisteredServerCluster<Clusters::BridgedDeviceBasicInformationCluster> mBridgedDeviceInfoCluster;
 };
 
 } // namespace chip::app

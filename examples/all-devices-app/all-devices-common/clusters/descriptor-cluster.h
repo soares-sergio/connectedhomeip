@@ -33,6 +33,7 @@ public:
 
 private:
     std::vector<DeviceType> mDeviceTypes;
+    CHIP_ERROR ReadPartsAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
 };
 
 } // namespace chip::app::Clusters

@@ -16,6 +16,8 @@ source_set("devices") {
     "OccupancySensorDevice.h",
     "ContactSensorDevice.cpp",
     "ContactSensorDevice.h",
+    "BridgedNodeDevice.h",
+    "BridgedNodeDevice.cpp",
   ]
 
   public_deps = [

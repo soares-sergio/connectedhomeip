@@ -4,6 +4,7 @@
 #include <devices/Device.h>
 #include <devices/OccupancySensorDevice.h>
 #include <devices/ContactSensorDevice.h>
+#include <devices/BridgedNodeDevice.h>
 #include <platform/PlatformManager.h>
 
 #include <lib/support/CHIPMemString.h>
@@ -25,16 +26,32 @@ pw::Status Bridge::AddDevice(const all_devices_rpc_AddDeviceRequest & request, p
     switch (request.device_type)
     {
     case all_devices_rpc_DeviceType_OCCUPANCY_SENSOR: {
-        CHIP_ERROR err = mDeviceManager.AddDevice(std::make_unique<chip::app::OccupancySensorDevice>(request.unique_id));
-        if (err != CHIP_NO_ERROR)
+        std::string bridge_id = request.unique_id + std::string("_bridged_node_device");
+        CHIP_ERROR err1 = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
+        if (err1 != CHIP_NO_ERROR)
         {
-            ChipLogError(AppServer, "Device add failed: %" CHIP_ERROR_FORMAT, err.Format());
+            ChipLogError(AppServer, "Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
+            return pw::Status::Internal();
+        }
+
+        CHIP_ERROR err2 = mDeviceManager.AddDevice(std::make_unique<chip::app::OccupancySensorDevice>(request.unique_id));
+        if (err2 != CHIP_NO_ERROR)
+        {
+            ChipLogError(AppServer, "Device add failed: %" CHIP_ERROR_FORMAT, err2.Format());
             return pw::Status::Internal();
         }
 
         return pw::OkStatus();
     }
     case all_devices_rpc_DeviceType_CONTACT_SENSOR: {
+        std::string bridge_id = request.unique_id + std::string("_bridged_node_device");
+        CHIP_ERROR err1 = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
+        if (err1 != CHIP_NO_ERROR)
+        {
+            ChipLogError(AppServer, "Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
+            return pw::Status::Internal();
+        }
+        
         CHIP_ERROR err = mDeviceManager.AddDevice(std::make_unique<chip::app::ContactSensorDevice>(request.unique_id));
         if (err != CHIP_NO_ERROR)
         {

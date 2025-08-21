@@ -1,0 +1,53 @@
+/*
+ *
+ *    Copyright (c) 2025 Project CHIP Authors
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+#include <devices/BridgedNodeDevice.h>
+
+using namespace chip::app::Clusters;
+
+namespace chip::app {
+
+constexpr DeviceTypeId kBridgedNodeDeviceType         = 0x0013;
+constexpr DeviceTypeId kBridgedNodeDeviceTypeRevision = 3;
+
+BridgedDeviceType BridgedNodeDevice::GetDeviceType() const
+{
+    return BridgedDeviceType::kBridgedNodeDevice;
+}
+
+CHIP_ERROR BridgedNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
+{
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = kBridgedNodeDeviceType,
+                                                       .revision   = kBridgedNodeDeviceTypeRevision };
+    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType));
+
+    mBridgedDeviceBasicInformationCluster.Create(endpoint, mUniqueId);
+    ReturnErrorOnFailure(provider.AddCluster(mBridgedDeviceBasicInformationCluster.Registration()));
+
+    return CHIP_NO_ERROR;
+}
+
+void BridgedNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider)
+{
+    UnRegisterBridgedNodeClusters(provider);
+    if (mBridgedDeviceBasicInformationCluster.IsConstructed())
+    {
+        provider.RemoveCluster(&mBridgedDeviceBasicInformationCluster.Cluster());
+        mBridgedDeviceBasicInformationCluster.Destroy();
+    }
+}
+
+} // namespace chip::app

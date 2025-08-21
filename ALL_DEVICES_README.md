@@ -56,6 +56,9 @@ uv pip install out/linux-x64-all-devices-app-boringssl/all_devices_rpc_console_w
 # Run the all devices console (after the app is started)
 all-devices-console -s localhost:33000
 
+# Combined:
+uv venv out/console-env && source out/console-env/bin/activate && uv pip install out/linux-x64-all-devices-app-boringssl/all_devices_rpc_console_wheels/*.whl && all-devices-console -s localhost:33000
+
 # Try something like:
 #  device.rpcs.all_devices.rpc.TestService.GetDeviceInfo()
 #  device.rpcs.all_devices.rpc.Bridge.ListDevices()

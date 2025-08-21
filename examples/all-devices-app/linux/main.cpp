@@ -68,8 +68,8 @@ DataModel::DeviceTypeEntry deviceTypesEp0[] = {
 };
 
 DataModel::DeviceTypeEntry deviceTypesEp1[] = {
-    { 0x0015, 2 }, // ma_contactsensor, version 2
-    // { 0x000E, 2 }, //aggregator
+    // { 0x0015, 2 }, // ma_contactsensor, version 2
+    { 0x000E, 2 }, //aggregator
 };
 
 ClusterId clientClustersEp0[] = { OtaSoftwareUpdateProvider::Id };

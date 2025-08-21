@@ -28,19 +28,33 @@ CHIP_ERROR Device::RegisterBridgedNodeClusters(chip::EndpointId endpoint,
                                                             } };
 
     mDescriptorCluster.Create(endpoint, deviceTypes);
-    mBridgedDeviceInfoCluster.Create(endpoint, mUniqueId);
+    // mBridgedDeviceInfoCluster.Create(endpoint, mUniqueId);
 
     ReturnErrorOnFailure(provider.AddCluster(mDescriptorCluster.Registration()));
-    ReturnErrorOnFailure(provider.AddCluster(mBridgedDeviceInfoCluster.Registration()));
+    // ReturnErrorOnFailure(provider.AddCluster(mBridgedDeviceInfoCluster.Registration()));
     mEndpointId = endpoint;
 
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, const Clusters::DescriptorCluster::DeviceType & deviceType) 
+{    
+    VerifyOrReturnError(mEndpointId == kInvalidEndpointId, CHIP_ERROR_INCORRECT_STATE);
+    mDeviceType = deviceType;
+
+    /// std::initializer_list does not work well with std::forward, so use the
+    /// vector constructor instead
+    std::vector<DescriptorCluster::DeviceType> deviceTypes{ deviceType };
+
+    mDescriptorCluster.Create(endpoint, deviceTypes);
+    ReturnErrorOnFailure(provider.AddCluster(mDescriptorCluster.Registration()));
     return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR Device::UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider)
 {
     ReturnErrorOnFailure(provider.RemoveCluster(&mDescriptorCluster.Cluster()));
-    ReturnErrorOnFailure(provider.RemoveCluster(&mBridgedDeviceInfoCluster.Cluster()));
+    // ReturnErrorOnFailure(provider.RemoveCluster(&mBridgedDeviceInfoCluster.Cluster()));
 
     mEndpointId = kInvalidEndpointId;
 
