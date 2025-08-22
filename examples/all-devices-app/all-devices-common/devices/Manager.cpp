@@ -64,6 +64,8 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
     mDataModelProvider.Temporary_ReportAttributeChanged(AttributePathParams{ mEndpointIdToAdd });
     mDataModelProvider.Temporary_ReportAttributeChanged(
         AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
+    mDataModelProvider.Temporary_ReportAttributeChanged(
+        AttributePathParams{ 1, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
 
     DeviceData deviceData = {
         .device               = std::move(device),

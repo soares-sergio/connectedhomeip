@@ -4,6 +4,7 @@
 #include <clusters/Descriptor/ClusterId.h>
 #include <clusters/Descriptor/Metadata.h>
 #include <lib/core/DataModelTypes.h>
+#include <app/InteractionModelEngine.h>
 
 using namespace chip::app::Clusters::Descriptor;
 using namespace chip::app::Clusters::Descriptor::Attributes;
@@ -42,6 +43,92 @@ bool IsDescendantOf(const DataModel::EndpointEntry * __restrict__ childEndpoint,
         }
     }
 }
+
+CHIP_ERROR ReadFeatureMap(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+{
+    BitFlags<Feature> featureFlags;
+    ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
+    CHIP_ERROR err = InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList);
+    if (err == CHIP_NO_ERROR && !semanticTagsList.IsEmpty()) {
+        featureFlags.Set(Descriptor::Feature::kTagList);
+    }
+    return aEncoder.Encode(featureFlags);
+}
+
+CHIP_ERROR ReadTagListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+{
+    ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
+    ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList));
+
+    return aEncoder.EncodeList([&semanticTagsList](const auto & encoder) -> CHIP_ERROR {
+        for (const auto & tag : semanticTagsList.TakeBuffer())
+        {
+            ReturnErrorOnFailure(encoder.Encode(tag));
+        }
+        return CHIP_NO_ERROR;
+    });
+}
+
+// CHIP_ERROR ReadDeviceAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+// {
+//     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesList;
+//     ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->DeviceTypes(endpoint, deviceTypesList));
+
+//     auto deviceTypes = deviceTypesList.TakeBuffer();
+
+//     CHIP_ERROR err = aEncoder.EncodeList([&deviceTypes](const auto & encoder) -> CHIP_ERROR {
+//         Descriptor::Structs::DeviceTypeStruct::Type deviceStruct;
+//         for (const auto & type : deviceTypes)
+//         {
+//             deviceStruct.deviceType = type.deviceTypeId;
+//             deviceStruct.revision   = type.deviceTypeRevision;
+//             ReturnErrorOnFailure(encoder.Encode(deviceStruct));
+//         }
+
+//         return CHIP_NO_ERROR;
+//     });
+
+//     return err;
+// }
+
+#if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+CHIP_ERROR ReadEndpointUniqueId(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+{
+    char buffer[chip::app::Clusters::Descriptor::Attributes::EndpointUniqueID::TypeInfo::MaxLength()] = { 0 };
+    MutableCharSpan epUniqueId(buffer);
+
+    //TODO: This function does not exist in the code driven data model provider
+    // ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->EndpointUniqueID(endpoint, epUniqueId));
+    return aEncoder.Encode(epUniqueId);
+}
+#endif
+
+// CHIP_ERROR ReadServerClusters(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+// {
+//     ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> builder;
+//     ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->ServerClusters(endpoint, builder));
+//     return aEncoder.EncodeList([&builder](const auto & encoder) -> CHIP_ERROR {
+//         for (const auto & cluster : builder.TakeBuffer())
+//         {
+//             ReturnErrorOnFailure(encoder.Encode(cluster.clusterId));
+//         }
+//         return CHIP_NO_ERROR;
+//     });
+// }
+
+// CHIP_ERROR ReadClientClusters(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+// {
+//     ReadOnlyBufferBuilder<ClusterId> clusterIdList;
+//     ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->ClientClusters(endpoint, clusterIdList));
+//     return aEncoder.EncodeList([&clusterIdList](const auto & encoder) -> CHIP_ERROR {
+//         for (const auto & id : clusterIdList.TakeBuffer())
+//         {
+//             ReturnErrorOnFailure(encoder.Encode(id));
+//         }
+//         return CHIP_NO_ERROR;
+//     });
+// }
+
 }
 
 CHIP_ERROR DescriptorCluster::Attributes(const ConcreteClusterPath & path,
@@ -57,7 +144,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
     switch (request.path.mAttributeId)
     {
     case FeatureMap::Id:
-        return encoder.Encode(BitFlags<Descriptor::Feature>{ 0 }); // TODO: more features support
+        return ReadFeatureMap(request.path.mEndpointId, encoder);
     case ClusterRevision::Id:
         return encoder.Encode(Descriptor::kRevision);
     case DeviceTypeList::Id:
@@ -68,6 +155,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
             }
             return CHIP_NO_ERROR;
         });
+        // return ReadDeviceAttribute(request.path.mEndpointId, encoder);
     case ServerList::Id: {
         ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> builder;
         ReturnErrorOnFailure(mContext->provider.ServerClusters(mPath.mEndpointId, builder));
@@ -93,7 +181,10 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
         });
     }
     case PartsList::Id:
+        // return encoder.EncodeEmptyList();
         return ReadPartsAttribute(request.path.mEndpointId, encoder);
+    case TagList::Id: 
+        return ReadTagListAttribute(request.path.mEndpointId, encoder);
     default:
         return Status::UnsupportedAttribute;
     }

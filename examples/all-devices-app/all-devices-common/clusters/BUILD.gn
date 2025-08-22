@@ -19,6 +19,7 @@ source_set("descriptor") {
     "${chip_root}/src/lib/core:error",
     "${chip_root}/src/lib/support",
     "${chip_root}/zzz_generated/app-common/clusters/Descriptor",
+    "${chip_root}/src/app:interaction-model",
   ]
 
   public_configs = [

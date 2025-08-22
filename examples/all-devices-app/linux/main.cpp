@@ -43,6 +43,8 @@
 #include <Rpc.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 
+// #include <all-devices-common/clusters/descriptor-cluster.h>
+
 // TODO: this should go away
 #include <data-model-providers/codegen/Instance.h>
 #include <server-cluster-shim/ServerClusterShim.h>
@@ -91,7 +93,7 @@ EndpointInterfaceRegistration endpointRegistration1(endpoint1,
 
 ServerClusterShim serverClusterShimEp0({
     // Endpoint 0
-    { 0, Descriptor::Id },
+    // { 0, Descriptor::Id },
     { 0, AccessControl::Id },
     { 0, OtaSoftwareUpdateRequestor::Id },
     { 0, GeneralCommissioning::Id },
@@ -215,6 +217,11 @@ void StopSignalHandler(int /* signal */)
     static WiFiDiagnosticsServerCluster clusterWifiDiagnostics(0, DeviceLayer::GetDiagnosticDataProvider(), {}, {});
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
+
+    std::vector<DescriptorCluster::DeviceType> tmp{ { 0x0016, 3 }, { 0x0012, 1 } };
+    static DescriptorCluster clusterDescriptor(0, tmp);
+    static ServerClusterRegistration descriptor(clusterDescriptor);
+    VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
 
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
