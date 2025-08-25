@@ -31,12 +31,12 @@
 #include <app/server/Server.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
-#include <memory>
 #include <platform/CommissionableDataProvider.h>
 #include <platform/Linux/NetworkCommissioningDriver.h>
 #include <platform/PlatformManager.h>
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <system/SystemLayer.h>
+#include <clusters/identify-cluster.h>
 
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
@@ -72,10 +72,7 @@ DataModel::DeviceTypeEntry deviceTypesEp1[] = {
     { 0x000E, 2 }, //aggregator
 };
 
-ClusterId clientClustersEp0[] = { OtaSoftwareUpdateProvider::Id };
-
 SpanEndpoint endpoint0 = SpanEndpoint::Builder()
-                             .SetClientClusters(chip::Span<const ClusterId>(clientClustersEp0))
                              .SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp0))
                              .Build();
 SpanEndpoint endpoint1 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp1)).Build();
@@ -96,16 +93,7 @@ ServerClusterShim serverClusterShimEp0({
     { 0, GeneralCommissioning::Id },
     { 0, OperationalCredentials::Id },
 });
-
-ServerClusterShim serverClusterShimEp1({ // Endpoint 1
-                                         { 1, Identify::Id },
-                                         { 1, Descriptor::Id },
-                                        });
-
 ServerClusterRegistration serverClusterShimRegistrationEp0(serverClusterShimEp0);
-ServerClusterRegistration serverClusterShimRegistrationEp1(serverClusterShimEp1);
-
-// TODO: add a Span of these registrations
 
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
 RegisteredServerCluster<NetworkCommissioningCluster> sWifiNetworkCommissioningCluster(kRootEndpointId, &sWiFiDriver);
@@ -128,35 +116,6 @@ void StopSignalHandler(int /* signal */)
         Server::GetInstance().GenerateShutDownEvent();
         SystemLayer().ScheduleLambda([]() { PlatformMgr().StopEventLoopTask(); });
     }
-}
-
-[[maybe_unused]] chip::app::DataModel::Provider * PopulateCodegenDataModelProvider(PersistentStorageDelegate * delegate)
-{
-    chip::app::CodegenDataModelProvider & dataModelProvider = CodegenDataModelProvider::Instance();
-    dataModelProvider.SetPersistentStorageDelegate(delegate);
-
-    CHIP_ERROR err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp0);
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
-
-    err = dataModelProvider.Registry().Register(serverClusterShimRegistrationEp1);
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
-
-    err = dataModelProvider.Registry().Register(sWifiNetworkCommissioningCluster.Registration());
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
-
-    return &dataModelProvider;
 }
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodeDrivenDataModelProvider(PersistentStorageDelegate * delegate)
@@ -211,19 +170,24 @@ void StopSignalHandler(int /* signal */)
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
 
-    std::vector<DescriptorCluster::DeviceType> tmp{ { 0x0016, 3 }, };
+    static std::vector<DescriptorCluster::DeviceType> tmp{ { 0x0016, 3 }, };
     static DescriptorCluster clusterDescriptor(0, tmp);
     static ServerClusterRegistration descriptor(clusterDescriptor);
     VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
 
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
-    err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp1);
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP1: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
+    // Endpoint 1 clusters
+    // Descriptor
+    static std::vector<DescriptorCluster::DeviceType> deviceTypesEp1Vector{ { 0x000E, 2 } };
+    static DescriptorCluster descriptorClusterEp1(1, deviceTypesEp1Vector);
+    static ServerClusterRegistration descriptorClusterEp1Registration(descriptorClusterEp1);
+    VerifyOrDie(dataModelProvider.AddCluster(descriptorClusterEp1Registration) == CHIP_NO_ERROR);
+
+    // Identify
+    static Clusters::IdentifyCluster identifyClusterEp1(1);
+    static ServerClusterRegistration identifyClusterEp1Registration(identifyClusterEp1);
+    VerifyOrDie(dataModelProvider.AddCluster(identifyClusterEp1Registration) == CHIP_NO_ERROR);
 
     // Add Endpoint Registrations
     err = dataModelProvider.AddEndpoint(endpointRegistration0);

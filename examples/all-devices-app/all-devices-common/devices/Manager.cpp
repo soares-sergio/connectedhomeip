@@ -54,18 +54,19 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
         DataModel::EndpointEntry{
             .id                 = mEndpointIdToAdd,                                  //
             .parentId           = endpointParentId,                                                 //
-            .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily //
+            .compositionPattern = device->GetDeviceType() == BridgedDeviceType::kBridgedNodeDevice ? DataModel::EndpointCompositionPattern::kTree : DataModel::EndpointCompositionPattern::kFullFamily,
         });
 
     ReturnErrorOnFailure(mDataModelProvider.AddEndpoint(*endpointRegistration));
 
     // TODO: this should NOT be needed, but as long as we use the SHIM, the descriptor cluster is
     //       EMBER so we need to notify. See the notifications of emberAfEndpointChanged
-    mDataModelProvider.Temporary_ReportAttributeChanged(AttributePathParams{ mEndpointIdToAdd });
     mDataModelProvider.Temporary_ReportAttributeChanged(
         AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
     mDataModelProvider.Temporary_ReportAttributeChanged(
         AttributePathParams{ 1, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
+    mDataModelProvider.Temporary_ReportAttributeChanged(AttributePathParams{ mEndpointIdToAdd });
+
 
     DeviceData deviceData = {
         .device               = std::move(device),
