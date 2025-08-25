@@ -66,7 +66,6 @@ AppMainLoopImplementation * gMainLoopImplementation = nullptr;
 
 DataModel::DeviceTypeEntry deviceTypesEp0[] = {
     { 0x0016, 3 }, // ma_rootdevice, version 3
-    { 0x0012, 1 }, // ma_otarequestor, version 1
 };
 
 DataModel::DeviceTypeEntry deviceTypesEp1[] = {
@@ -93,15 +92,9 @@ EndpointInterfaceRegistration endpointRegistration1(endpoint1,
 
 ServerClusterShim serverClusterShimEp0({
     // Endpoint 0
-    // { 0, Descriptor::Id },
     { 0, AccessControl::Id },
-    { 0, OtaSoftwareUpdateRequestor::Id },
     { 0, GeneralCommissioning::Id },
-    { 0, DiagnosticLogs::Id },
-    { 0, ThreadNetworkDiagnostics::Id },
-    { 0, EthernetNetworkDiagnostics::Id },
     { 0, OperationalCredentials::Id },
-    { 0, UserLabel::Id },
 });
 
 ServerClusterShim serverClusterShimEp1({ // Endpoint 1
@@ -218,7 +211,7 @@ void StopSignalHandler(int /* signal */)
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
 
-    std::vector<DescriptorCluster::DeviceType> tmp{ { 0x0016, 3 }, { 0x0012, 1 } };
+    std::vector<DescriptorCluster::DeviceType> tmp{ { 0x0016, 3 }, };
     static DescriptorCluster clusterDescriptor(0, tmp);
     static ServerClusterRegistration descriptor(clusterDescriptor);
     VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
