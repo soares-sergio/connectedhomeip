@@ -112,6 +112,36 @@ source_set("boolean-state-cluster") {
   ]
 }
 
+source_set("access-control-cluster") {
+  sources = [
+    "access-control-cluster.cpp",
+    "access-control-cluster.h",
+  ]
+
+  defines = [
+    "CHIP_CONFIG_USE_ACCESS_RESTRICTIONS=0",
+  ]
+
+  #deps = [
+  #  "${chip_root}/src/app:attribute-access",
+  #]
+
+  public_deps = [
+    #"${chip_root}/src/access:access_buildconfig",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/AccessControl",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
 group("clusters") {
   public_deps = [
     ":bridged-device-basic-information",
@@ -119,5 +149,6 @@ group("clusters") {
     ":identify",
     ":occupancy-sensor",
     ":boolean-state-cluster",
+    ":access-control-cluster",
   ]
 }
