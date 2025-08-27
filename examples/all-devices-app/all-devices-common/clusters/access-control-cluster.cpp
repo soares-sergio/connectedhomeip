@@ -275,7 +275,7 @@ CHIP_ERROR AccessControlCluster::WriteAcl(const ConcreteDataAttributePath & aPat
     return CHIP_NO_ERROR;
 }
 
-void OnEntryChanged(const chip::Access::SubjectDescriptor * subjectDescriptor, FabricIndex fabric, size_t index,
+void AccessControlCluster::OnEntryChanged(const chip::Access::SubjectDescriptor * subjectDescriptor, FabricIndex fabric, size_t index,
                                             const chip::Access::AccessControl::Entry * entry, chip::Access::AccessControl::EntryListener::ChangeType changeType) {
 {
     // NOTE: If the entry was changed internally by the system (e.g. creating

@@ -43,7 +43,10 @@
 #include <Rpc.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 
-// #include <all-devices-common/clusters/descriptor-cluster.h>
+// Code driven clusters made for this app, these are clusters that 
+// need some additional work before landing upstream
+#include "../all-devices-common/clusters/descriptor-cluster.h"
+#include "../all-devices-common/clusters/access-control-cluster.h"
 
 // TODO: this should go away
 #include <data-model-providers/codegen/Instance.h>
@@ -89,7 +92,6 @@ EndpointInterfaceRegistration endpointRegistration1(endpoint1,
 
 ServerClusterShim serverClusterShimEp0({
     // Endpoint 0
-    { 0, AccessControl::Id },
     { 0, GeneralCommissioning::Id },
     { 0, OperationalCredentials::Id },
 });
@@ -174,6 +176,10 @@ void StopSignalHandler(int /* signal */)
     static DescriptorCluster clusterDescriptor(0, tmp);
     static ServerClusterRegistration descriptor(clusterDescriptor);
     VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
+
+    static AccessControlCluster clusterAccessControl({});
+    static ServerClusterRegistration accessControl(clusterAccessControl);
+    VerifyOrDie(dataModelProvider.AddCluster(accessControl) == CHIP_NO_ERROR);
 
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
