@@ -47,6 +47,7 @@
 // need some additional work before landing upstream
 #include "../all-devices-common/clusters/descriptor-cluster.h"
 #include "../all-devices-common/clusters/access-control-cluster.h"
+#include "../all-devices-common/clusters/operational-credentials-cluster.h"
 
 // TODO: this should go away
 #include <data-model-providers/codegen/Instance.h>
@@ -93,7 +94,6 @@ EndpointInterfaceRegistration endpointRegistration1(endpoint1,
 ServerClusterShim serverClusterShimEp0({
     // Endpoint 0
     { 0, GeneralCommissioning::Id },
-    { 0, OperationalCredentials::Id },
 });
 ServerClusterRegistration serverClusterShimRegistrationEp0(serverClusterShimEp0);
 
@@ -180,6 +180,10 @@ void StopSignalHandler(int /* signal */)
     static AccessControlCluster clusterAccessControl({});
     static ServerClusterRegistration accessControl(clusterAccessControl);
     VerifyOrDie(dataModelProvider.AddCluster(accessControl) == CHIP_NO_ERROR);
+
+    static OperationalCredentialsCluster clusterOperationalCredenitals(0);
+    static ServerClusterRegistration operationalCredentials(clusterOperationalCredenitals);
+    VerifyOrDie(dataModelProvider.AddCluster(operationalCredentials) == CHIP_NO_ERROR);
 
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 

@@ -142,6 +142,29 @@ source_set("access-control-cluster") {
   ]
 }
 
+source_set("operational-credentials-cluster") {
+  sources = [
+    "operational-credentials-cluster.cpp",
+    "operational-credentials-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/OperationalCredentials",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
+
 group("clusters") {
   public_deps = [
     ":bridged-device-basic-information",
@@ -150,5 +173,6 @@ group("clusters") {
     ":occupancy-sensor",
     ":boolean-state-cluster",
     ":access-control-cluster",
+    ":operational-credentials-cluster",
   ]
 }
