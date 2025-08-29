@@ -3,6 +3,7 @@
 #include <clusters/bridged-device-basic-information-cluster.h>
 #include <clusters/descriptor-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
+#include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
 
 #include <string>
 
@@ -25,7 +26,7 @@ enum class BridgedDeviceType
 class Device : public EndpointInterface
 {
 public:
-    Device(std::string id) : mUniqueId(std::move(id)) {}
+    Device(std::string id) : mUniqueId(std::move(id)), mEndpointRegistration(*this, {}) {}
     virtual ~Device() = default;
 
     const std::string & GetUniqueId() const { return mUniqueId; }
@@ -34,7 +35,8 @@ public:
     virtual BridgedDeviceType GetDeviceType() const = 0;
 
     /// Register relevant clusters on the given endpoint
-    virtual CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider) = 0;
+    virtual CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
+                                EndpointId parentId = kInvalidEndpointId) = 0;
 
     /// Remove clusters from the given provider.
     ///
@@ -49,12 +51,14 @@ public:
 protected:
     /// Internal registration functions for common device clusters
     /// Subclasses are expected to call these
-    CHIP_ERROR RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, const Clusters::DescriptorCluster::DeviceType & deviceType);
+    CHIP_ERROR RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
+                                  const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId);
     CHIP_ERROR UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider);
 
     chip::EndpointId mEndpointId = kInvalidEndpointId;
     std::string mUniqueId;
     Clusters::DescriptorCluster::DeviceType mDeviceType;
+    EndpointInterfaceRegistration mEndpointRegistration;
 
     // Common clusters..
     LazyRegisteredServerCluster<Clusters::DescriptorCluster> mDescriptorCluster;

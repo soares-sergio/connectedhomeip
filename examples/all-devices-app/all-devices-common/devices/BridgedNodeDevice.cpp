@@ -28,20 +28,21 @@ BridgedDeviceType BridgedNodeDevice::GetDeviceType() const
     return BridgedDeviceType::kBridgedNodeDevice;
 }
 
-CHIP_ERROR BridgedNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
+CHIP_ERROR BridgedNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
     const DescriptorCluster::DeviceType deviceType = { .deviceType = kBridgedNodeDeviceType,
                                                        .revision   = kBridgedNodeDeviceTypeRevision };
-    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType));
+    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mBridgedDeviceBasicInformationCluster.Create(endpoint, mUniqueId);
     ReturnErrorOnFailure(provider.AddCluster(mBridgedDeviceBasicInformationCluster.Registration()));
 
-    return CHIP_NO_ERROR;
+    return provider.AddEndpoint(mEndpointRegistration);
 }
 
 void BridgedNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
+    provider.RemoveEndpoint(mEndpointId);
     UnRegisterBridgedNodeClusters(provider);
     if (mBridgedDeviceBasicInformationCluster.IsConstructed())
     {

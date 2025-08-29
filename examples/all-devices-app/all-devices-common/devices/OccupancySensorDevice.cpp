@@ -28,11 +28,11 @@ BridgedDeviceType OccupancySensorDevice::GetDeviceType() const
     return BridgedDeviceType::kOccupancySensor;
 }
 
-CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
+CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
     const DescriptorCluster::DeviceType deviceType = { .deviceType = kOccupancySensorDeviceType,
                                                        .revision   = kOccupancySensorDeviceTypeRevision };
-    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType));
+    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mIdentifyCluster.Create(endpoint);
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
@@ -40,11 +40,12 @@ CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDriven
     mOccupancySensingCluster.Create(endpoint, BitFlags<OccupancySensing::Feature>(0));
     ReturnErrorOnFailure(provider.AddCluster(mOccupancySensingCluster.Registration()));
 
-    return CHIP_NO_ERROR;
+    return provider.AddEndpoint(mEndpointRegistration);
 }
 
 void OccupancySensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
+    provider.RemoveEndpoint(mEndpointId);
     UnRegisterBridgedNodeClusters(provider);
     if (mOccupancySensingCluster.IsConstructed())
     {

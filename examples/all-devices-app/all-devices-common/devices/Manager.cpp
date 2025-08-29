@@ -20,13 +20,15 @@ DeviceManager::~DeviceManager()
     Clear();
 }
 
+
+
 void DeviceManager::Clear()
 {
     for (auto const & [id, deviceData] : mActiveDevices)
     {
-        mDataModelProvider.RemoveEndpoint(deviceData.endpointRegistration->GetEndpointEntry().id);
         deviceData.device->UnRegister(mDataModelProvider);
     }
+    mActiveDevices.clear();
 
     mDataModelProvider.Temporary_ReportAttributeChanged(
         AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
@@ -42,22 +44,15 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
 
-    ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider));
-    // EndpointId endpointParentId = (device->GetDeviceType()==BridgedDeviceType::kBridgedNodeDevice) ? 1 : mEndpointIdToAdd-1; 
+    // EndpointId endpointParentId = (device->GetDeviceType()==BridgedDeviceType::kBridgedNodeDevice) ? 1 : mEndpointIdToAdd-1;
     EndpointId endpointParentId = mLastBridedNodeDeviceEp;
-    if (device->GetDeviceType()==BridgedDeviceType::kBridgedNodeDevice) {
+    if (device->GetDeviceType() == BridgedDeviceType::kBridgedNodeDevice)
+    {
         mLastBridedNodeDeviceEp = mEndpointIdToAdd;
-        endpointParentId = 1;
+        endpointParentId        = 1;
     }
-    auto endpointRegistration = std::make_unique<EndpointInterfaceRegistration>(
-        *device,
-        DataModel::EndpointEntry{
-            .id                 = mEndpointIdToAdd,                                  //
-            .parentId           = endpointParentId,                                                 //
-            .compositionPattern = device->GetDeviceType() == BridgedDeviceType::kBridgedNodeDevice ? DataModel::EndpointCompositionPattern::kTree : DataModel::EndpointCompositionPattern::kFullFamily,
-        });
 
-    ReturnErrorOnFailure(mDataModelProvider.AddEndpoint(*endpointRegistration));
+    ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider, endpointParentId));
 
     // TODO: this should NOT be needed, but as long as we use the SHIM, the descriptor cluster is
     //       EMBER so we need to notify. See the notifications of emberAfEndpointChanged
@@ -67,10 +62,8 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
         AttributePathParams{ 1, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
     mDataModelProvider.Temporary_ReportAttributeChanged(AttributePathParams{ mEndpointIdToAdd });
 
-
     DeviceData deviceData = {
-        .device               = std::move(device),
-        .endpointRegistration = std::move(endpointRegistration),
+        .device = std::move(device),
     };
 
     mEndpointIdToAdd++;
@@ -104,7 +97,6 @@ CHIP_ERROR DeviceManager::RemoveDevice(const char * unique_id)
     auto it = mActiveDevices.find(unique_id);
     VerifyOrReturnError(it != mActiveDevices.end(), CHIP_ERROR_KEY_NOT_FOUND);
 
-    mDataModelProvider.RemoveEndpoint(it->second.endpointRegistration->GetEndpointEntry().id);
     it->second.device->UnRegister(mDataModelProvider);
     mActiveDevices.erase(it);
 

@@ -8,10 +8,12 @@ namespace chip::app {
 constexpr DeviceTypeId kBridgedNodeDeviceType     = 0x0013;
 constexpr uint16_t kBridgedNodeDeviceTypeRevision = 3;
 
-CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, const Clusters::DescriptorCluster::DeviceType & deviceType) 
-{    
+CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
+                                  const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId)
+{
     VerifyOrReturnError(mEndpointId == kInvalidEndpointId, CHIP_ERROR_INCORRECT_STATE);
     mDeviceType = deviceType;
+    mEndpointId = endpoint;
 
     /// std::initializer_list does not work well with std::forward, so use the
     /// vector constructor instead
@@ -19,6 +21,14 @@ CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataM
 
     mDescriptorCluster.Create(endpoint, deviceTypes);
     ReturnErrorOnFailure(provider.AddCluster(mDescriptorCluster.Registration()));
+
+    mEndpointRegistration.endpointEntry = DataModel::EndpointEntry{
+        .id                 = endpoint, //
+        .parentId           = parentId, //
+        .compositionPattern = GetDeviceType() == BridgedDeviceType::kBridgedNodeDevice
+            ? DataModel::EndpointCompositionPattern::kTree
+            : DataModel::EndpointCompositionPattern::kFullFamily,
+    };
     return CHIP_NO_ERROR;
 }
 

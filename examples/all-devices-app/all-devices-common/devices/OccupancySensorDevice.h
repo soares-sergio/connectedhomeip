@@ -31,7 +31,8 @@ public:
 
     BridgedDeviceType GetDeviceType() const override;
 
-    CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider) override;
+    CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
+                        EndpointId parentId = kInvalidEndpointId) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
 
     Clusters::OccupancySensingCluster & Cluster() { return mOccupancySensingCluster.Cluster(); }

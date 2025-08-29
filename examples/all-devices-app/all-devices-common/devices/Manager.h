@@ -42,7 +42,6 @@ private:
     struct DeviceData
     {
         std::unique_ptr<Device> device;
-        std::unique_ptr<EndpointInterfaceRegistration> endpointRegistration;
     };
 
     EndpointId mLastBridedNodeDeviceEp;

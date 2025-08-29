@@ -28,11 +28,11 @@ BridgedDeviceType ContactSensorDevice::GetDeviceType() const
     return BridgedDeviceType::kContactSensor;
 }
 
-CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider)
+CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
     const DescriptorCluster::DeviceType deviceType = { .deviceType = kContactSensorDeviceType,
                                                        .revision   = kContactSensorDeviceTypeRevision };
-    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType));
+    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mIdentifyCluster.Create(endpoint);
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
@@ -40,11 +40,12 @@ CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDa
     mBooleanStateCluster.Create(endpoint);
     ReturnErrorOnFailure(provider.AddCluster(mBooleanStateCluster.Registration()));
 
-    return CHIP_NO_ERROR;
+    return provider.AddEndpoint(mEndpointRegistration);
 }
 
 void ContactSensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
+    provider.RemoveEndpoint(mEndpointId);
     UnRegisterBridgedNodeClusters(provider);
     if (mBooleanStateCluster.IsConstructed())
     {
