@@ -59,6 +59,9 @@
 #include <imgui_ui/windows/qrcode.h>
 #endif
 
+#include <AppMain.h>
+#include <string>
+
 using namespace chip;
 using namespace chip::app;
 using namespace chip::Platform;
@@ -316,7 +319,12 @@ void EventHandler(const DeviceLayer::ChipDeviceEvent * event, intptr_t arg)
 
 CHIP_ERROR InitCommissionableDataProvider(LinuxCommissionableDataProvider & provider)
 {
-    const auto discriminator             = static_cast<uint16_t>(CHIP_DEVICE_CONFIG_USE_TEST_SETUP_DISCRIMINATOR);
+    auto discriminator             = static_cast<uint16_t>(CHIP_DEVICE_CONFIG_USE_TEST_SETUP_DISCRIMINATOR);
+    chip::Optional<uint16_t> discriminatorFromParam = LinuxDeviceOptions::GetInstance().discriminator;
+    if (discriminatorFromParam.HasValue()) {
+        discriminator = discriminatorFromParam.Value();
+    } 
+
     const auto setupPasscode             = MakeOptional(static_cast<uint32_t>(CHIP_DEVICE_CONFIG_USE_TEST_SETUP_PIN_CODE));
     const uint32_t spake2pIterationCount = Crypto::kSpake2p_Min_PBKDF_Iterations;
 
@@ -332,10 +340,11 @@ CHIP_ERROR InitCommissionableDataProvider(LinuxCommissionableDataProvider & prov
     );
 }
 
-CHIP_ERROR Initialize()
+CHIP_ERROR Initialize(int argc, char * argv[])
 {
     ChipLogProgress(AppServer, "Initializing...");
     ReturnErrorOnFailure(Platform::MemoryInit());
+    ReturnErrorOnFailure(ParseArguments(argc, argv));
     ReturnErrorOnFailure(DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(CHIP_CONFIG_KVS_PATH));
     ReturnErrorOnFailure(DeviceLayer::PlatformMgr().InitChipStack());
 
@@ -360,7 +369,7 @@ int main(int argc, char * argv[])
 {
     ChipLogProgress(AppServer, "Initializing");
 
-    if (CHIP_ERROR err = Initialize(); err != CHIP_NO_ERROR)
+    if (CHIP_ERROR err = Initialize(argc, argv); err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Initialize() failed: %" CHIP_ERROR_FORMAT, err.Format());
         chipDie();
