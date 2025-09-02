@@ -24,8 +24,10 @@ source_set("app-data-model") {
   include_dirs = [ "." ]
 
   deps = [
+    "${chip_root}/examples/all-devices-app/all-devices-common/devices",
     "${chip_root}/src/app/data-model-provider",
     "${chip_root}/src/app/persistence:default",
     "${chip_root}/src/data-model-providers/codedriven",
+
   ]
 }

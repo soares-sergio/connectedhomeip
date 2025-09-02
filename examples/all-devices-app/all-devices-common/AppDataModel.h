@@ -19,16 +19,23 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
+#include <devices/Device.h>
 
 using chip::app::CodeDrivenDataModelProvider;
 
 enum class AppDeviceType
 {
-    kContactSensor,
-    kOccupancySensor,
+    kRootNode, // Minimal root node, only mandatory clusters
     kBridge,
+    kBridgedNode, // Minimal bridged node, only mandatory clusters
+    kContactSensor,
     kLight,
+    kOccupancySensor,
 };
 
-CodeDrivenDataModelProvider & GetAppDataModelProvider();
+std::unique_ptr<chip::app::Device> RegisterNewDevice(AppDeviceType deviceType,
+                                          CodeDrivenDataModelProvider & provider,
+                                          chip::EndpointId endpointId,
+                                          chip::EndpointId parentEndpointId = chip::kInvalidEndpointId);

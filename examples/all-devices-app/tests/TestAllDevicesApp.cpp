@@ -35,46 +35,95 @@ public:
     ExchangeContext * CurrentExchange() override { return nullptr; }
 };
 
+#include <app/persistence/DefaultAttributePersistenceProvider.h>
+#include <platform/KvsPersistentStorageDelegate.h>
+
 class TestAllDevicesApp : public ::testing::Test
 {
 public:
     static void SetUpTestSuite() { ASSERT_EQ(chip::Platform::MemoryInit(), CHIP_NO_ERROR); }
     static void TearDownTestSuite() { chip::Platform::MemoryShutdown(); }
-
-protected:
-    chip::Test::TestProviderChangeListener mChangeListener;
-    chip::Test::LogOnlyEvents mEventGenerator;
-    TestActionContext mActionContext;
-    InteractionModelContext mContext{
-        .eventsGenerator         = mEventGenerator,
-        .dataModelChangeListener = mChangeListener,
-        .actionContext           = mActionContext,
-    };
-    CodeDrivenDataModelProvider * mProvider = nullptr;
-    chip::Test::TestServerClusterContext mServerClusterTestContext;
-
-    TestAllDevicesApp() {}
-
-    ~TestAllDevicesApp() override
-    {
-        if (mProvider != nullptr)
-        {
-            mProvider->Shutdown();
-        }
-        mProvider = nullptr;
-    }
 };
 
-namespace {} // namespace
+#include <app-common/zap-generated/ids/Clusters.h>
+#include <algorithm>
+#include <vector>
 
-TEST_F(TestAllDevicesApp, GetAppDataModel)
+namespace {
+
+constexpr EndpointId kTestEndpointId = 1;
+constexpr chip::DeviceTypeId kContactSensorDeviceType = 0x0015;
+constexpr uint16_t kContactSensorDeviceTypeRevision = 2;
+
+constexpr chip::DeviceTypeId kOccupancySensorDeviceType = 0x0107;
+constexpr uint16_t kOccupancySensorDeviceTypeRevision = 4;
+
+void VerifyServerClusters(CodeDrivenDataModelProvider & provider, EndpointId endpointId, std::vector<chip::ClusterId> expectedClusterIds)
 {
-    mProvider = &GetAppDataModelProvider();
-    ASSERT_TRUE(mProvider != nullptr);
+    ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> clustersBuilder;
+    ASSERT_EQ(provider.ServerClusters(endpointId, clustersBuilder), CHIP_NO_ERROR);
+    auto clusters = clustersBuilder.TakeBuffer();
 
-    // Check there is nothing in the DM Provider yet
-    ReadOnlyBufferBuilder<DataModel::EndpointEntry> endpointsBuilder;
-    ASSERT_EQ(mProvider->Endpoints(endpointsBuilder), CHIP_NO_ERROR);
-    auto endpoints = endpointsBuilder.TakeBuffer();
-    ASSERT_EQ(endpoints.size(), 0u);
+    std::vector<chip::ClusterId> actualClusterIds;
+    for (const auto & cluster : clusters)
+    {
+        actualClusterIds.push_back(cluster.clusterId);
+    }
+    std::sort(actualClusterIds.begin(), actualClusterIds.end());
+    std::sort(expectedClusterIds.begin(), expectedClusterIds.end());
+
+    ASSERT_EQ(actualClusterIds.size(), expectedClusterIds.size());
+    for (size_t i = 0; i < actualClusterIds.size(); ++i)
+    {
+        ASSERT_EQ(actualClusterIds[i], expectedClusterIds[i]);
+    }
+}
+} // namespace
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_ContactSensor)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    std::unique_ptr<Device> device = RegisterNewDevice(AppDeviceType::kContactSensor, provider, kTestEndpointId);
+    ASSERT_TRUE(device);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 2u);
+    ASSERT_EQ(deviceTypes[1].deviceTypeId, kContactSensorDeviceType);
+    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, kContactSensorDeviceTypeRevision);
+
+    // Check server clusters
+    VerifyServerClusters(provider, kTestEndpointId, {
+        chip::app::Clusters::Descriptor::Id,
+        chip::app::Clusters::Identify::Id,
+        chip::app::Clusters::BooleanState::Id
+    });
+}
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_OccupancySensor)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    std::unique_ptr<Device> device = RegisterNewDevice(AppDeviceType::kOccupancySensor, provider, kTestEndpointId);
+    ASSERT_TRUE(device);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 2u);
+    ASSERT_EQ(deviceTypes[1].deviceTypeId, kOccupancySensorDeviceType);
+    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, kOccupancySensorDeviceTypeRevision);
+
+    // Check server clusters
+    VerifyServerClusters(provider, kTestEndpointId, {
+        chip::app::Clusters::Descriptor::Id,
+        chip::app::Clusters::Identify::Id,
+        chip::app::Clusters::OccupancySensing::Id
+    });
 }

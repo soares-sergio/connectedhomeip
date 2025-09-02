@@ -222,19 +222,7 @@ void StopSignalHandler(int /* signal */)
 
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
-    // Endpoint 1 clusters
-    // Descriptor
-    static std::vector<DescriptorCluster::DeviceType> deviceTypesEp1Vector{ { 0x000E, 2 } };
-    static DescriptorCluster descriptorClusterEp1(1, deviceTypesEp1Vector);
-    static ServerClusterRegistration descriptorClusterEp1Registration(descriptorClusterEp1);
-    VerifyOrDie(dataModelProvider.AddCluster(descriptorClusterEp1Registration) == CHIP_NO_ERROR);
-
-    // Identify
-    static Clusters::IdentifyCluster identifyClusterEp1(1);
-    static ServerClusterRegistration identifyClusterEp1Registration(identifyClusterEp1);
-    VerifyOrDie(dataModelProvider.AddCluster(identifyClusterEp1Registration) == CHIP_NO_ERROR);
-
-    // Add Endpoint Registrations
+    // Add Endpoint 0 Registration
     CHIP_ERROR err = dataModelProvider.AddEndpoint(endpointRegistration0);
     if (err != CHIP_NO_ERROR)
     {
@@ -242,15 +230,38 @@ void StopSignalHandler(int /* signal */)
         chipDie();
     }
 
-    err = dataModelProvider.AddEndpoint(endpointRegistration1);
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register Endpoint 1: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
+    if (deviceType == AppDeviceType::kBridge) { //TODO: Create an Aggregator Device and move this inside RegisterNewDevice
+        // Endpoint 1 clusters
+        // Descriptor
+        static std::vector<DescriptorCluster::DeviceType> deviceTypesEp1Vector{ { 0x000E, 2 } };
+        static DescriptorCluster descriptorClusterEp1(1, deviceTypesEp1Vector);
+        static ServerClusterRegistration descriptorClusterEp1Registration(descriptorClusterEp1);
+        VerifyOrDie(dataModelProvider.AddCluster(descriptorClusterEp1Registration) == CHIP_NO_ERROR);
 
-    gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
-    rpc::Start(33000, *gDeviceManager);
+        // Identify
+        static Clusters::IdentifyCluster identifyClusterEp1(1);
+        static ServerClusterRegistration identifyClusterEp1Registration(identifyClusterEp1);
+        VerifyOrDie(dataModelProvider.AddCluster(identifyClusterEp1Registration) == CHIP_NO_ERROR);
+
+        // Endpoint 1 Registration
+        err = dataModelProvider.AddEndpoint(endpointRegistration1);
+        if (err != CHIP_NO_ERROR)
+        {
+            ChipLogError(AppServer, "Cannot register Endpoint 1: %" CHIP_ERROR_FORMAT, err.Format());
+            chipDie();
+        }
+
+        gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
+        rpc::Start(33000, *gDeviceManager);
+    }
+    else {
+        static std::unique_ptr<Device> ep1Device = RegisterNewDevice(deviceType, dataModelProvider, 1);
+        if (ep1Device == nullptr)
+        {
+            ChipLogError(AppServer, "Error registering Endpoint 1 device!");
+            chipDie();
+        }
+    }
 
     return &dataModelProvider;
 }
