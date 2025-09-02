@@ -47,6 +47,7 @@ executable("all-devices-app") {
     "${chip_root}/examples/providers:device_info_provider_please_do_not_reuse_as_is",
     "${chip_root}/src/app/clusters/administrator-commissioning-server",
     "${chip_root}/src/app/clusters/basic-information",
+    "${chip_root}/src/app/clusters/general-commissioning-server",
     "${chip_root}/src/app/clusters/general-diagnostics-server",
     "${chip_root}/src/app/clusters/group-key-mgmt-server",
     "${chip_root}/src/app/clusters/software-diagnostics-server",

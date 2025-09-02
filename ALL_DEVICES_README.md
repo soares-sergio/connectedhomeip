@@ -82,6 +82,12 @@ pip install jupyterlab ipykernel jupyterlab-lsp python-lsp-server pprint pandas
 
 ```
 
+Then run via:
+
+```
+jupyter-lab
+```
+
 Startup blurb:
 
 ```

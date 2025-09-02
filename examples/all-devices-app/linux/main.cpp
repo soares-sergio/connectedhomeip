@@ -16,10 +16,12 @@
  *    limitations under the License.
  */
 
+#include <AppDataModel.h>
 #include <TracingCommandLineArgument.h>
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
 #include <app/clusters/basic-information/BasicInformationCluster.h>
+#include <app/clusters/general-commissioning-server/general-commissioning-cluster.h>
 #include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
 #include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
@@ -29,6 +31,7 @@
 #include <app/server-cluster/ServerClusterInterfaceRegistry.h>
 #include <app/server/Dnssd.h>
 #include <app/server/Server.h>
+#include <clusters/identify-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
 #include <platform/CommissionableDataProvider.h>
@@ -36,23 +39,17 @@
 #include <platform/PlatformManager.h>
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <system/SystemLayer.h>
-#include <clusters/identify-cluster.h>
-#include <AppDataModel.h>
 
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
 #include <Rpc.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 
-// Code driven clusters made for this app, these are clusters that 
+// Code driven clusters made for this app, these are clusters that
 // need some additional work before landing upstream
-#include "../all-devices-common/clusters/descriptor-cluster.h"
 #include "../all-devices-common/clusters/access-control-cluster.h"
+#include "../all-devices-common/clusters/descriptor-cluster.h"
 #include "../all-devices-common/clusters/operational-credentials-cluster.h"
-
-// TODO: this should go away
-#include <data-model-providers/codegen/Instance.h>
-#include <server-cluster-shim/ServerClusterShim.h>
 
 #if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
 #include <imgui_ui/ui.h>
@@ -61,8 +58,8 @@
 #endif
 
 #include <AppMain.h>
-#include <string>
 #include <map>
+#include <string>
 
 using namespace chip;
 using namespace chip::app;
@@ -79,12 +76,10 @@ DataModel::DeviceTypeEntry deviceTypesEp0[] = {
 };
 
 DataModel::DeviceTypeEntry deviceTypesEp1[] = {
-    { 0x000E, 2 }, //aggregator
+    { 0x000E, 2 }, // aggregator
 };
 
-SpanEndpoint endpoint0 = SpanEndpoint::Builder()
-                             .SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp0))
-                             .Build();
+SpanEndpoint endpoint0 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp0)).Build();
 SpanEndpoint endpoint1 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp1)).Build();
 
 EndpointInterfaceRegistration endpointRegistration0(endpoint0,
@@ -96,12 +91,6 @@ EndpointInterfaceRegistration endpointRegistration1(endpoint1,
                                                     { .id                 = 1,
                                                       .parentId           = kInvalidEndpointId,
                                                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
-
-ServerClusterShim serverClusterShimEp0({
-    // Endpoint 0
-    { 0, GeneralCommissioning::Id },
-});
-ServerClusterRegistration serverClusterShimRegistrationEp0(serverClusterShimEp0);
 
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
 RegisteredServerCluster<NetworkCommissioningCluster> sWifiNetworkCommissioningCluster(kRootEndpointId, &sWiFiDriver);
@@ -116,16 +105,14 @@ std::unique_ptr<DeviceManager> gDeviceManager;
 // App custom argument handling
 constexpr uint16_t kOptionDeviceType = 0xffd0;
 
-constexpr const char * kBridgeApp                 = "bridge";
-constexpr const char * kContactSensorApp          = "contact-sensor";
-constexpr const char * kOccupancySensorApp        = "occupancy-sensor";
-constexpr const char * kLightApp                  = "light";
-std::map<std::string, AppDeviceType> kValidApps = { 
-    {kBridgeApp, AppDeviceType::kBridge}, 
-    {kContactSensorApp, AppDeviceType::kContactSensor}, 
-    {kOccupancySensorApp, AppDeviceType::kOccupancySensor}, 
-    {kLightApp, AppDeviceType::kLight} 
-};
+constexpr const char * kBridgeApp               = "bridge";
+constexpr const char * kContactSensorApp        = "contact-sensor";
+constexpr const char * kOccupancySensorApp      = "occupancy-sensor";
+constexpr const char * kLightApp                = "light";
+std::map<std::string, AppDeviceType> kValidApps = { { kBridgeApp, AppDeviceType::kBridge },
+                                                    { kContactSensorApp, AppDeviceType::kContactSensor },
+                                                    { kOccupancySensorApp, AppDeviceType::kOccupancySensor },
+                                                    { kLightApp, AppDeviceType::kLight } };
 
 AppDeviceType deviceType = AppDeviceType::kBridge; // Using a bridge as default
 
@@ -133,11 +120,13 @@ chip::ArgParser::OptionDef sAllDevicesAppOptionDefs[] = {
     { "device", chip::ArgParser::kArgumentRequired, kOptionDeviceType },
 };
 
-bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int identifier, const char * name, const char * value) {
-    switch(identifier) 
+bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int identifier, const char * name, const char * value)
+{
+    switch (identifier)
     {
     case kOptionDeviceType:
-        if (value == nullptr || kValidApps.find(value) == kValidApps.end()) {
+        if (value == nullptr || kValidApps.find(value) == kValidApps.end())
+        {
             ChipLogError(Support, "INTERNAL ERROR: Invalid device type: %s\n", value);
             return false;
         }
@@ -153,9 +142,9 @@ bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int i
 }
 
 chip::ArgParser::OptionSet sCmdLineOptions = { AllDevicesAppOptionHandler, // handler function
-                                                      sAllDevicesAppOptionDefs,   // array of option definitions
-                                                      "PROGRAM OPTIONS",      // help group
-                                                      "-d, --device <bridge|contact-sensor|occupancy-sensor|light>\n" };
+                                               sAllDevicesAppOptionDefs,   // array of option definitions
+                                               "PROGRAM OPTIONS",          // help group
+                                               "-d, --device <bridge|contact-sensor|occupancy-sensor|light>\n" };
 
 void StopSignalHandler(int /* signal */)
 {
@@ -172,21 +161,15 @@ void StopSignalHandler(int /* signal */)
 
 [[maybe_unused]] chip::app::DataModel::Provider * PopulateCodeDrivenDataModelProvider(PersistentStorageDelegate * delegate)
 {
-    ServerClusterShim::InitEmberShims();
-
     static chip::app::DefaultAttributePersistenceProvider attributePersistenceProvider;
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
-    // Add Cluster registrations
-    CHIP_ERROR err = dataModelProvider.AddCluster(serverClusterShimRegistrationEp0);
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register ServerClusterShim for EP0: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
-
     // register real code driven clusters
+    static GeneralCommissioningCluster clusterGeneralCommissioning({}, {});
+    static ServerClusterRegistration serverClusterGeneralCommissioning(clusterGeneralCommissioning);
+    VerifyOrDie(dataModelProvider.AddCluster(serverClusterGeneralCommissioning) == CHIP_NO_ERROR);
+
     static AdministratorCommissioningWithBasicCommissioningWindowCluster clusterAdminCommissioning(0, {});
     static ServerClusterRegistration serverClusterAdminCommissioning(clusterAdminCommissioning);
     VerifyOrDie(dataModelProvider.AddCluster(serverClusterAdminCommissioning) == CHIP_NO_ERROR);
@@ -222,7 +205,9 @@ void StopSignalHandler(int /* signal */)
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
 
-    static std::vector<DescriptorCluster::DeviceType> tmp{ { 0x0016, 3 }, };
+    static std::vector<DescriptorCluster::DeviceType> tmp{
+        { 0x0016, 3 },
+    };
     static DescriptorCluster clusterDescriptor(0, tmp);
     static ServerClusterRegistration descriptor(clusterDescriptor);
     VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
@@ -250,7 +235,7 @@ void StopSignalHandler(int /* signal */)
     VerifyOrDie(dataModelProvider.AddCluster(identifyClusterEp1Registration) == CHIP_NO_ERROR);
 
     // Add Endpoint Registrations
-    err = dataModelProvider.AddEndpoint(endpointRegistration0);
+    CHIP_ERROR err = dataModelProvider.AddEndpoint(endpointRegistration0);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "Cannot register Endpoint 0: %" CHIP_ERROR_FORMAT, err.Format());
@@ -277,8 +262,6 @@ void RunApplication(AppMainLoopImplementation * mainLoop = nullptr)
     static chip::CommonCaseDeviceServerInitParams initParams;
     VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
 
-    // FIXME: update DMP here!!!
-    // initParams.dataModelProvider = PopulateCodegenDataModelProvider(initParams.persistentStorageDelegate);
     initParams.dataModelProvider             = PopulateCodeDrivenDataModelProvider(initParams.persistentStorageDelegate);
     initParams.operationalServicePort        = CHIP_PORT;
     initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
@@ -366,11 +349,12 @@ void EventHandler(const DeviceLayer::ChipDeviceEvent * event, intptr_t arg)
 
 CHIP_ERROR InitCommissionableDataProvider(LinuxCommissionableDataProvider & provider)
 {
-    auto discriminator             = static_cast<uint16_t>(CHIP_DEVICE_CONFIG_USE_TEST_SETUP_DISCRIMINATOR);
+    auto discriminator                              = static_cast<uint16_t>(CHIP_DEVICE_CONFIG_USE_TEST_SETUP_DISCRIMINATOR);
     chip::Optional<uint16_t> discriminatorFromParam = LinuxDeviceOptions::GetInstance().discriminator;
-    if (discriminatorFromParam.HasValue()) {
+    if (discriminatorFromParam.HasValue())
+    {
         discriminator = discriminatorFromParam.Value();
-    } 
+    }
 
     const auto setupPasscode             = MakeOptional(static_cast<uint32_t>(CHIP_DEVICE_CONFIG_USE_TEST_SETUP_PIN_CODE));
     const uint32_t spake2pIterationCount = Crypto::kSpake2p_Min_PBKDF_Iterations;
