@@ -15,20 +15,6 @@
 import("//build_overrides/chip.gni")
 import("${chip_root}/src/app/chip_data_model.gni")
 
-chip_data_model("all-devices-common") {
-  zap_file = "all-devices-app.zap"
-  idl = "all-devices-app.matter"
-  is_server = true
-}
-
-source_set("server-cluster-shim") {
-  sources = [
-    "${chip_root}/examples/common/server-cluster-shim/ServerClusterShim.cpp",
-    "${chip_root}/examples/common/server-cluster-shim/ServerClusterShim.h",
-  ]
-  deps = [ ":all-devices-common" ]
-}
-
 source_set("app-data-model") {
   sources = [
     "AppDataModel.cpp",

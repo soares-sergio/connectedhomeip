@@ -26,6 +26,7 @@ source_set("wifi-response-encoding") {
 
   public_deps = [
     ":constants",
+    "${chip_root}/src/app/clusters/general-commissioning-server",
     "${chip_root}/src/app/data-model",
     "${chip_root}/src/platform",
     "${chip_root}/zzz_generated/app-common/clusters/NetworkCommissioning",

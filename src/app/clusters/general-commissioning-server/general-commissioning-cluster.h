@@ -57,10 +57,18 @@ public:
     // Fabric delegate
     void OnFabricRemoved(const FabricTable & fabricTable, FabricIndex fabricIndex) override;
 
+    // GeneralCommissioning is generally a singleton. 
+    // This provides access to an instance where "Startup" has been called.
+    // TODO: this IS NOT OK and coupling should be cleaned up
+    static GeneralCommissioningCluster* Instance() { return gGlobalInstance; }
+
 private:
+    static GeneralCommissioningCluster *gGlobalInstance;
+
     const BitFlags<GeneralCommissioning::Feature> mFeatures;
     const OptionalAttributes mOptionalAttributes;
     uint64_t mBreadCrumb = 0;
+
 
     std::optional<DataModel::ActionReturnStatus>
     HandleArmFailSafe(const DataModel::InvokeRequest & request, CommandHandler * handler,

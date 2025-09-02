@@ -36,8 +36,6 @@ executable("all-devices-app") {
   ]
 
   deps = [
-    "${chip_root}/examples/all-devices-app/all-devices-common",
-    "${chip_root}/examples/all-devices-app/all-devices-common:server-cluster-shim",
     "${chip_root}/examples/all-devices-app/all-devices-common/clusters",
     "${chip_root}/examples/all-devices-app/all-devices-common/pwrpc",
     "${chip_root}/examples/all-devices-app/all-devices-common:app-data-model",
@@ -50,8 +48,11 @@ executable("all-devices-app") {
     "${chip_root}/src/app/clusters/general-commissioning-server",
     "${chip_root}/src/app/clusters/general-diagnostics-server",
     "${chip_root}/src/app/clusters/group-key-mgmt-server",
+    "${chip_root}/src/app/clusters/network-commissioning",
     "${chip_root}/src/app/clusters/software-diagnostics-server",
     "${chip_root}/src/app/clusters/wifi-network-diagnostics-server",
+    "${chip_root}/src/app/persistence",
+    "${chip_root}/src/app/persistence:default",
     "${chip_root}/src/data-model-providers/codedriven",
     "${chip_root}/src/lib",
     "${chip_root}/examples/platform/linux:app-main",

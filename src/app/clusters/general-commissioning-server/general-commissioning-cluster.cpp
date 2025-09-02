@@ -22,6 +22,7 @@
 #include <clusters/GeneralCommissioning/AttributeIds.h>
 #include <clusters/GeneralCommissioning/CommandIds.h>
 #include <clusters/GeneralCommissioning/Metadata.h>
+#include <cstdint>
 #include <optional>
 #include <platform/DeviceControlServer.h>
 #include <platform/PlatformManager.h>
@@ -164,6 +165,8 @@ void NotifyTermsAndConditionsAttributeChangeIfRequired(const TermsAndConditionsS
 #endif // CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
 
 } // anonymous namespace
+
+GeneralCommissioningCluster * GeneralCommissioningCluster::gGlobalInstance = nullptr;
 
 DataModel::ActionReturnStatus GeneralCommissioningCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                                          AttributeValueEncoder & encoder)
@@ -390,6 +393,7 @@ void GeneralCommissioningCluster::SetBreadCrumb(uint64_t value)
 
 CHIP_ERROR GeneralCommissioningCluster::Startup(ServerClusterContext & context)
 {
+    gGlobalInstance = this;
     ReturnErrorOnFailure(DefaultServerCluster::Startup(context));
     PlatformMgrImpl().AddEventHandler(OnPlatformEventHandler, reinterpret_cast<intptr_t>(this));
     Server::GetInstance().GetFabricTable().AddFabricDelegate(this);
@@ -398,6 +402,10 @@ CHIP_ERROR GeneralCommissioningCluster::Startup(ServerClusterContext & context)
 
 void GeneralCommissioningCluster::Shutdown()
 {
+    if (gGlobalInstance == this)
+    {
+        gGlobalInstance = nullptr;
+    }
     PlatformMgrImpl().RemoveEventHandler(OnPlatformEventHandler, reinterpret_cast<intptr_t>(this));
     Server::GetInstance().GetFabricTable().RemoveFabricDelegate(this);
     DefaultServerCluster::Shutdown();
