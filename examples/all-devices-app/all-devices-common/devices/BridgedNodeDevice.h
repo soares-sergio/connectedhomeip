@@ -16,8 +16,8 @@
  */
 #pragma once
 
-#include <clusters/identify-cluster.h>
 #include <clusters/bridged-device-basic-information-cluster.h>
+#include <clusters/identify-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {

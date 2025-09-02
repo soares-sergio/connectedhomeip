@@ -9,7 +9,7 @@ constexpr DeviceTypeId kBridgedNodeDeviceType     = 0x0013;
 constexpr uint16_t kBridgedNodeDeviceTypeRevision = 3;
 
 CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
-                                  const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId)
+                                      const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId)
 {
     VerifyOrReturnError(mEndpointId == kInvalidEndpointId, CHIP_ERROR_INCORRECT_STATE);
     mDeviceType = deviceType;

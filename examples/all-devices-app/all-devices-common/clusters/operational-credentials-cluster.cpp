@@ -16,13 +16,13 @@
  */
 #include "operational-credentials-cluster.h"
 
-#include <app/server/Server.h>
+#include <app/reporting/reporting.h>
 #include <app/server-cluster/AttributeListBuilder.h>
 #include <app/server/Dnssd.h>
-#include <app/reporting/reporting.h>
-#include <clusters/OperationalCredentials/Enums.h>
+#include <app/server/Server.h>
 #include <clusters/OperationalCredentials/AttributeIds.h>
 #include <clusters/OperationalCredentials/Commands.h>
+#include <clusters/OperationalCredentials/Enums.h>
 #include <clusters/OperationalCredentials/Metadata.h>
 #include <credentials/CHIPCert.h>
 #include <credentials/CertificationDeclaration.h>
@@ -168,7 +168,6 @@ void SendNOCResponse(app::CommandHandler * commandObj, const ConcreteCommandPath
 
 } // anonymous namespace
 
-
 CHIP_ERROR ReadNOCs(AttributeValueEncoder & aEncoder)
 {
     return aEncoder.EncodeList([](const auto & encoder) -> CHIP_ERROR {
@@ -189,13 +188,13 @@ CHIP_ERROR ReadNOCs(AttributeValueEncoder & aEncoder)
 
             // ICAC and VVSC are mutually exclusive. ICAC is nullable, VVSC is optional.
             ReturnErrorOnFailure(fabricTable.FetchICACert(fabricIndex, icacOrVvscSpan));
-            if (!icacOrVvscSpan.empty()) 
+            if (!icacOrVvscSpan.empty())
             {
                 nocStruct.icac.SetNonNull(icacOrVvscSpan);
             }
             else
             {
-                icacOrVvscSpan = MutableByteSpan { icacOrVvscBuf };
+                icacOrVvscSpan = MutableByteSpan{ icacOrVvscBuf };
                 ReturnErrorOnFailure(fabricTable.FetchVVSC(fabricIndex, icacOrVvscSpan));
                 if (!icacOrVvscSpan.empty())
                 {
@@ -294,7 +293,8 @@ CHIP_ERROR ReadRootCertificates(AttributeValueEncoder & aEncoder)
     });
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleCSRRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::CSRRequest::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleCSRRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                                                              Commands::CSRRequest::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("CSRRequest", "OperationalCredentials");
     ChipLogProgress(Zcl, "OpCreds: Received a CSRRequest command");
@@ -423,7 +423,8 @@ exit:
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::AddNOC::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                                                          Commands::AddNOC::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("AddNOC", "OperationalCredentials");
     auto & NOCValue          = commandData.NOCValue;
@@ -602,7 +603,8 @@ exit:
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleUpdateNOC(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::UpdateNOC::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleUpdateNOC(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                                                             Commands::UpdateNOC::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("UpdateNOC", "OperationalCredentials");
     auto & NOCValue  = commandData.NOCValue;
@@ -692,7 +694,9 @@ exit:
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleUpdateFabricLabel(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::UpdateFabricLabel::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleUpdateFabricLabel(CommandHandler * commandObj,
+                                                                     const ConcreteCommandPath & commandPath,
+                                                                     Commands::UpdateFabricLabel::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("UpdateFabricLabel", "OperationalCredentials");
     auto & label        = commandData.label;
@@ -743,8 +747,9 @@ exit:
     return std::nullopt;
 }
 
-
-std::optional<DataModel::ActionReturnStatus> HandleAddTrustedRootCertificate(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::AddTrustedRootCertificate::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus>
+HandleAddTrustedRootCertificate(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                                Commands::AddTrustedRootCertificate::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("AddTrustedRootCertificate", "OperationalCredentials");
 
@@ -800,7 +805,9 @@ exit:
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleSetVIDVerificationStatement(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::SetVIDVerificationStatement::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus>
+HandleSetVIDVerificationStatement(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                                  Commands::SetVIDVerificationStatement::DecodableType & commandData)
 {
     FabricIndex fabricIndex = commandObj->GetAccessingFabricIndex();
     ChipLogProgress(Zcl, "OpCreds: Received a SetVIDVerificationStatement Command for FabricIndex 0x%x",
@@ -860,7 +867,9 @@ std::optional<DataModel::ActionReturnStatus> HandleSetVIDVerificationStatement(C
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleSignVIDVerificationRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::SignVIDVerificationRequest::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus>
+HandleSignVIDVerificationRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                                 Commands::SignVIDVerificationRequest::DecodableType & commandData)
 {
     ChipLogProgress(Zcl, "OpCreds: Received a SignVIDVerificationRequest Command for FabricIndex 0x%x",
                     static_cast<unsigned>(commandData.fabricIndex));
@@ -903,7 +912,9 @@ std::optional<DataModel::ActionReturnStatus> HandleSignVIDVerificationRequest(Co
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleCertificateChainRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::CertificateChainRequest::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus>
+HandleCertificateChainRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                              Commands::CertificateChainRequest::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("CertificateChainRequest", "OperationalCredentials");
     auto & certificateType = commandData.certificateType;
@@ -916,7 +927,6 @@ std::optional<DataModel::ActionReturnStatus> HandleCertificateChainRequest(Comma
     Commands::CertificateChainResponse::Type response;
 
     Credentials::DeviceAttestationCredentialsProvider * dacProvider = Credentials::GetDeviceAttestationCredentialsProvider();
-
 
     if (certificateType == kDACCertificate)
     {
@@ -948,7 +958,9 @@ exit:
     return std::nullopt;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleAttestationRequest(CommandHandler * commandObj, const ConcreteCommandPath & commandPath, Commands::AttestationRequest::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleAttestationRequest(CommandHandler * commandObj,
+                                                                      const ConcreteCommandPath & commandPath,
+                                                                      Commands::AttestationRequest::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("AttestationRequest", "OperationalCredentials");
     auto & attestationNonce = commandData.attestationNonce;
@@ -1041,7 +1053,8 @@ exit:
 
 /************************************************************************************************************/
 
-CHIP_ERROR OperationalCredentialsCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
+CHIP_ERROR OperationalCredentialsCluster::Attributes(const ConcreteClusterPath & path,
+                                                     ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
 {
     AttributeListBuilder listBuilder(builder);
 
@@ -1049,9 +1062,10 @@ CHIP_ERROR OperationalCredentialsCluster::Attributes(const ConcreteClusterPath &
                               Span<const AttributeListBuilder::OptionalAttributeEntry>());
 }
 
-DataModel::ActionReturnStatus OperationalCredentialsCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request, AttributeValueEncoder & encoder)
+DataModel::ActionReturnStatus OperationalCredentialsCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
+                                                                           AttributeValueEncoder & encoder)
 {
-    switch(request.path.mAttributeId)
+    switch (request.path.mAttributeId)
     {
     case OperationalCredentials::Attributes::ClusterRevision::Id:
         return encoder.Encode(OperationalCredentials::kRevision);
@@ -1074,92 +1088,81 @@ DataModel::ActionReturnStatus OperationalCredentialsCluster::ReadAttribute(const
     }
 }
 
-CHIP_ERROR OperationalCredentialsCluster::AcceptedCommands(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder) 
+CHIP_ERROR OperationalCredentialsCluster::AcceptedCommands(const ConcreteClusterPath & path,
+                                                           ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
 {
-    static constexpr DataModel::AcceptedCommandEntry kAcceptedCommands[] = {
-        Commands::AttestationRequest::kMetadataEntry,
-        Commands::CertificateChainRequest::kMetadataEntry,
-        Commands::CSRRequest::kMetadataEntry,
-        Commands::AddNOC::kMetadataEntry,
-        Commands::UpdateNOC::kMetadataEntry,
-        Commands::UpdateFabricLabel::kMetadataEntry,
-        Commands::RemoveFabric::kMetadataEntry,
-        Commands::AddTrustedRootCertificate::kMetadataEntry,
-        Commands::SetVIDVerificationStatement::kMetadataEntry,
-        Commands::SignVIDVerificationRequest::kMetadataEntry
-    };
+    static constexpr DataModel::AcceptedCommandEntry kAcceptedCommands[] = { Commands::AttestationRequest::kMetadataEntry,
+                                                                             Commands::CertificateChainRequest::kMetadataEntry,
+                                                                             Commands::CSRRequest::kMetadataEntry,
+                                                                             Commands::AddNOC::kMetadataEntry,
+                                                                             Commands::UpdateNOC::kMetadataEntry,
+                                                                             Commands::UpdateFabricLabel::kMetadataEntry,
+                                                                             Commands::RemoveFabric::kMetadataEntry,
+                                                                             Commands::AddTrustedRootCertificate::kMetadataEntry,
+                                                                             Commands::SetVIDVerificationStatement::kMetadataEntry,
+                                                                             Commands::SignVIDVerificationRequest::kMetadataEntry };
 
     return builder.ReferenceExisting(kAcceptedCommands);
 }
 
-CHIP_ERROR OperationalCredentialsCluster::GeneratedCommands(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<CommandId> & builder)
+CHIP_ERROR OperationalCredentialsCluster::GeneratedCommands(const ConcreteClusterPath & path,
+                                                            ReadOnlyBufferBuilder<CommandId> & builder)
 {
-    static constexpr CommandId kGeneratedCommands[] = {
-        Commands::AttestationResponse::Id,
-        Commands::CertificateChainResponse::Id,
-        Commands::CSRResponse::Id,
-        Commands::NOCResponse::Id,
-        Commands::SignVIDVerificationResponse::Id
-    };
+    static constexpr CommandId kGeneratedCommands[] = { Commands::AttestationResponse::Id, Commands::CertificateChainResponse::Id,
+                                                        Commands::CSRResponse::Id, Commands::NOCResponse::Id,
+                                                        Commands::SignVIDVerificationResponse::Id };
 
     return builder.ReferenceExisting(kGeneratedCommands);
 }
 
-std::optional<DataModel::ActionReturnStatus> OperationalCredentialsCluster::InvokeCommand(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments, CommandHandler * handler) 
+std::optional<DataModel::ActionReturnStatus> OperationalCredentialsCluster::InvokeCommand(const DataModel::InvokeRequest & request,
+                                                                                          TLV::TLVReader & input_arguments,
+                                                                                          CommandHandler * handler)
 {
     // TODO: Confirm if using the Fabric index directly is needed.
-    switch(request.path.mCommandId)
+    switch (request.path.mCommandId)
     {
-    case OperationalCredentials::Commands::AttestationRequest::Id:
-    {
+    case OperationalCredentials::Commands::AttestationRequest::Id: {
         OperationalCredentials::Commands::AttestationRequest::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments));
         return HandleAttestationRequest(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::CertificateChainRequest::Id:
-    {
+    case OperationalCredentials::Commands::CertificateChainRequest::Id: {
         OperationalCredentials::Commands::CertificateChainRequest::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments));
         return HandleCertificateChainRequest(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::CSRRequest::Id:
-    {
+    case OperationalCredentials::Commands::CSRRequest::Id: {
         OperationalCredentials::Commands::CSRRequest::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments));
         return HandleCSRRequest(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::AddNOC::Id:
-    {
+    case OperationalCredentials::Commands::AddNOC::Id: {
         OperationalCredentials::Commands::AddNOC::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments));
         return HandleAddNOC(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::UpdateNOC::Id:
-    {
+    case OperationalCredentials::Commands::UpdateNOC::Id: {
         OperationalCredentials::Commands::UpdateNOC::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments, request.GetAccessingFabricIndex()));
         return HandleUpdateNOC(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::UpdateFabricLabel::Id:
-    {
+    case OperationalCredentials::Commands::UpdateFabricLabel::Id: {
         OperationalCredentials::Commands::UpdateFabricLabel::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments, request.GetAccessingFabricIndex()));
         return HandleUpdateFabricLabel(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::AddTrustedRootCertificate::Id:
-    {
+    case OperationalCredentials::Commands::AddTrustedRootCertificate::Id: {
         OperationalCredentials::Commands::AddTrustedRootCertificate::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments));
         return HandleAddTrustedRootCertificate(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::SetVIDVerificationStatement::Id:
-    {
+    case OperationalCredentials::Commands::SetVIDVerificationStatement::Id: {
         OperationalCredentials::Commands::SetVIDVerificationStatement::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments, request.GetAccessingFabricIndex()));
         return HandleSetVIDVerificationStatement(handler, request.path, requestData);
     }
-    case OperationalCredentials::Commands::SignVIDVerificationRequest::Id:
-    {
+    case OperationalCredentials::Commands::SignVIDVerificationRequest::Id: {
         OperationalCredentials::Commands::SignVIDVerificationRequest::DecodableType requestData;
         ReturnErrorOnFailure(requestData.Decode(input_arguments));
         return HandleSignVIDVerificationRequest(handler, request.path, requestData);

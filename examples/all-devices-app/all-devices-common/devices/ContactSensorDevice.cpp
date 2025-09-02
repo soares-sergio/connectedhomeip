@@ -59,4 +59,4 @@ void ContactSensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
     }
 }
 
-}
+} // namespace chip::app

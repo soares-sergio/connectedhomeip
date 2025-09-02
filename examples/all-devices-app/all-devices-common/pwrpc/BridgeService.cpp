@@ -1,10 +1,10 @@
 #include "BridgeService.h"
 #include "bridge_service/bridge_service.pb.h"
 
+#include <devices/BridgedNodeDevice.h>
+#include <devices/ContactSensorDevice.h>
 #include <devices/Device.h>
 #include <devices/OccupancySensorDevice.h>
-#include <devices/ContactSensorDevice.h>
-#include <devices/BridgedNodeDevice.h>
 #include <platform/PlatformManager.h>
 
 #include <lib/support/CHIPMemString.h>
@@ -27,7 +27,7 @@ pw::Status Bridge::AddDevice(const all_devices_rpc_AddDeviceRequest & request, p
     {
     case all_devices_rpc_DeviceType_OCCUPANCY_SENSOR: {
         std::string bridge_id = request.unique_id + std::string("_bridged_node_device");
-        CHIP_ERROR err1 = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
+        CHIP_ERROR err1       = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
         if (err1 != CHIP_NO_ERROR)
         {
             ChipLogError(AppServer, "Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
@@ -45,13 +45,13 @@ pw::Status Bridge::AddDevice(const all_devices_rpc_AddDeviceRequest & request, p
     }
     case all_devices_rpc_DeviceType_CONTACT_SENSOR: {
         std::string bridge_id = request.unique_id + std::string("_bridged_node_device");
-        CHIP_ERROR err1 = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
+        CHIP_ERROR err1       = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
         if (err1 != CHIP_NO_ERROR)
         {
             ChipLogError(AppServer, "Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
             return pw::Status::Internal();
         }
-        
+
         CHIP_ERROR err = mDeviceManager.AddDevice(std::make_unique<chip::app::ContactSensorDevice>(request.unique_id));
         if (err != CHIP_NO_ERROR)
         {
@@ -99,10 +99,12 @@ pw::Status Bridge::ListDevices(const pw_protobuf_Empty & request, all_devices_rp
         switch (device->GetDeviceType())
         {
         case chip::app::BridgedDeviceType::kContactSensor:
-            response.devices[response.devices_count].device_type = all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_CONTACT_SENSOR;
+            response.devices[response.devices_count].device_type =
+                all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_CONTACT_SENSOR;
             break;
         case chip::app::BridgedDeviceType::kOccupancySensor:
-            response.devices[response.devices_count].device_type = all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_OCCUPANCY_SENSOR;
+            response.devices[response.devices_count].device_type =
+                all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_OCCUPANCY_SENSOR;
             break;
         default:
             response.devices[response.devices_count].device_type = all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_UNKNOWN;
@@ -130,11 +132,10 @@ pw::Status Bridge::UpdateDevice(const all_devices_rpc_UpdateDeviceRequest & requ
 
         chip::app::OccupancySensorDevice * occ = static_cast<chip::app::OccupancySensorDevice *>(device);
         occ->Cluster().SetOccupied(request.occupied);
-    } 
+    }
     else if (request.has_contact)
     {
-        VerifyOrReturnError(device->GetDeviceType() == chip::app::BridgedDeviceType::kContactSensor,
-                            pw::Status::InvalidArgument());
+        VerifyOrReturnError(device->GetDeviceType() == chip::app::BridgedDeviceType::kContactSensor, pw::Status::InvalidArgument());
 
         chip::app::ContactSensorDevice * con = static_cast<chip::app::ContactSensorDevice *>(device);
         con->Cluster().SetStateValue(request.contact);

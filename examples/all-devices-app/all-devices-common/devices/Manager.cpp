@@ -2,9 +2,9 @@
 
 #include <clusters/Descriptor/AttributeIds.h>
 #include <clusters/Descriptor/ClusterId.h>
-#include <lib/support/CodeUtils.h>
 #include <devices/BridgedNodeDevice.h>
 #include <devices/ContactSensorDevice.h>
+#include <lib/support/CodeUtils.h>
 
 #include <memory>
 #include <string>
@@ -19,8 +19,6 @@ DeviceManager::~DeviceManager()
 {
     Clear();
 }
-
-
 
 void DeviceManager::Clear()
 {

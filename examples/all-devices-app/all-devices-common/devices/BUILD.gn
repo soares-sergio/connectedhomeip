@@ -8,16 +8,16 @@ config("includes") {
 
 source_set("devices") {
   sources = [
+    "BridgedNodeDevice.cpp",
+    "BridgedNodeDevice.h",
+    "ContactSensorDevice.cpp",
+    "ContactSensorDevice.h",
     "Device.cpp",
     "Device.h",
     "Manager.cpp",
     "Manager.h",
     "OccupancySensorDevice.cpp",
     "OccupancySensorDevice.h",
-    "ContactSensorDevice.cpp",
-    "ContactSensorDevice.h",
-    "BridgedNodeDevice.h",
-    "BridgedNodeDevice.cpp",
   ]
 
   public_deps = [

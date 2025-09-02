@@ -16,16 +16,16 @@
  */
 #pragma once
 
-#include <clusters/identify-cluster.h>
 #include <clusters/boolean-state-cluster.h>
+#include <clusters/identify-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {
 namespace app {
 
-class ContactSensorDevice : public Device 
+class ContactSensorDevice : public Device
 {
-public: 
+public:
     ContactSensorDevice(std::string id) : Device(std::move(id)) {}
     ~ContactSensorDevice() override = default;
 
@@ -42,5 +42,5 @@ private:
     LazyRegisteredServerCluster<Clusters::BooleanStateCluster> mBooleanStateCluster;
 };
 
-}
-}
+} // namespace app
+} // namespace chip

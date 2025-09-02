@@ -1,10 +1,10 @@
 #include "descriptor-cluster.h"
 
+#include <app/InteractionModelEngine.h>
 #include <app/server-cluster/AttributeListBuilder.h>
 #include <clusters/Descriptor/ClusterId.h>
 #include <clusters/Descriptor/Metadata.h>
 #include <lib/core/DataModelTypes.h>
-#include <app/InteractionModelEngine.h>
 
 using namespace chip::app::Clusters::Descriptor;
 using namespace chip::app::Clusters::Descriptor::Attributes;
@@ -49,7 +49,8 @@ CHIP_ERROR ReadFeatureMap(EndpointId endpoint, AttributeValueEncoder & aEncoder)
     BitFlags<Feature> featureFlags;
     ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
     CHIP_ERROR err = InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList);
-    if (err == CHIP_NO_ERROR && !semanticTagsList.IsEmpty()) {
+    if (err == CHIP_NO_ERROR && !semanticTagsList.IsEmpty())
+    {
         featureFlags.Set(Descriptor::Feature::kTagList);
     }
     return aEncoder.Encode(featureFlags);
@@ -97,8 +98,8 @@ CHIP_ERROR ReadEndpointUniqueId(EndpointId endpoint, AttributeValueEncoder & aEn
     char buffer[chip::app::Clusters::Descriptor::Attributes::EndpointUniqueID::TypeInfo::MaxLength()] = { 0 };
     MutableCharSpan epUniqueId(buffer);
 
-    //TODO: This function does not exist in the code driven data model provider
-    // ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->EndpointUniqueID(endpoint, epUniqueId));
+    // TODO: This function does not exist in the code driven data model provider
+    //  ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->EndpointUniqueID(endpoint, epUniqueId));
     return aEncoder.Encode(epUniqueId);
 }
 #endif
@@ -129,7 +130,7 @@ CHIP_ERROR ReadEndpointUniqueId(EndpointId endpoint, AttributeValueEncoder & aEn
 //     });
 // }
 
-}
+} // namespace
 
 CHIP_ERROR DescriptorCluster::Attributes(const ConcreteClusterPath & path,
                                          ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
@@ -183,7 +184,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
     case PartsList::Id:
         // return encoder.EncodeEmptyList();
         return ReadPartsAttribute(request.path.mEndpointId, encoder);
-    case TagList::Id: 
+    case TagList::Id:
         return ReadTagListAttribute(request.path.mEndpointId, encoder);
     default:
         return Status::UnsupportedAttribute;

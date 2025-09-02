@@ -14,12 +14,12 @@ source_set("descriptor") {
 
   public_deps = [
     "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app:interaction-model",
     "${chip_root}/src/app/data-model-provider:metadata",
     "${chip_root}/src/app/server-cluster",
     "${chip_root}/src/lib/core:error",
     "${chip_root}/src/lib/support",
     "${chip_root}/zzz_generated/app-common/clusters/Descriptor",
-    "${chip_root}/src/app:interaction-model",
   ]
 
   public_configs = [
@@ -118,9 +118,7 @@ source_set("access-control-cluster") {
     "access-control-cluster.h",
   ]
 
-  defines = [
-    "CHIP_CONFIG_USE_ACCESS_RESTRICTIONS=0",
-  ]
+  defines = [ "CHIP_CONFIG_USE_ACCESS_RESTRICTIONS=0" ]
 
   #deps = [
   #  "${chip_root}/src/app:attribute-access",
@@ -164,15 +162,14 @@ source_set("operational-credentials-cluster") {
   ]
 }
 
-
 group("clusters") {
   public_deps = [
+    ":access-control-cluster",
+    ":boolean-state-cluster",
     ":bridged-device-basic-information",
     ":descriptor",
     ":identify",
     ":occupancy-sensor",
-    ":boolean-state-cluster",
-    ":access-control-cluster",
     ":operational-credentials-cluster",
   ]
 }
