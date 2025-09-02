@@ -37,6 +37,7 @@
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <system/SystemLayer.h>
 #include <clusters/identify-cluster.h>
+#include <AppDataModel.h>
 
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
@@ -61,12 +62,14 @@
 
 #include <AppMain.h>
 #include <string>
+#include <map>
 
 using namespace chip;
 using namespace chip::app;
 using namespace chip::Platform;
 using namespace chip::DeviceLayer;
 using namespace chip::app::Clusters;
+using namespace chip::ArgParser;
 
 namespace {
 AppMainLoopImplementation * gMainLoopImplementation = nullptr;
@@ -109,6 +112,50 @@ DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 LinuxCommissionableDataProvider gCommissionableDataProvider;
 
 std::unique_ptr<DeviceManager> gDeviceManager;
+
+// App custom argument handling
+constexpr uint16_t kOptionDeviceType = 0xffd0;
+
+constexpr const char * kBridgeApp                 = "bridge";
+constexpr const char * kContactSensorApp          = "contact-sensor";
+constexpr const char * kOccupancySensorApp        = "occupancy-sensor";
+constexpr const char * kLightApp                  = "light";
+std::map<std::string, AppDeviceType> kValidApps = { 
+    {kBridgeApp, AppDeviceType::kBridge}, 
+    {kContactSensorApp, AppDeviceType::kContactSensor}, 
+    {kOccupancySensorApp, AppDeviceType::kOccupancySensor}, 
+    {kLightApp, AppDeviceType::kLight} 
+};
+
+AppDeviceType deviceType = AppDeviceType::kBridge; // Using a bridge as default
+
+chip::ArgParser::OptionDef sAllDevicesAppOptionDefs[] = {
+    { "device", chip::ArgParser::kArgumentRequired, kOptionDeviceType },
+};
+
+bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int identifier, const char * name, const char * value) {
+    switch(identifier) 
+    {
+    case kOptionDeviceType:
+        if (value == nullptr || kValidApps.find(value) == kValidApps.end()) {
+            ChipLogError(Support, "INTERNAL ERROR: Invalid device type: %s\n", value);
+            return false;
+        }
+        ChipLogProgress(AppServer, "Using the device type of %s", value);
+        deviceType = kValidApps[value];
+        return true;
+    default:
+        ChipLogError(Support, "%s: INTERNAL ERROR: Unhandled option: %s\n", program, name);
+        return false;
+    }
+
+    return true;
+}
+
+chip::ArgParser::OptionSet sCmdLineOptions = { AllDevicesAppOptionHandler, // handler function
+                                                      sAllDevicesAppOptionDefs,   // array of option definitions
+                                                      "PROGRAM OPTIONS",      // help group
+                                                      "-d, --device <bridge|contact-sensor|occupancy-sensor|light>\n" };
 
 void StopSignalHandler(int /* signal */)
 {
@@ -344,7 +391,7 @@ CHIP_ERROR Initialize(int argc, char * argv[])
 {
     ChipLogProgress(AppServer, "Initializing...");
     ReturnErrorOnFailure(Platform::MemoryInit());
-    ReturnErrorOnFailure(ParseArguments(argc, argv));
+    ReturnErrorOnFailure(ParseArguments(argc, argv, &sCmdLineOptions));
     ReturnErrorOnFailure(DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(CHIP_CONFIG_KVS_PATH));
     ReturnErrorOnFailure(DeviceLayer::PlatformMgr().InitChipStack());
 

@@ -23,4 +23,12 @@
 
 using chip::app::CodeDrivenDataModelProvider;
 
+enum class AppDeviceType
+{
+    kContactSensor,
+    kOccupancySensor,
+    kBridge,
+    kLight,
+};
+
 CodeDrivenDataModelProvider & GetAppDataModelProvider();
