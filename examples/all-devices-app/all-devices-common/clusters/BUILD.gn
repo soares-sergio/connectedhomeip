@@ -103,7 +103,7 @@ source_set("boolean-state-cluster") {
     "${chip_root}/src/app/server-cluster",
     "${chip_root}/src/lib/core:error",
     "${chip_root}/src/lib/support",
-    "${chip_root}/zzz_generated/app-common/clusters/OccupancySensing",
+    "${chip_root}/zzz_generated/app-common/clusters/BooleanState",
   ]
 
   public_configs = [
@@ -162,6 +162,27 @@ source_set("operational-credentials-cluster") {
   ]
 }
 
+source_set("on-off-cluster") {
+  sources = [
+    "on-off-cluster.cpp",
+    "on-off-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/OnOff",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
 group("clusters") {
   public_deps = [
     ":access-control-cluster",
@@ -171,5 +192,6 @@ group("clusters") {
     ":identify",
     ":occupancy-sensor",
     ":operational-credentials-cluster",
+    ":on-off-cluster",
   ]
 }

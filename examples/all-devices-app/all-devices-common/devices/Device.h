@@ -16,6 +16,7 @@ enum class BridgedDeviceType
     kBridgedNodeDevice,
     kContactSensor,
     kOccupancySensor,
+    kOnOffLight
 };
 
 /// A device is a entity that is uniquely identified (unique id string)
