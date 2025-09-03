@@ -1,0 +1,5 @@
+all_devices.rpc.AddDeviceRequest.unique_id max_size:64
+all_devices.rpc.RemoveDeviceRequest.unique_id max_size:64
+all_devices.rpc.UpdateDeviceRequest.unique_id max_size:64
+all_devices.rpc.DeviceInfo.unique_id max_size:64
+all_devices.rpc.DeviceList.devices max_count:256  // just a guess for convenience

@@ -1,0 +1,66 @@
+import("//build_overrides/chip.gni")
+import("//build_overrides/pigweed.gni")
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_protobuf_compiler/proto.gni")
+
+# WTF? this should NOT be needed ...
+config("default_config") {
+  include_dirs = [
+    ".",
+    "..",
+  ]
+}
+
+pw_source_set("rpc_services") {
+  public_configs = [ ":default_config" ]
+}
+
+pw_proto_library("test_service") {
+  sources = [ "protos/test_service.proto" ]
+  inputs = [ "protos/test_service.options" ]
+  deps = [ "$dir_pw_protobuf:common_protos" ]
+  strip_prefix = "protos"
+  prefix = "test_service"
+}
+
+pw_proto_library("bridge_service") {
+  sources = [ "protos/bridge_service.proto" ]
+  inputs = [ "protos/bridge_service.options" ]
+  deps = [ "$dir_pw_protobuf:common_protos" ]
+  strip_prefix = "protos"
+  prefix = "bridge_service"
+}
+
+source_set("pwrpc") {
+  sources = [
+    "BridgeService.cpp",
+    "BridgeService.h",
+    "Rpc.cpp",
+    "Rpc.h",
+    "SystemRpcServer.cpp",
+    "TestService.cpp",
+    "TestService.h",
+  ]
+
+  public_deps = [
+    ":bridge_service.nanopb_rpc",
+    ":rpc_services",
+    ":test_service.nanopb_rpc",
+    "$dir_pw_hdlc:default_addresses",
+    "$dir_pw_hdlc:rpc_channel_output",
+    "$dir_pw_log",
+    "$dir_pw_rpc:server",
+    "$dir_pw_rpc/system_server:facade",
+    "$dir_pw_rpc/system_server:socket",
+    "$dir_pw_stream:socket_stream",
+    "$dir_pw_stream:sys_io_stream",
+    "$dir_pw_sync:mutex",
+    "$dir_pw_trace",
+    "$dir_pw_trace_tokenized",
+    "$dir_pw_trace_tokenized:trace_rpc_service",
+    "${chip_root}/examples/all-devices-app/all-devices-common/devices",
+    "${chip_root}/src/platform",
+    "${chip_root}/src/setup_payload",
+    "${chip_root}/src/setup_payload:onboarding-codes-utils",
+  ]
+}

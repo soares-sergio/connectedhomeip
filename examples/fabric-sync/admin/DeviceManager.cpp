@@ -20,7 +20,6 @@
 #include <LinuxCommissionableDataProvider.h>
 #include <app/server/CommissioningWindowManager.h>
 #include <app/server/Server.h>
-#include <bridge/FabricBridge.h>
 #include <crypto/RandUtils.h>
 #include <lib/support/StringBuilder.h>
 

@@ -42,7 +42,7 @@ CHIP_ERROR CodeDrivenDataModelProvider::Startup(DataModel::InteractionModelConte
         .interactionContext = *mInteractionModelContext,
     });
 
-    // Start up registered server clusters if one of their associated endpoints is registered.
+    // Start up all registered server clusters
     bool had_failure = false;
     for (auto * cluster : mServerClusterRegistry.AllServerClusterInstances())
     {
@@ -268,7 +268,7 @@ CHIP_ERROR CodeDrivenDataModelProvider::AddEndpoint(EndpointInterfaceRegistratio
     if (mServerClusterContext.has_value())
     {
         // If the provider has been started, we need to check if any clusters on this new endpoint
-        // should be started up.
+        // are now fully resolved and ready for startup.
         for (auto * cluster : mServerClusterRegistry.AllServerClusterInstances())
         {
             bool clusterIsOnNewEndpoint = false;

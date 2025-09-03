@@ -26,6 +26,7 @@
 #include <app/GlobalAttributes.h>
 #include <app/RequiredPrivilege.h>
 #include <app/data-model-provider/MetadataTypes.h>
+#include <app/util/DataModelHandler.h>
 #include <app/util/IMClusterCommandHandler.h>
 #include <app/util/attribute-storage-detail.h>
 #include <app/util/attribute-storage.h>
@@ -172,6 +173,11 @@ bool PathsContainsOrLogError(const ConcreteClusterPath & path, ServerClusterInte
 }
 
 } // namespace
+
+void ServerClusterShim::InitEmberShims()
+{
+    InitDataModelHandler();
+}
 
 ServerClusterShim::~ServerClusterShim() {}
 

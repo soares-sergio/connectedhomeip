@@ -77,6 +77,7 @@ class HostApp(Enum):
     JAVA_MATTER_CONTROLLER = auto()
     KOTLIN_MATTER_CONTROLLER = auto()
     CONTACT_SENSOR = auto()
+    ALL_DEVICES_APP = auto()
     DISHWASHER = auto()
     MICROWAVE_OVEN = auto()
     REFRIGERATOR = auto()
@@ -128,8 +129,6 @@ class HostApp(Enum):
             return 'placeholder/linux/'
         elif self == HostApp.OTA_REQUESTOR:
             return 'ota-requestor-app/linux'
-        elif self in [HostApp.ADDRESS_RESOLVE, HostApp.TESTS, HostApp.PYTHON_BINDINGS, HostApp.CERT_TOOL]:
-            return '../'
         elif self == HostApp.EFR32_TEST_RUNNER:
             return '../src/test_driver/efr32'
         elif self == HostApp.TV_CASTING:
@@ -148,6 +147,8 @@ class HostApp(Enum):
             return 'kotlin-matter-controller'
         elif self == HostApp.CONTACT_SENSOR:
             return 'contact-sensor-app/linux'
+        elif self == HostApp.ALL_DEVICES_APP:
+            return 'all-devices-app/linux'
         elif self == HostApp.DISHWASHER:
             return 'dishwasher-app/linux'
         elif self == HostApp.MICROWAVE_OVEN:
@@ -273,6 +274,9 @@ class HostApp(Enum):
         elif self == HostApp.CONTACT_SENSOR:
             yield 'contact-sensor-app'
             yield 'contact-sensor-app.map'
+        elif self == HostApp.ALL_DEVICES_APP:
+            yield 'all-devices-app'
+            yield 'all-devices-app.map'
         elif self == HostApp.DISHWASHER:
             yield 'dishwasher-app'
             yield 'dishwasher-app.map'

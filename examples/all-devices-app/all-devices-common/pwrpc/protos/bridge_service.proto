@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package all_devices.rpc;
+
+import 'pw_protobuf_protos/common.proto';
+
+enum DeviceType { UNKNOWN = 0; CONTACT_SENSOR = 1; OCCUPANCY_SENSOR = 2; }
+
+message AddDeviceRequest {
+  string unique_id = 1;
+  DeviceType device_type = 2;
+}
+
+message RemoveDeviceRequest {
+  string unique_id = 1;
+}
+
+// Separated from AddDeviceRequest in case we want to add
+// more data here
+message DeviceInfo {
+  string unique_id = 1;
+  DeviceType device_type = 2;
+}
+
+// A list of devices
+message DeviceList {
+  repeated DeviceInfo devices = 1;
+}
+
+message UpdateDeviceRequest {
+  string unique_id = 1;
+  optional bool occupied = 2; // Only for an occupancy sensor
+  optional bool contact = 3; // Only for an contact sensor
+}
+
+service Bridge {
+  rpc AddDevice(AddDeviceRequest) returns(pw.protobuf.Empty) {}
+  rpc ListDevices(pw.protobuf.Empty) returns(DeviceList) {}
+  rpc RemoveDevice(RemoveDeviceRequest) returns(pw.protobuf.Empty) {}
+  rpc UpdateDevice(UpdateDeviceRequest) returns(pw.protobuf.Empty) {}
+}

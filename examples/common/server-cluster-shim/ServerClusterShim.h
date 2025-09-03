@@ -85,6 +85,8 @@ public:
 
     CHIP_ERROR EventInfo(const ConcreteEventPath & path, DataModel::EventEntry & eventInfo) override;
 
+    static void InitEmberShims();
+
 private:
     ServerClusterContext * mContext = nullptr;
     const std::vector<ConcreteClusterPath> mPaths;
