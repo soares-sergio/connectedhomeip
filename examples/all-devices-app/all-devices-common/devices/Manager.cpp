@@ -12,7 +12,7 @@
 namespace chip::app {
 
 DeviceManager::DeviceManager(EndpointId startEndpointId, CodeDrivenDataModelProvider & provider) :
-    mLastBridedNodeDeviceEp(startEndpointId), mEndpointIdToAdd(startEndpointId), mDataModelProvider(provider)
+    mEndpointIdToAdd(startEndpointId), mDataModelProvider(provider)
 {}
 
 DeviceManager::~DeviceManager()
@@ -32,7 +32,7 @@ void DeviceManager::Clear()
         AttributePathParams{ kRootEndpointId, Clusters::Descriptor::Id, Clusters::Descriptor::Attributes::PartsList::Id });
 }
 
-CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
+CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device, EndpointId endpointParentId)
 {
     VerifyOrReturnError(device, CHIP_ERROR_INVALID_ARGUMENT);
 
@@ -40,14 +40,6 @@ CHIP_ERROR DeviceManager::AddDevice(std::unique_ptr<Device> device)
     if (mActiveDevices.find(deviceId) != mActiveDevices.end())
     {
         return CHIP_ERROR_INVALID_ARGUMENT;
-    }
-
-    // EndpointId endpointParentId = (device->GetDeviceType()==BridgedDeviceType::kBridgedNodeDevice) ? 1 : mEndpointIdToAdd-1;
-    EndpointId endpointParentId = mLastBridedNodeDeviceEp;
-    if (device->GetDeviceType() == BridgedDeviceType::kBridgedNodeDevice)
-    {
-        mLastBridedNodeDeviceEp = mEndpointIdToAdd;
-        endpointParentId        = 1;
     }
 
     ReturnErrorOnFailure(device->Register(mEndpointIdToAdd, mDataModelProvider, endpointParentId));

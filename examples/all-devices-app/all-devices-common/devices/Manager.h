@@ -22,7 +22,7 @@ public:
     ~DeviceManager();
 
     /// Adds the given device to the internal list of devices
-    CHIP_ERROR AddDevice(std::unique_ptr<Device> device);
+    CHIP_ERROR AddDevice(std::unique_ptr<Device> device, EndpointId endpointParentId);
 
     /// Return the device with the given id or nullptr if device is not found
     Device * GetDevice(const char * unique_id);
@@ -44,7 +44,6 @@ private:
         std::unique_ptr<Device> device;
     };
 
-    EndpointId mLastBridedNodeDeviceEp;
     EndpointId mEndpointIdToAdd;
     CodeDrivenDataModelProvider & mDataModelProvider;
     std::map<std::string, DeviceData> mActiveDevices;

@@ -9,41 +9,22 @@
 #include <memory>
 
 
-using chip::app::CodeDrivenDataModelProvider;
-using chip::app::DataModel::EndpointCompositionPattern;
-using chip::app::DataModel::Provider;
-using chip::app::Device;
-
-std::unique_ptr<Device> RegisterNewDevice(AppDeviceType deviceType,
-                                             chip::app::CodeDrivenDataModelProvider & provider,
-                                             chip::EndpointId endpointId,
-                                             chip::EndpointId parentEndpointId)
+CHIP_ERROR RegisterNewDevice(AppDeviceType deviceType,
+                             std::string unique_id,
+                             chip::EndpointId parentEndpointId,
+                             chip::app::DeviceManager & deviceManager)
 {
-    std::unique_ptr<Device> device;
     switch (deviceType)
     {
     case AppDeviceType::kContactSensor:
-        device = std::make_unique<chip::app::ContactSensorDevice>("contact_sensor");
-        break;
+        return deviceManager.AddDevice(std::make_unique<chip::app::ContactSensorDevice>(unique_id), parentEndpointId);
     case AppDeviceType::kOccupancySensor:
-        device = std::make_unique<chip::app::OccupancySensorDevice>("occupancy_sensor");
-        break;
+        return deviceManager.AddDevice(std::make_unique<chip::app::OccupancySensorDevice>(unique_id), parentEndpointId);
     // case AppDeviceType::kBridge:
     //     return // TODO: create an AggregatorDevice; call contact sensor device register
     // case AppDeviceType::kBridgedNode:
     //     return // TODO: call Bridged Node device register
     default:
-        return nullptr;
+        return CHIP_ERROR_INVALID_ARGUMENT;
     }
-
-    if (device)
-    {
-        CHIP_ERROR err = device->Register(endpointId, provider, parentEndpointId);
-        if (err != CHIP_NO_ERROR)
-        {
-            return nullptr;
-        }
-    }
-
-    return device;
 }

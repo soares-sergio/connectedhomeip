@@ -12,6 +12,36 @@
 #include <memory>
 
 using namespace chip;
+using chip::app::Device;
+
+namespace {
+
+    // This helper method adds a BridgedNode device as a prent of childDevice.
+    pw::Status AddBridgedNodeDeviceHelper(std::unique_ptr<Device> childDevice, chip::app::DeviceManager & deviceManager) {        
+        // Add Parent Bridged Node Device
+        const EndpointId kAggregatorEndpointId = 1;
+        std::string parentBridgedNodeId = childDevice->GetUniqueId() + std::string("_bridged_node_device_parent");
+        CHIP_ERROR err1 = deviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(parentBridgedNodeId), kAggregatorEndpointId);
+        if (err1 != CHIP_NO_ERROR)
+        {
+            ChipLogError(AppServer, "Parent Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
+            return pw::Status::Internal();
+        }
+
+        // Add Child Device
+        Device * parentBridgedNodeDevice = deviceManager.GetDevice(parentBridgedNodeId.c_str());
+        VerifyOrReturnError(parentBridgedNodeDevice != nullptr, pw::Status::Internal());
+        
+        CHIP_ERROR err2 = deviceManager.AddDevice(std::move(childDevice), parentBridgedNodeDevice->GetEndpointId());
+        if (err2 != CHIP_NO_ERROR)
+        {
+            ChipLogError(AppServer, "Device add failed: %" CHIP_ERROR_FORMAT, err2.Format());
+            return pw::Status::Internal();
+        }
+        return pw::OkStatus();
+    }
+
+}
 
 namespace all_devices::rpc {
 
@@ -26,40 +56,10 @@ pw::Status Bridge::AddDevice(const all_devices_rpc_AddDeviceRequest & request, p
     switch (request.device_type)
     {
     case all_devices_rpc_DeviceType_OCCUPANCY_SENSOR: {
-        std::string bridge_id = request.unique_id + std::string("_bridged_node_device");
-        CHIP_ERROR err1       = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
-        if (err1 != CHIP_NO_ERROR)
-        {
-            ChipLogError(AppServer, "Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
-            return pw::Status::Internal();
-        }
-
-        CHIP_ERROR err2 = mDeviceManager.AddDevice(std::make_unique<chip::app::OccupancySensorDevice>(request.unique_id));
-        if (err2 != CHIP_NO_ERROR)
-        {
-            ChipLogError(AppServer, "Device add failed: %" CHIP_ERROR_FORMAT, err2.Format());
-            return pw::Status::Internal();
-        }
-
-        return pw::OkStatus();
+        return AddBridgedNodeDeviceHelper(std::make_unique<chip::app::OccupancySensorDevice>(request.unique_id), mDeviceManager);
     }
     case all_devices_rpc_DeviceType_CONTACT_SENSOR: {
-        std::string bridge_id = request.unique_id + std::string("_bridged_node_device");
-        CHIP_ERROR err1       = mDeviceManager.AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(bridge_id));
-        if (err1 != CHIP_NO_ERROR)
-        {
-            ChipLogError(AppServer, "Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
-            return pw::Status::Internal();
-        }
-
-        CHIP_ERROR err = mDeviceManager.AddDevice(std::make_unique<chip::app::ContactSensorDevice>(request.unique_id));
-        if (err != CHIP_NO_ERROR)
-        {
-            ChipLogError(AppServer, "Device add failed: %" CHIP_ERROR_FORMAT, err.Format());
-            return pw::Status::Internal();
-        }
-
-        return pw::OkStatus();
+        return AddBridgedNodeDeviceHelper(std::make_unique<chip::app::ContactSensorDevice>(request.unique_id), mDeviceManager);
     }
     default:
         ChipLogError(AppServer, "Cannot handle this device type.");

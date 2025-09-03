@@ -165,6 +165,8 @@ void StopSignalHandler(int /* signal */)
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
+    gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
+
     // register real code driven clusters
     static GeneralCommissioningCluster clusterGeneralCommissioning({}, {});
     static ServerClusterRegistration serverClusterGeneralCommissioning(clusterGeneralCommissioning);
@@ -223,6 +225,7 @@ void StopSignalHandler(int /* signal */)
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
     // Add Endpoint 0 Registration
+    //TODO: Create a Root Node Device type and move this inside RegisterNewDevice
     CHIP_ERROR err = dataModelProvider.AddEndpoint(endpointRegistration0);
     if (err != CHIP_NO_ERROR)
     {
@@ -250,18 +253,12 @@ void StopSignalHandler(int /* signal */)
             ChipLogError(AppServer, "Cannot register Endpoint 1: %" CHIP_ERROR_FORMAT, err.Format());
             chipDie();
         }
-
-        gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
-        rpc::Start(33000, *gDeviceManager);
     }
     else {
-        static std::unique_ptr<Device> ep1Device = RegisterNewDevice(deviceType, dataModelProvider, 1);
-        if (ep1Device == nullptr)
-        {
-            ChipLogError(AppServer, "Error registering Endpoint 1 device!");
-            chipDie();
-        }
+        VerifyOrDie(RegisterNewDevice(deviceType, "sensor", kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
     }
+
+    rpc::Start(33000, *gDeviceManager);
 
     return &dataModelProvider;
 }
