@@ -25,9 +25,16 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
-class IdentifyCluster : public DefaultServerCluster
+class IsDeviceIdentifying {
+public:
+    virtual ~IsDeviceIdentifying() = default;
+    virtual bool IsIdentifying() const = 0;
+};
+
+class IdentifyCluster : public DefaultServerCluster, public IsDeviceIdentifying
 {
 public:
+    ~IdentifyCluster() override = default;
     IdentifyCluster(EndpointId endpointId) : DefaultServerCluster({ endpointId, Identify::Id }) {}
 
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
@@ -44,6 +51,14 @@ public:
     std::optional<DataModel::ActionReturnStatus> InvokeCommand(const DataModel::InvokeRequest & request,
                                                                chip::TLV::TLVReader & input_arguments,
                                                                CommandHandler * handler) override;
+
+    //TODO: Should add a proper implementation of this. This is needed as part of the Groups
+    // cluster, the old ember-based implementation checked if a device is identifying based on 
+    // the identifyTime. The Groups cluster now takes a variable of IsDeviceIdentifying in its constructor
+    // that should handle this properly.
+    bool IsIdentifying() const override {
+        return false;
+    }
 };
 
 } // namespace Clusters

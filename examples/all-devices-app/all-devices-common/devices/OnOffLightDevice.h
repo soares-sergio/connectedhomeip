@@ -18,6 +18,7 @@
 
 #include <clusters/identify-cluster.h>
 #include <clusters/on-off-cluster.h>
+#include <clusters/groups-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {
@@ -35,12 +36,13 @@ public:
                         EndpointId parentId = kInvalidEndpointId) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
 
-    Clusters::OnOffCluster & Cluster() { return mOnOffCluster.Cluster(); }
+    Clusters::OnOffCluster & OnOffCluster() { return mOnOffCluster.Cluster(); }
+    Clusters::GroupsCluster & GroupsCluster() { return mGroupsCluster.Cluster(); }
 
 private:
     LazyRegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
     LazyRegisteredServerCluster<Clusters::OnOffCluster> mOnOffCluster;
-
+    LazyRegisteredServerCluster<Clusters::GroupsCluster> mGroupsCluster;
 };
 
 }

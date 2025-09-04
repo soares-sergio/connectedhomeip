@@ -18,6 +18,15 @@
 
 using namespace chip::app::Clusters;
 
+namespace {
+class IsDeviceIdendifyingImpl : public IsDeviceIdentifying {
+public:
+    bool IsIdentifying() const override{
+        return false;
+    }
+};
+}
+
 namespace chip::app {
 
 constexpr DeviceTypeId kOnOffLightDeviceType         = 0x0100;
@@ -41,6 +50,10 @@ CHIP_ERROR OnOffLightDevice::Register(chip::EndpointId endpoint, CodeDrivenDataM
     mOnOffCluster.Create(endpoint, optionalAttributeSet, BitFlags<OnOff::Feature>(0));
     ReturnErrorOnFailure(provider.AddCluster(mOnOffCluster.Registration()));
 
+    const IsDeviceIdendifyingImpl identifying;
+    mGroupsCluster.Create(endpoint, BitFlags<Groups::Feature>(0), identifying);
+    ReturnErrorOnFailure(provider.AddCluster(mGroupsCluster.Registration()));
+
     return provider.AddEndpoint(mEndpointRegistration);
 }
 
@@ -57,6 +70,11 @@ void OnOffLightDevice::UnRegister(CodeDrivenDataModelProvider & provider)
     {
         provider.RemoveCluster(&mIdentifyCluster.Cluster());
         mIdentifyCluster.Destroy();
+    }
+    if (mGroupsCluster.IsConstructed())
+    {
+        provider.RemoveCluster(&mGroupsCluster.Cluster());
+        mGroupsCluster.Destroy();
     }
 }
 

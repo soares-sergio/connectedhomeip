@@ -183,6 +183,31 @@ source_set("on-off-cluster") {
   ]
 }
 
+source_set("groups-cluster") {
+  sources = [
+    "groups-cluster.cpp",
+    "groups-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app:interaction-model",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/src/credentials",
+    "${chip_root}/src/tracing:macros",
+    "${chip_root}/zzz_generated/app-common/clusters/Groups",
+    ":identify",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
 group("clusters") {
   public_deps = [
     ":access-control-cluster",
@@ -193,5 +218,6 @@ group("clusters") {
     ":occupancy-sensor",
     ":operational-credentials-cluster",
     ":on-off-cluster",
+    ":groups-cluster",
   ]
 }
