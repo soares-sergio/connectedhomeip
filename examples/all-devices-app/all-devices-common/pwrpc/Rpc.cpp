@@ -26,25 +26,8 @@
 #include <platform/PlatformManager.h>
 #include <thread>
 
-#include <map>
-
 #include "BridgeService.h"
 #include "TestService.h"
-
-#define PW_TRACE_BUFFER_SIZE_BYTES 1024
-#include "pw_trace/trace.h"
-#include "pw_trace_tokenized/trace_rpc_service_nanopb.h"
-
-// Define trace time for pw_trace
-PW_TRACE_TIME_TYPE pw_trace_GetTraceTime()
-{
-    return (PW_TRACE_TIME_TYPE) chip::System::SystemClock().GetMonotonicMicroseconds64().count();
-}
-// Microsecond time source
-size_t pw_trace_GetTraceTimeTicksPerSecond()
-{
-    return 1000000;
-}
 
 namespace chip::rpc {
 namespace {
@@ -66,7 +49,7 @@ void RunRpcService(app::DeviceManager & deviceManager)
     // Init may block on accept (it waits for the forst accept)
     // Start will loop.
     pw::rpc::system_server::Init();
-    pw::rpc::system_server::Start();
+    VerifyOrDie(pw::rpc::system_server::Start().ok());
 }
 
 void Start(uint16_t rpcServerPort, app::DeviceManager & deviceManager)
