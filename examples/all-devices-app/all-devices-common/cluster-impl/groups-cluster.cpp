@@ -44,7 +44,6 @@ struct GroupMembershipResponse
     // Use GetCommandId instead of commandId directly to avoid naming conflict with CommandIdentification in ExecutionOfACommand
     static constexpr CommandId GetCommandId() { return Commands::GetGroupMembershipResponse::Id; }
     static constexpr ClusterId GetClusterId() { return Groups::Id; }
-    static constexpr bool kIsFabricScoped = false;
 
     GroupMembershipResponse(const Commands::GetGroupMembership::DecodableType & data, chip::EndpointId endpoint,
                             GroupDataProvider::EndpointIterator * iter) :
@@ -163,8 +162,10 @@ static Status GroupAdd(FabricIndex fabricIndex, EndpointId endpointId, GroupId g
     return Status::ResourceExhausted;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleAddGroup(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                          const Commands::AddGroup::DecodableType & commandData) {
+std::optional<DataModel::ActionReturnStatus> HandleAddGroup(app::CommandHandler * commandObj,
+                                                            const app::ConcreteCommandPath & commandPath,
+                                                            const Commands::AddGroup::DecodableType & commandData)
+{
     MATTER_TRACE_SCOPE("AddGroup", "Groups");
     auto fabricIndex = commandObj->GetAccessingFabricIndex();
     Groups::Commands::AddGroupResponse::Type response;
@@ -175,8 +176,9 @@ std::optional<DataModel::ActionReturnStatus> HandleAddGroup(app::CommandHandler 
     return Status::Success;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleViewGroup(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                           const Commands::ViewGroup::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleViewGroup(app::CommandHandler * commandObj,
+                                                             const app::ConcreteCommandPath & commandPath,
+                                                             const Commands::ViewGroup::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("ViewGroup", "Groups");
     auto fabricIndex             = commandObj->GetAccessingFabricIndex();
@@ -203,8 +205,9 @@ exit:
     return status;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleGetGroupMembership(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                                    const Commands::GetGroupMembership::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus>
+HandleGetGroupMembership(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                         const Commands::GetGroupMembership::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("GetGroupMembership", "Groups");
     auto fabricIndex = commandObj->GetAccessingFabricIndex();
@@ -265,8 +268,9 @@ static Status GroupRemove(FabricIndex fabricIndex, EndpointId endpointId, GroupI
     return Status::NotFound;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleRemoveGroup(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                             const Commands::RemoveGroup::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleRemoveGroup(app::CommandHandler * commandObj,
+                                                               const app::ConcreteCommandPath & commandPath,
+                                                               const Commands::RemoveGroup::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("RemoveGroup", "Groups");
     auto fabricIndex = commandObj->GetAccessingFabricIndex();
@@ -283,8 +287,9 @@ std::optional<DataModel::ActionReturnStatus> HandleRemoveGroup(app::CommandHandl
     return Status::Success;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleRemoveAllGroups(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                                 const Commands::RemoveAllGroups::DecodableType & commandData)
+std::optional<DataModel::ActionReturnStatus> HandleRemoveAllGroups(app::CommandHandler * commandObj,
+                                                                   const app::ConcreteCommandPath & commandPath,
+                                                                   const Commands::RemoveAllGroups::DecodableType & commandData)
 {
     MATTER_TRACE_SCOPE("RemoveAllGroups", "Groups");
     auto fabricIndex = commandObj->GetAccessingFabricIndex();
@@ -324,9 +329,9 @@ exit:
     return status;
 }
 
-std::optional<DataModel::ActionReturnStatus> HandleAddGroupIfIdentifying(app::CommandHandler * commandObj,
-                                                       const app::ConcreteCommandPath & commandPath,
-                                                       const Commands::AddGroupIfIdentifying::DecodableType & commandData, bool isIdentifying)
+std::optional<DataModel::ActionReturnStatus>
+HandleAddGroupIfIdentifying(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                            const Commands::AddGroupIfIdentifying::DecodableType & commandData, bool isIdentifying)
 {
     MATTER_TRACE_SCOPE("AddGroupIfIdentifying", "Groups");
     auto fabricIndex = commandObj->GetAccessingFabricIndex();
@@ -336,7 +341,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddGroupIfIdentifying(app::Co
 
     Status status;
 
-    //TODO: Ensure the delegagte to check for is the device is identifying is not a hardcoded implementation
+    // TODO: Ensure the delegagte to check for is the device is identifying is not a hardcoded implementation
     if (!isIdentifying)
     {
         // If not identifying, ignore add group -> success; not a failure.
@@ -351,15 +356,16 @@ std::optional<DataModel::ActionReturnStatus> HandleAddGroupIfIdentifying(app::Co
     commandObj->AddStatus(commandPath, status);
     return status;
 }
-}
+} // namespace
 
 namespace chip {
 namespace app {
 namespace Clusters {
 
 std::optional<DataModel::ActionReturnStatus> GroupsCluster::InvokeCommand(const DataModel::InvokeRequest & request,
-                                                            chip::TLV::TLVReader & input_arguments,
-                                                            CommandHandler * handler) {
+                                                                          chip::TLV::TLVReader & input_arguments,
+                                                                          CommandHandler * handler)
+{
     switch (request.path.mCommandId)
     {
     case Groups::Commands::AddGroup::Id: {
@@ -398,10 +404,11 @@ std::optional<DataModel::ActionReturnStatus> GroupsCluster::InvokeCommand(const 
 }
 
 DataModel::ActionReturnStatus GroupsCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
-                                            AttributeValueEncoder & encoder) {
+                                                           AttributeValueEncoder & encoder)
+{
     switch (request.path.mAttributeId)
     {
-    case Groups::Attributes::FeatureMap::Id: 
+    case Groups::Attributes::FeatureMap::Id:
         return encoder.Encode(mFeatureFlags);
     case Groups::Attributes::ClusterRevision::Id:
         return encoder.Encode(Groups::kRevision);
@@ -412,25 +419,25 @@ DataModel::ActionReturnStatus GroupsCluster::ReadAttribute(const DataModel::Read
     }
 }
 
-CHIP_ERROR GroupsCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) {
+CHIP_ERROR GroupsCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
+{
     AttributeListBuilder listBuilder(builder);
     return listBuilder.Append(Span(Groups::Attributes::kMandatoryMetadata), {});
 }
 
 CHIP_ERROR GroupsCluster::AcceptedCommands(const ConcreteClusterPath & path,
-                            ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder) {
+                                           ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
+{
     static constexpr DataModel::AcceptedCommandEntry kAcceptedCommands[] = {
-        Commands::AddGroup::kMetadataEntry,
-        Commands::ViewGroup::kMetadataEntry,
-        Commands::GetGroupMembership::kMetadataEntry,
-        Commands::RemoveGroup::kMetadataEntry,
-        Commands::RemoveAllGroups::kMetadataEntry,
-        Commands::AddGroupIfIdentifying::kMetadataEntry,
+        Commands::AddGroup::kMetadataEntry,           Commands::ViewGroup::kMetadataEntry,
+        Commands::GetGroupMembership::kMetadataEntry, Commands::RemoveGroup::kMetadataEntry,
+        Commands::RemoveAllGroups::kMetadataEntry,    Commands::AddGroupIfIdentifying::kMetadataEntry,
     };
     return builder.ReferenceExisting(kAcceptedCommands);
 }
 
-CHIP_ERROR GroupsCluster::GeneratedCommands(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<CommandId> & builder) {
+CHIP_ERROR GroupsCluster::GeneratedCommands(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<CommandId> & builder)
+{
     static constexpr CommandId kGeneratedCommands[] = {
         Commands::AddGroupResponse::Id,
         Commands::ViewGroupResponse::Id,
@@ -440,6 +447,6 @@ CHIP_ERROR GroupsCluster::GeneratedCommands(const ConcreteClusterPath & path, Re
     return builder.ReferenceExisting(kGeneratedCommands);
 }
 
-}
-}
-}
+} // namespace Clusters
+} // namespace app
+} // namespace chip

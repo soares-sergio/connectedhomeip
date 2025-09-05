@@ -16,8 +16,8 @@
  */
 #pragma once
 
-#include <clusters/identify-cluster.h>
-#include <clusters/occupancy-sensor-cluster.h>
+#include <cluster-impl/identify-cluster.h>
+#include <cluster-impl/occupancy-sensor-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {

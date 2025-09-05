@@ -19,13 +19,12 @@
 using namespace chip::app::Clusters;
 
 namespace {
-class IsDeviceIdendifyingImpl : public IsDeviceIdentifying {
+class IsDeviceIdendifyingImpl : public IsDeviceIdentifying
+{
 public:
-    bool IsIdentifying() const override{
-        return false;
-    }
+    bool IsIdentifying() const override { return false; }
 };
-}
+} // namespace
 
 namespace chip::app {
 

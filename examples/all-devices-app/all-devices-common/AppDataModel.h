@@ -19,15 +19,15 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <devices/Device.h>
 #include <devices/Manager.h>
+#include <memory>
 
 enum class AppDeviceType
 {
-    kUnknown = 0,
-    kContactSensor = 1,
+    kUnknown         = 0,
+    kContactSensor   = 1,
     kOccupancySensor = 2,
     kRootNode, // Minimal root node, only mandatory clusters
     kBridge,
@@ -35,7 +35,5 @@ enum class AppDeviceType
     kLight,
 };
 
-CHIP_ERROR RegisterNewDevice(AppDeviceType deviceType,
-                             std::string unique_id,
-                             chip::EndpointId parentEndpointId,
+CHIP_ERROR RegisterNewDevice(AppDeviceType deviceType, std::string unique_id, chip::EndpointId parentEndpointId,
                              chip::app::DeviceManager & deviceManager);

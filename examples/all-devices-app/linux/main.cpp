@@ -31,7 +31,6 @@
 #include <app/server-cluster/ServerClusterInterfaceRegistry.h>
 #include <app/server/Dnssd.h>
 #include <app/server/Server.h>
-#include <clusters/identify-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
 #include <platform/CommissionableDataProvider.h>
@@ -47,9 +46,10 @@
 
 // Code driven clusters made for this app, these are clusters that
 // need some additional work before landing upstream
-#include "../all-devices-common/clusters/access-control-cluster.h"
-#include "../all-devices-common/clusters/descriptor-cluster.h"
-#include "../all-devices-common/clusters/operational-credentials-cluster.h"
+#include <cluster-impl/access-control-cluster.h>
+#include <cluster-impl/descriptor-cluster.h>
+#include <cluster-impl/identify-cluster.h>
+#include <cluster-impl/operational-credentials-cluster.h>
 
 #if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
 #include <imgui_ui/ui.h>
@@ -225,7 +225,7 @@ void StopSignalHandler(int /* signal */)
     VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
 
     // Add Endpoint 0 Registration
-    //TODO: Create a Root Node Device type and move this inside RegisterNewDevice
+    // TODO: Create a Root Node Device type and move this inside RegisterNewDevice
     CHIP_ERROR err = dataModelProvider.AddEndpoint(endpointRegistration0);
     if (err != CHIP_NO_ERROR)
     {
@@ -233,7 +233,8 @@ void StopSignalHandler(int /* signal */)
         chipDie();
     }
 
-    if (deviceType == AppDeviceType::kBridge) { //TODO: Create an Aggregator Device and move this inside RegisterNewDevice
+    if (deviceType == AppDeviceType::kBridge)
+    { // TODO: Create an Aggregator Device and move this inside RegisterNewDevice
         // Endpoint 1 clusters
         // Descriptor
         static std::vector<DescriptorCluster::DeviceType> deviceTypesEp1Vector{ { 0x000E, 2 } };
@@ -254,7 +255,8 @@ void StopSignalHandler(int /* signal */)
             chipDie();
         }
     }
-    else {
+    else
+    {
         VerifyOrDie(RegisterNewDevice(deviceType, "sensor", kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
     }
 

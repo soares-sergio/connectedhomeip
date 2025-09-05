@@ -16,17 +16,17 @@
  */
 #pragma once
 
-#include <clusters/identify-cluster.h>
-#include <clusters/on-off-cluster.h>
-#include <clusters/groups-cluster.h>
+#include <cluster-impl/groups-cluster.h>
+#include <cluster-impl/identify-cluster.h>
+#include <cluster-impl/on-off-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {
 namespace app {
 
-class OnOffLightDevice : public Device 
+class OnOffLightDevice : public Device
 {
-public: 
+public:
     OnOffLightDevice(std::string id) : Device(std::move(id)) {}
     ~OnOffLightDevice() override = default;
 
@@ -45,5 +45,5 @@ private:
     LazyRegisteredServerCluster<Clusters::GroupsCluster> mGroupsCluster;
 };
 
-}
-}
+} // namespace app
+} // namespace chip

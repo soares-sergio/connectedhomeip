@@ -25,9 +25,10 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
-class IsDeviceIdentifying {
+class IsDeviceIdentifying
+{
 public:
-    virtual ~IsDeviceIdentifying() = default;
+    virtual ~IsDeviceIdentifying()     = default;
     virtual bool IsIdentifying() const = 0;
 };
 
@@ -52,13 +53,11 @@ public:
                                                                chip::TLV::TLVReader & input_arguments,
                                                                CommandHandler * handler) override;
 
-    //TODO: Should add a proper implementation of this. This is needed as part of the Groups
-    // cluster, the old ember-based implementation checked if a device is identifying based on 
-    // the identifyTime. The Groups cluster now takes a variable of IsDeviceIdentifying in its constructor
-    // that should handle this properly.
-    bool IsIdentifying() const override {
-        return false;
-    }
+    // TODO: Should add a proper implementation of this. This is needed as part of the Groups
+    //  cluster, the old ember-based implementation checked if a device is identifying based on
+    //  the identifyTime. The Groups cluster now takes a variable of IsDeviceIdentifying in its constructor
+    //  that should handle this properly.
+    bool IsIdentifying() const override { return false; }
 };
 
 } // namespace Clusters

@@ -27,14 +27,16 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
-class OnOffCluster : public DefaultServerCluster {
+class OnOffCluster : public DefaultServerCluster
+{
 public:
-    using OptionalAttributeSet = chip::app::OptionalAttributeSet<OnOff::Attributes::GlobalSceneControl::Id, OnOff::Attributes::OnTime::Id, 
-                                                                 OnOff::Attributes::OffWaitTime::Id, OnOff::Attributes::StartUpOnOff::Id>;
+    using OptionalAttributeSet =
+        chip::app::OptionalAttributeSet<OnOff::Attributes::GlobalSceneControl::Id, OnOff::Attributes::OnTime::Id,
+                                        OnOff::Attributes::OffWaitTime::Id, OnOff::Attributes::StartUpOnOff::Id>;
 
-    OnOffCluster(EndpointId endpoint, OptionalAttributeSet optionalAttributeSet, 
-        BitFlags<OnOff::Feature> featureFlags) : DefaultServerCluster({endpoint , OnOff::Id}), 
-                                                                  mFeatureFlags(featureFlags) {}
+    OnOffCluster(EndpointId endpoint, OptionalAttributeSet optionalAttributeSet, BitFlags<OnOff::Feature> featureFlags) :
+        DefaultServerCluster({ endpoint, OnOff::Id }), mFeatureFlags(featureFlags)
+    {}
 
     std::optional<DataModel::ActionReturnStatus> InvokeCommand(const DataModel::InvokeRequest & request,
                                                                chip::TLV::TLVReader & input_arguments,
@@ -46,7 +48,7 @@ public:
                                                 AttributeValueEncoder & encoder) override;
 
     DataModel::ActionReturnStatus WriteAttribute(const DataModel::WriteAttributeRequest & request,
-                                                                      AttributeValueDecoder & decoder) override;
+                                                 AttributeValueDecoder & decoder) override;
 
     CHIP_ERROR AcceptedCommands(const ConcreteClusterPath & path,
                                 ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder) override;
@@ -58,13 +60,13 @@ private:
     BitFlags<OnOff::Feature> mFeatureFlags;
 
     // Attributes
-    bool mOnOff = false;
-    bool mGlobalSceneControl = false;
-    bool mOnTime = 0;
-    bool mOffWaitTime = 0;
+    bool mOnOff                           = false;
+    bool mGlobalSceneControl              = false;
+    bool mOnTime                          = 0;
+    bool mOffWaitTime                     = 0;
     OnOff::StartUpOnOffEnum mStartUpOnOff = OnOff::StartUpOnOffEnum::kOn;
 };
 
-}
-}
-}
+} // namespace Clusters
+} // namespace app
+} // namespace chip

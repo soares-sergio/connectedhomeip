@@ -1,7 +1,7 @@
 #pragma once
 
-#include <clusters/bridged-device-basic-information-cluster.h>
-#include <clusters/descriptor-cluster.h>
+#include <cluster-impl/bridged-device-basic-information-cluster.h>
+#include <cluster-impl/descriptor-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
 

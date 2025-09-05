@@ -44,8 +44,9 @@ void OnOffCluster::SetOnOff(bool value)
 }
 
 std::optional<DataModel::ActionReturnStatus> OnOffCluster::InvokeCommand(const DataModel::InvokeRequest & request,
-                                                               chip::TLV::TLVReader & input_arguments,
-                                                               CommandHandler * handler) {
+                                                                         chip::TLV::TLVReader & input_arguments,
+                                                                         CommandHandler * handler)
+{
     switch (request.path.mCommandId)
     {
     case OnOff::Commands::Off::Id: {
@@ -55,7 +56,8 @@ std::optional<DataModel::ActionReturnStatus> OnOffCluster::InvokeCommand(const D
         return CHIP_NO_ERROR;
     }
     case OnOff::Commands::On::Id: {
-        if(mFeatureFlags.Has(Feature::kOffOnly)) {
+        if (mFeatureFlags.Has(Feature::kOffOnly))
+        {
             return Protocols::InteractionModel::Status::UnsupportedCommand;
         }
         OnOff::Commands::On::DecodableType request_data;
@@ -64,7 +66,8 @@ std::optional<DataModel::ActionReturnStatus> OnOffCluster::InvokeCommand(const D
         return CHIP_NO_ERROR;
     }
     case OnOff::Commands::Toggle::Id: {
-        if(mFeatureFlags.Has(Feature::kOffOnly)) {
+        if (mFeatureFlags.Has(Feature::kOffOnly))
+        {
             return Protocols::InteractionModel::Status::UnsupportedCommand;
         }
         OnOff::Commands::Toggle::DecodableType request_data;
@@ -77,48 +80,53 @@ std::optional<DataModel::ActionReturnStatus> OnOffCluster::InvokeCommand(const D
     }
 }
 
-CHIP_ERROR OnOffCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) {
+CHIP_ERROR OnOffCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
+{
     AttributeListBuilder listBuilder(builder);
 
     static constexpr DataModel::AttributeEntry optionalAttributeEntries[] = {
-        OnOff::Attributes::GlobalSceneControl::kMetadataEntry, 
-        OnOff::Attributes::OnTime::kMetadataEntry, 
-        OnOff::Attributes::OffWaitTime::kMetadataEntry, 
+        OnOff::Attributes::GlobalSceneControl::kMetadataEntry,
+        OnOff::Attributes::OnTime::kMetadataEntry,
+        OnOff::Attributes::OffWaitTime::kMetadataEntry,
         OnOff::Attributes::StartUpOnOff::kMetadataEntry,
     };
 
-    return listBuilder.Append(Span(OnOff::Attributes::kMandatoryMetadata), Span(optionalAttributeEntries),
-                              mOptionalAttributeSet);
+    return listBuilder.Append(Span(OnOff::Attributes::kMandatoryMetadata), Span(optionalAttributeEntries), mOptionalAttributeSet);
 }
 
 DataModel::ActionReturnStatus OnOffCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
-                                            AttributeValueEncoder & encoder) {
+                                                          AttributeValueEncoder & encoder)
+{
     switch (request.path.mAttributeId)
     {
     case GroupKeyManagement::Attributes::ClusterRevision::Id:
-        return encoder.Encode(OnOff::kRevision);    
+        return encoder.Encode(OnOff::kRevision);
     case Attributes::FeatureMap::Id:
         return encoder.Encode(mFeatureFlags);
     case Attributes::GlobalSceneControl::Id: {
-        if (!mFeatureFlags.Has(Feature::kLighting)) {
+        if (!mFeatureFlags.Has(Feature::kLighting))
+        {
             return Protocols::InteractionModel::Status::UnsupportedAttribute;
         }
         return encoder.Encode(mGlobalSceneControl);
     }
     case Attributes::OnTime::Id: {
-        if (!mFeatureFlags.Has(Feature::kLighting)) {
+        if (!mFeatureFlags.Has(Feature::kLighting))
+        {
             return Protocols::InteractionModel::Status::UnsupportedAttribute;
         }
         return encoder.Encode(mOnTime);
     }
     case Attributes::OffWaitTime::Id: {
-        if (!mFeatureFlags.Has(Feature::kLighting)) {
+        if (!mFeatureFlags.Has(Feature::kLighting))
+        {
             return Protocols::InteractionModel::Status::UnsupportedAttribute;
         }
         return encoder.Encode(mOffWaitTime);
     }
     case Attributes::StartUpOnOff::Id: {
-        if (!mFeatureFlags.Has(Feature::kLighting)) {
+        if (!mFeatureFlags.Has(Feature::kLighting))
+        {
             return Protocols::InteractionModel::Status::UnsupportedAttribute;
         }
         return encoder.Encode(mStartUpOnOff);
@@ -129,11 +137,13 @@ DataModel::ActionReturnStatus OnOffCluster::ReadAttribute(const DataModel::ReadA
 }
 
 DataModel::ActionReturnStatus OnOffCluster::WriteAttribute(const DataModel::WriteAttributeRequest & request,
-                                                                      AttributeValueDecoder & decoder) {
+                                                           AttributeValueDecoder & decoder)
+{
     VerifyOrDie(request.path.mClusterId == app::Clusters::OnOff::Id);
 
-    //All the attributes below currently require this flag to be enabled
-    if (!mFeatureFlags.Has(Feature::kLighting)) {
+    // All the attributes below currently require this flag to be enabled
+    if (!mFeatureFlags.Has(Feature::kLighting))
+    {
         return Protocols::InteractionModel::Status::UnsupportedWrite;
     }
 
@@ -165,7 +175,8 @@ DataModel::ActionReturnStatus OnOffCluster::WriteAttribute(const DataModel::Writ
 }
 
 CHIP_ERROR OnOffCluster::AcceptedCommands(const ConcreteClusterPath & path,
-                            ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder) {
+                                          ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
+{
     static constexpr DataModel::AcceptedCommandEntry kAcceptedCommands[] = {
         Commands::Off::kMetadataEntry,
         Commands::On::kMetadataEntry,
@@ -176,6 +187,6 @@ CHIP_ERROR OnOffCluster::AcceptedCommands(const ConcreteClusterPath & path,
     };
     return builder.ReferenceExisting(kAcceptedCommands);
 }
-}
-}
-}
+} // namespace Clusters
+} // namespace app
+} // namespace chip

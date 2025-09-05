@@ -45,20 +45,21 @@ public:
     static void TearDownTestSuite() { chip::Platform::MemoryShutdown(); }
 };
 
-#include <app-common/zap-generated/ids/Clusters.h>
 #include <algorithm>
+#include <app-common/zap-generated/ids/Clusters.h>
 #include <vector>
 
 namespace {
 
-constexpr EndpointId kTestEndpointId = 1;
+constexpr EndpointId kTestEndpointId                  = 1;
 constexpr chip::DeviceTypeId kContactSensorDeviceType = 0x0015;
-constexpr uint16_t kContactSensorDeviceTypeRevision = 2;
+constexpr uint16_t kContactSensorDeviceTypeRevision   = 2;
 
 constexpr chip::DeviceTypeId kOccupancySensorDeviceType = 0x0107;
-constexpr uint16_t kOccupancySensorDeviceTypeRevision = 4;
+constexpr uint16_t kOccupancySensorDeviceTypeRevision   = 4;
 
-void VerifyServerClusters(CodeDrivenDataModelProvider & provider, EndpointId endpointId, std::vector<chip::ClusterId> expectedClusterIds)
+void VerifyServerClusters(CodeDrivenDataModelProvider & provider, EndpointId endpointId,
+                          std::vector<chip::ClusterId> expectedClusterIds)
 {
     ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> clustersBuilder;
     ASSERT_EQ(provider.ServerClusters(endpointId, clustersBuilder), CHIP_NO_ERROR);
@@ -97,11 +98,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_ContactSensor)
     ASSERT_EQ(deviceTypes[1].deviceTypeRevision, kContactSensorDeviceTypeRevision);
 
     // Check server clusters
-    VerifyServerClusters(provider, kTestEndpointId, {
-        chip::app::Clusters::Descriptor::Id,
-        chip::app::Clusters::Identify::Id,
-        chip::app::Clusters::BooleanState::Id
-    });
+    VerifyServerClusters(
+        provider, kTestEndpointId,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::BooleanState::Id });
 }
 
 TEST_F(TestAllDevicesApp, RegisterNewDevice_OccupancySensor)
@@ -121,9 +120,7 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OccupancySensor)
     ASSERT_EQ(deviceTypes[1].deviceTypeRevision, kOccupancySensorDeviceTypeRevision);
 
     // Check server clusters
-    VerifyServerClusters(provider, kTestEndpointId, {
-        chip::app::Clusters::Descriptor::Id,
-        chip::app::Clusters::Identify::Id,
-        chip::app::Clusters::OccupancySensing::Id
-    });
+    VerifyServerClusters(
+        provider, kTestEndpointId,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OccupancySensing::Id });
 }

@@ -190,16 +190,16 @@ source_set("groups-cluster") {
   ]
 
   public_deps = [
+    ":identify",
     "${chip_root}/src/app:attribute-access",
-    "${chip_root}/src/app/data-model-provider:metadata",
     "${chip_root}/src/app:interaction-model",
+    "${chip_root}/src/app/data-model-provider:metadata",
     "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/credentials",
     "${chip_root}/src/lib/core:error",
     "${chip_root}/src/lib/support",
-    "${chip_root}/src/credentials",
     "${chip_root}/src/tracing:macros",
     "${chip_root}/zzz_generated/app-common/clusters/Groups",
-    ":identify",
   ]
 
   public_configs = [
@@ -208,16 +208,16 @@ source_set("groups-cluster") {
   ]
 }
 
-group("clusters") {
+group("cluster-impl") {
   public_deps = [
     ":access-control-cluster",
     ":boolean-state-cluster",
     ":bridged-device-basic-information",
     ":descriptor",
+    ":groups-cluster",
     ":identify",
     ":occupancy-sensor",
-    ":operational-credentials-cluster",
     ":on-off-cluster",
-    ":groups-cluster",
+    ":operational-credentials-cluster",
   ]
 }

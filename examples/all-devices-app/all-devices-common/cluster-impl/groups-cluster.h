@@ -17,13 +17,13 @@
 
 #pragma once
 
+#include "identify-cluster.h"
 #include <app-common/zap-generated/cluster-objects.h>
 #include <app/server-cluster/DefaultServerCluster.h>
 #include <app/server-cluster/OptionalAttributeSet.h>
 #include <clusters/Groups/ClusterId.h>
 #include <clusters/Groups/Metadata.h>
 #include <platform/DiagnosticDataProvider.h>
-#include "identify-cluster.h"
 
 namespace chip {
 namespace app {
@@ -32,10 +32,12 @@ namespace Clusters {
 class GroupsCluster : public DefaultServerCluster
 {
 public:
-    //TODO: In CodegenIntegration, need to add code to check if the device is identifying, which can still be based on the old
-    // non code driven implementation for now. This will need to be part of an implemenation for IsDeviceIdentifying
-    GroupsCluster(EndpointId endpoint, BitFlags<Groups::Feature> featureFlags, const IsDeviceIdentifying & deviceIdentifying) : DefaultServerCluster({endpoint , Groups::Id}), 
-                                                                  mFeatureFlags(featureFlags), isIdentifyingBool(deviceIdentifying.IsIdentifying()) {}
+    // TODO: In CodegenIntegration, need to add code to check if the device is identifying, which can still be based on the old
+    //  non code driven implementation for now. This will need to be part of an implemenation for IsDeviceIdentifying
+    GroupsCluster(EndpointId endpoint, BitFlags<Groups::Feature> featureFlags, const IsDeviceIdentifying & deviceIdentifying) :
+        DefaultServerCluster({ endpoint, Groups::Id }), mFeatureFlags(featureFlags),
+        isIdentifyingBool(deviceIdentifying.IsIdentifying())
+    {}
 
     std::optional<DataModel::ActionReturnStatus> InvokeCommand(const DataModel::InvokeRequest & request,
                                                                chip::TLV::TLVReader & input_arguments,
@@ -55,7 +57,6 @@ private:
     BitFlags<Groups::Feature> mFeatureFlags;
     Groups::NameSupportBitmap mNameSupport = Groups::NameSupportBitmap::kGroupNames;
     bool isIdentifyingBool;
-
 };
 
 } // namespace Clusters

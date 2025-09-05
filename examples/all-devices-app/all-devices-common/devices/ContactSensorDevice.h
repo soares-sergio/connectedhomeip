@@ -16,8 +16,8 @@
  */
 #pragma once
 
-#include <clusters/boolean-state-cluster.h>
-#include <clusters/identify-cluster.h>
+#include <cluster-impl/boolean-state-cluster.h>
+#include <cluster-impl/identify-cluster.h>
 #include <devices/Device.h>
 
 namespace chip {
