@@ -3,8 +3,6 @@
 #include <platform/CommissionableDataProvider.h>
 #include <platform/ConfigurationManager.h>
 #include <platform/DeviceInstanceInfoProvider.h>
-#include <setup_payload/OnboardingCodesUtil.h>
-#include <setup_payload/QRCodeSetupPayloadGenerator.h>
 
 using namespace chip;
 
@@ -66,16 +64,6 @@ pw::Status TestService::GetDeviceInfo(const pw_protobuf_Empty & request, all_dev
         CHIP_NO_ERROR)
     {
         response.serial_number[0] = '\0'; // optional serial field not set.
-    }
-
-    // Create buffer for QR code that can fit max size and null terminator.
-    char qrCodeBuffer[chip::QRCodeBasicSetupPayloadGenerator::kMaxQRCodeBase38RepresentationLength + 1];
-    chip::MutableCharSpan qrCodeText(qrCodeBuffer);
-    if (GetQRCode(qrCodeText, chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE)) == CHIP_NO_ERROR)
-    {
-        snprintf(response.pairing_info.qr_code, sizeof(response.pairing_info.qr_code), "%s", qrCodeText.data());
-        GetQRCodeUrl(response.pairing_info.qr_code_url, sizeof(response.pairing_info.qr_code_url), qrCodeText);
-        response.has_pairing_info = true;
     }
 
     return pw::OkStatus();

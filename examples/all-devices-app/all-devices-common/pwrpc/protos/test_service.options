@@ -1,4 +1,2 @@
 all_devices.rpc.MatterDeviceInfo.serial_number max_size:32  // length defined in chip spec 11.1.6.1
 all_devices.rpc.MatterDeviceInfo.software_version_string max_size:64  // length defined in chip spec 11.1.6.1
-all_devices.rpc.PairingInfo.qr_code max_size:256
-all_devices.rpc.PairingInfo.qr_code_url max_size:256

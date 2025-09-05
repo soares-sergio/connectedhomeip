@@ -7,8 +7,6 @@ import 'pw_protobuf_protos/common.proto';
 message PairingInfo {
   uint32 code = 1;
   uint32 discriminator = 2;
-  string qr_code = 3;
-  string qr_code_url = 4;
 }
 
 message MatterDeviceInfo {
