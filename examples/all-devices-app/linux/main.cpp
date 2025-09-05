@@ -109,10 +109,12 @@ constexpr const char * kBridgeApp               = "bridge";
 constexpr const char * kContactSensorApp        = "contact-sensor";
 constexpr const char * kOccupancySensorApp      = "occupancy-sensor";
 constexpr const char * kLightApp                = "light";
+constexpr const char * kPlugApp                 = "plug";
 std::map<std::string, AppDeviceType> kValidApps = { { kBridgeApp, AppDeviceType::kBridge },
                                                     { kContactSensorApp, AppDeviceType::kContactSensor },
                                                     { kOccupancySensorApp, AppDeviceType::kOccupancySensor },
-                                                    { kLightApp, AppDeviceType::kLight } };
+                                                    { kLightApp, AppDeviceType::kLight },
+                                                    { kPlugApp, AppDeviceType::kPlug } };
 
 AppDeviceType deviceType = AppDeviceType::kBridge; // Using a bridge as default
 

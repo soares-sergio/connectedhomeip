@@ -131,6 +131,9 @@ DataModel::ActionReturnStatus OnOffCluster::ReadAttribute(const DataModel::ReadA
         }
         return encoder.Encode(mStartUpOnOff);
     }
+    case Attributes::OnOff::Id: {
+        return encoder.Encode(mOnOff);
+    }
     default:
         return Protocols::InteractionModel::Status::UnsupportedAttribute;
     }

@@ -18,8 +18,8 @@ source_set("devices") {
     "Manager.h",
     "OccupancySensorDevice.cpp",
     "OccupancySensorDevice.h",
-    "OnOffLightDevice.cpp",
-    "OnOffLightDevice.h",
+    "OnOffDevice.cpp",
+    "OnOffDevice.h",
   ]
 
   public_deps = [

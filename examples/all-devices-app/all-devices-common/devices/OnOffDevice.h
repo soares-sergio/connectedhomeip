@@ -24,11 +24,11 @@
 namespace chip {
 namespace app {
 
-class OnOffLightDevice : public Device
+class OnOffDevice : public Device
 {
 public:
-    OnOffLightDevice(std::string id) : Device(std::move(id)) {}
-    ~OnOffLightDevice() override = default;
+    OnOffDevice(std::string id, DeviceTypeId onOffDeviceType, uint16_t onOffDeviceRevision) : Device(std::move(id)), mOnOffDeviceType(onOffDeviceType), mOnOffDeviceRevision(onOffDeviceRevision) {}
+    ~OnOffDevice() override = default;
 
     BridgedDeviceType GetDeviceType() const override;
 
@@ -40,6 +40,9 @@ public:
     Clusters::GroupsCluster & GroupsCluster() { return mGroupsCluster.Cluster(); }
 
 private:
+    DeviceTypeId mOnOffDeviceType;
+    uint16_t mOnOffDeviceRevision;
+
     LazyRegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
     LazyRegisteredServerCluster<Clusters::OnOffCluster> mOnOffCluster;
     LazyRegisteredServerCluster<Clusters::GroupsCluster> mGroupsCluster;

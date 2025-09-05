@@ -14,7 +14,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include <devices/OnOffLightDevice.h>
+#include <devices/OnOffDevice.h>
 
 using namespace chip::app::Clusters;
 
@@ -28,18 +28,20 @@ public:
 
 namespace chip::app {
 
-constexpr DeviceTypeId kOnOffLightDeviceType         = 0x0100;
-constexpr DeviceTypeId kOnOffLightDeviceTypeRevision = 3;
-
-BridgedDeviceType OnOffLightDevice::GetDeviceType() const
+BridgedDeviceType OnOffDevice::GetDeviceType() const
 {
-    return BridgedDeviceType::kOnOffLight;
+    switch(mOnOffDeviceType) {
+        case 0x0100:
+            return BridgedDeviceType::kOnOffLight;
+        default:
+            return BridgedDeviceType::kOnOffPlug;
+    }
 }
 
-CHIP_ERROR OnOffLightDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
+CHIP_ERROR OnOffDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = kOnOffLightDeviceType,
-                                                       .revision   = kOnOffLightDeviceTypeRevision };
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = mOnOffDeviceType,
+                                                       .revision   = mOnOffDeviceRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mIdentifyCluster.Create(endpoint);
@@ -56,7 +58,7 @@ CHIP_ERROR OnOffLightDevice::Register(chip::EndpointId endpoint, CodeDrivenDataM
     return provider.AddEndpoint(mEndpointRegistration);
 }
 
-void OnOffLightDevice::UnRegister(CodeDrivenDataModelProvider & provider)
+void OnOffDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     provider.RemoveEndpoint(mEndpointId);
     UnRegisterBridgedNodeClusters(provider);

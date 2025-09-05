@@ -33,6 +33,7 @@ enum class AppDeviceType
     kBridge,
     kBridgedNode, // Minimal bridged node, only mandatory clusters
     kLight,
+    kPlug,
 };
 
 CHIP_ERROR RegisterNewDevice(AppDeviceType deviceType, std::string unique_id, chip::EndpointId parentEndpointId,
