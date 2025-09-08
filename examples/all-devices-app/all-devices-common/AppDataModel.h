@@ -24,17 +24,7 @@
 #include <devices/Manager.h>
 #include <memory>
 
-enum class AppDeviceType
-{
-    kUnknown         = 0,
-    kContactSensor   = 1,
-    kOccupancySensor = 2,
-    kRootNode, // Minimal root node, only mandatory clusters
-    kBridge,
-    kBridgedNode, // Minimal bridged node, only mandatory clusters
-    kLight,
-    kPlug,
-};
+using chip::app::DeviceType;
 
-CHIP_ERROR RegisterNewDevice(AppDeviceType deviceType, std::string unique_id, chip::EndpointId parentEndpointId,
+CHIP_ERROR RegisterNewDevice(DeviceType deviceType, std::string unique_id, chip::EndpointId parentEndpointId,
                              chip::app::DeviceManager & deviceManager);

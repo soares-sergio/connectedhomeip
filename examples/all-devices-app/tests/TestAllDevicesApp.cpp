@@ -86,8 +86,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_ContactSensor)
     chip::KvsPersistentStorageDelegate storage;
     chip::app::DefaultAttributePersistenceProvider attributeProvider;
     CodeDrivenDataModelProvider provider(storage, attributeProvider);
-    std::unique_ptr<Device> device = RegisterNewDevice(AppDeviceType::kContactSensor, provider, kTestEndpointId);
-    ASSERT_TRUE(device);
+    chip::app::DeviceManager deviceManager(kTestEndpointId, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kContactSensor, "contactsensor-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
 
     // Check device types
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
@@ -108,8 +109,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OccupancySensor)
     chip::KvsPersistentStorageDelegate storage;
     chip::app::DefaultAttributePersistenceProvider attributeProvider;
     CodeDrivenDataModelProvider provider(storage, attributeProvider);
-    std::unique_ptr<Device> device = RegisterNewDevice(AppDeviceType::kOccupancySensor, provider, kTestEndpointId);
-    ASSERT_TRUE(device);
+    chip::app::DeviceManager deviceManager(kTestEndpointId, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kOccupancySensor, "occupancysensor-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
 
     // Check device types
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;

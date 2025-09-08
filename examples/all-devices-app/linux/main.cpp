@@ -110,13 +110,13 @@ constexpr const char * kContactSensorApp        = "contact-sensor";
 constexpr const char * kOccupancySensorApp      = "occupancy-sensor";
 constexpr const char * kLightApp                = "light";
 constexpr const char * kPlugApp                 = "plug";
-std::map<std::string, AppDeviceType> kValidApps = { { kBridgeApp, AppDeviceType::kBridge },
-                                                    { kContactSensorApp, AppDeviceType::kContactSensor },
-                                                    { kOccupancySensorApp, AppDeviceType::kOccupancySensor },
-                                                    { kLightApp, AppDeviceType::kLight },
-                                                    { kPlugApp, AppDeviceType::kPlug } };
+std::map<std::string, DeviceType> kValidApps = { { kBridgeApp, DeviceType::kAggregator },
+                                                    { kContactSensorApp, DeviceType::kContactSensor },
+                                                    { kOccupancySensorApp, DeviceType::kOccupancySensor },
+                                                    { kLightApp, DeviceType::kOnOffLight },
+                                                    { kPlugApp, DeviceType::kOnOffPlug } };
 
-AppDeviceType deviceType = AppDeviceType::kBridge; // Using a bridge as default
+DeviceType deviceType = DeviceType::kAggregator; // Using a bridge as default
 
 chip::ArgParser::OptionDef sAllDevicesAppOptionDefs[] = {
     { "device", chip::ArgParser::kArgumentRequired, kOptionDeviceType },
@@ -235,7 +235,7 @@ void StopSignalHandler(int /* signal */)
         chipDie();
     }
 
-    if (deviceType == AppDeviceType::kBridge)
+    if (deviceType == DeviceType::kAggregator)
     { // TODO: Create an Aggregator Device and move this inside RegisterNewDevice
         // Endpoint 1 clusters
         // Descriptor

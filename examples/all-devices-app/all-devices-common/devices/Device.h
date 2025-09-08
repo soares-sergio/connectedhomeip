@@ -14,7 +14,9 @@ namespace chip::app {
 /// know the device type.
 enum class DeviceType : DeviceTypeId
 {
+    kAggregator        = 0x000E,
     kBridgedNodeDevice = 0x0013,
+    kRootNode          = 0x0016,
     kContactSensor     = 0x0015,
     kOccupancySensor   = 0x0107,
     kOnOffLight        = 0x0100,
