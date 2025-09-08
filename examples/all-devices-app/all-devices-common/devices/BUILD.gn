@@ -8,6 +8,8 @@ config("includes") {
 
 source_set("devices") {
   sources = [
+    "AggregatorDevice.cpp",
+    "AggregatorDevice.h",
     "BridgedNodeDevice.cpp",
     "BridgedNodeDevice.h",
     "ContactSensorDevice.cpp",

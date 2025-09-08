@@ -236,26 +236,8 @@ void StopSignalHandler(int /* signal */)
     }
 
     if (deviceType == DeviceType::kAggregator)
-    { // TODO: Create an Aggregator Device and move this inside RegisterNewDevice
-        // Endpoint 1 clusters
-        // Descriptor
-        static std::vector<DescriptorCluster::DeviceType> deviceTypesEp1Vector{ { 0x000E, 2 } };
-        static DescriptorCluster descriptorClusterEp1(1, deviceTypesEp1Vector);
-        static ServerClusterRegistration descriptorClusterEp1Registration(descriptorClusterEp1);
-        VerifyOrDie(dataModelProvider.AddCluster(descriptorClusterEp1Registration) == CHIP_NO_ERROR);
-
-        // Identify
-        static Clusters::IdentifyCluster identifyClusterEp1(1);
-        static ServerClusterRegistration identifyClusterEp1Registration(identifyClusterEp1);
-        VerifyOrDie(dataModelProvider.AddCluster(identifyClusterEp1Registration) == CHIP_NO_ERROR);
-
-        // Endpoint 1 Registration
-        err = dataModelProvider.AddEndpoint(endpointRegistration1);
-        if (err != CHIP_NO_ERROR)
-        {
-            ChipLogError(AppServer, "Cannot register Endpoint 1: %" CHIP_ERROR_FORMAT, err.Format());
-            chipDie();
-        }
+    {
+        VerifyOrDie(RegisterNewDevice(deviceType, "aggregator", kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
     }
     else
     {

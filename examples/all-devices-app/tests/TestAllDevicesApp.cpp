@@ -126,3 +126,95 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OccupancySensor)
         provider, kTestEndpointId,
         { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OccupancySensing::Id });
 }
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffLight)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    chip::app::DeviceManager deviceManager(kTestEndpointId, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kOnOffLight, "onofflight-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 2u);
+    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(0x0100));
+    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 3);
+
+    // Check server clusters
+    VerifyServerClusters(
+        provider, kTestEndpointId,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OnOff::Id, chip::app::Clusters::Groups::Id });
+}
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffPlug)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    chip::app::DeviceManager deviceManager(kTestEndpointId, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kOnOffPlug, "onoffplug-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 2u);
+    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(0x010A));
+    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 4);
+
+    // Check server clusters
+    VerifyServerClusters(
+        provider, kTestEndpointId,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OnOff::Id, chip::app::Clusters::Groups::Id });
+}
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_BridgedNodeDevice)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    chip::app::DeviceManager deviceManager(kTestEndpointId, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kBridgedNodeDevice, "bridgednode-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 2u);
+    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kBridgedNodeDevice));
+    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 3);
+
+    // Check server clusters
+    VerifyServerClusters(
+        provider, kTestEndpointId,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::BridgedDeviceBasicInformation::Id });
+}
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_Aggregator)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    chip::app::DeviceManager deviceManager(kTestEndpointId, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kAggregator, "aggregator-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 2u);
+    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kAggregator));
+    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 2);
+
+    // Check server clusters
+    VerifyServerClusters(
+        provider, kTestEndpointId,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id });
+}
