@@ -24,24 +24,39 @@ class IsDeviceIdendifyingImpl : public IsDeviceIdentifying
 public:
     bool IsIdentifying() const override { return false; }
 };
+
+constexpr uint16_t kOnOffLightDeviceTypeRevision = 3;
+constexpr uint16_t kOnOffPlugDeviceTypeRevision  = 4;
+
 } // namespace
 
 namespace chip::app {
 
 DeviceType OnOffDevice::GetDeviceType() const
 {
-    switch(mOnOffDeviceType) {
-        case 0x0100:
-            return DeviceType::kOnOffLight;
-        default:
-            return DeviceType::kOnOffPlug;
-    }
+    return mDeviceType;
 }
 
 CHIP_ERROR OnOffDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = mOnOffDeviceType,
-                                                       .revision   = mOnOffDeviceRevision };
+    DeviceTypeId deviceTypeId;
+    uint16_t revision;
+
+    switch (mDeviceType)
+    {
+    case DeviceType::kOnOffLight:
+        deviceTypeId = static_cast<DeviceTypeId>(DeviceType::kOnOffLight);
+        revision     = kOnOffLightDeviceTypeRevision;
+        break;
+    case DeviceType::kOnOffPlug:
+        deviceTypeId = static_cast<DeviceTypeId>(DeviceType::kOnOffPlug);
+        revision     = kOnOffPlugDeviceTypeRevision;
+        break;
+    default:
+        return CHIP_ERROR_INVALID_ARGUMENT;
+    }
+
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = deviceTypeId, .revision = revision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mIdentifyCluster.Create(endpoint);

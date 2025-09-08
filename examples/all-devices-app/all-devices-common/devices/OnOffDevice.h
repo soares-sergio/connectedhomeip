@@ -27,7 +27,7 @@ namespace app {
 class OnOffDevice : public Device
 {
 public:
-    OnOffDevice(std::string id, DeviceTypeId onOffDeviceType, uint16_t onOffDeviceRevision) : Device(std::move(id)), mOnOffDeviceType(onOffDeviceType), mOnOffDeviceRevision(onOffDeviceRevision) {}
+    OnOffDevice(std::string id, DeviceType deviceType) : Device(std::move(id)), mDeviceType(deviceType) {}
     ~OnOffDevice() override = default;
 
     DeviceType GetDeviceType() const override;
@@ -40,8 +40,7 @@ public:
     Clusters::GroupsCluster & GroupsCluster() { return mGroupsCluster.Cluster(); }
 
 private:
-    DeviceTypeId mOnOffDeviceType;
-    uint16_t mOnOffDeviceRevision;
+    DeviceType mDeviceType;
 
     LazyRegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
     LazyRegisteredServerCluster<Clusters::OnOffCluster> mOnOffCluster;
