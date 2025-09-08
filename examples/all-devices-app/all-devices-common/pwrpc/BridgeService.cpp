@@ -100,11 +100,11 @@ pw::Status Bridge::ListDevices(const pw_protobuf_Empty & request, all_devices_rp
         chip::Platform::CopyString(response.devices[response.devices_count].unique_id, device->GetUniqueId().c_str());
         switch (device->GetDeviceType())
         {
-        case chip::app::BridgedDeviceType::kContactSensor:
+        case chip::app::DeviceType::kContactSensor:
             response.devices[response.devices_count].device_type =
                 all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_CONTACT_SENSOR;
             break;
-        case chip::app::BridgedDeviceType::kOccupancySensor:
+        case chip::app::DeviceType::kOccupancySensor:
             response.devices[response.devices_count].device_type =
                 all_devices_rpc_DeviceType::all_devices_rpc_DeviceType_OCCUPANCY_SENSOR;
             break;
@@ -129,7 +129,7 @@ pw::Status Bridge::UpdateDevice(const all_devices_rpc_UpdateDeviceRequest & requ
 
     if (request.has_occupied)
     {
-        VerifyOrReturnError(device->GetDeviceType() == chip::app::BridgedDeviceType::kOccupancySensor,
+        VerifyOrReturnError(device->GetDeviceType() == chip::app::DeviceType::kOccupancySensor,
                             pw::Status::InvalidArgument());
 
         chip::app::OccupancySensorDevice * occ = static_cast<chip::app::OccupancySensorDevice *>(device);
@@ -137,7 +137,7 @@ pw::Status Bridge::UpdateDevice(const all_devices_rpc_UpdateDeviceRequest & requ
     }
     else if (request.has_contact)
     {
-        VerifyOrReturnError(device->GetDeviceType() == chip::app::BridgedDeviceType::kContactSensor, pw::Status::InvalidArgument());
+        VerifyOrReturnError(device->GetDeviceType() == chip::app::DeviceType::kContactSensor, pw::Status::InvalidArgument());
 
         chip::app::ContactSensorDevice * con = static_cast<chip::app::ContactSensorDevice *>(device);
         con->Cluster().SetStateValue(request.contact);

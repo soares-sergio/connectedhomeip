@@ -28,13 +28,13 @@ public:
 
 namespace chip::app {
 
-BridgedDeviceType OnOffDevice::GetDeviceType() const
+DeviceType OnOffDevice::GetDeviceType() const
 {
     switch(mOnOffDeviceType) {
         case 0x0100:
-            return BridgedDeviceType::kOnOffLight;
+            return DeviceType::kOnOffLight;
         default:
-            return BridgedDeviceType::kOnOffPlug;
+            return DeviceType::kOnOffPlug;
     }
 }
 

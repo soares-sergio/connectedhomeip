@@ -5,7 +5,6 @@ using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-constexpr DeviceTypeId kBridgedNodeDeviceType     = 0x0013;
 constexpr uint16_t kBridgedNodeDeviceTypeRevision = 3;
 
 CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
@@ -25,7 +24,7 @@ CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataM
     mEndpointRegistration.endpointEntry = DataModel::EndpointEntry{
         .id                 = endpoint, //
         .parentId           = parentId, //
-        .compositionPattern = GetDeviceType() == BridgedDeviceType::kBridgedNodeDevice
+        .compositionPattern = GetDeviceType() == DeviceType::kBridgedNodeDevice
             ? DataModel::EndpointCompositionPattern::kTree
             : DataModel::EndpointCompositionPattern::kFullFamily,
     };
@@ -46,7 +45,7 @@ CHIP_ERROR Device::DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry>
     ReturnErrorOnFailure(out.EnsureAppendCapacity(2));
 
     ReturnErrorOnFailure(out.Append(DataModel::DeviceTypeEntry{
-        .deviceTypeId       = kBridgedNodeDeviceType,
+        .deviceTypeId       = static_cast<DeviceTypeId>(DeviceType::kBridgedNodeDevice),
         .deviceTypeRevision = kBridgedNodeDeviceTypeRevision,
     }));
 

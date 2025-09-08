@@ -30,7 +30,7 @@ public:
     OnOffDevice(std::string id, DeviceTypeId onOffDeviceType, uint16_t onOffDeviceRevision) : Device(std::move(id)), mOnOffDeviceType(onOffDeviceType), mOnOffDeviceRevision(onOffDeviceRevision) {}
     ~OnOffDevice() override = default;
 
-    BridgedDeviceType GetDeviceType() const override;
+    DeviceType GetDeviceType() const override;
 
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                         EndpointId parentId = kInvalidEndpointId) override;

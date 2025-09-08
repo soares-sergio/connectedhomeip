@@ -20,17 +20,16 @@ using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-constexpr DeviceTypeId kOccupancySensorDeviceType         = 0x0107;
 constexpr DeviceTypeId kOccupancySensorDeviceTypeRevision = 4;
 
-BridgedDeviceType OccupancySensorDevice::GetDeviceType() const
+DeviceType OccupancySensorDevice::GetDeviceType() const
 {
-    return BridgedDeviceType::kOccupancySensor;
+    return DeviceType::kOccupancySensor;
 }
 
 CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = kOccupancySensorDeviceType,
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kOccupancySensor),
                                                        .revision   = kOccupancySensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 

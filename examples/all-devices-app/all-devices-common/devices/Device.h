@@ -1,5 +1,6 @@
 #pragma once
 
+#include <app/util/basic-types.h>
 #include <cluster-impl/bridged-device-basic-information-cluster.h>
 #include <cluster-impl/descriptor-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
@@ -11,13 +12,13 @@ namespace chip::app {
 
 /// A list of supported devices, since some of our methods want to
 /// know the device type.
-enum class BridgedDeviceType
+enum class DeviceType : DeviceTypeId
 {
-    kBridgedNodeDevice,
-    kContactSensor,
-    kOccupancySensor,
-    kOnOffLight,
-    kOnOffPlug,
+    kBridgedNodeDevice = 0x0013,
+    kContactSensor     = 0x0015,
+    kOccupancySensor   = 0x0107,
+    kOnOffLight        = 0x0100,
+    kOnOffPlug         = 0x010A,
 };
 
 /// A device is a entity that is uniquely identified (unique id string)
@@ -34,7 +35,7 @@ public:
     const std::string & GetUniqueId() const { return mUniqueId; }
     EndpointId GetEndpointId() const { return mEndpointId; }
 
-    virtual BridgedDeviceType GetDeviceType() const = 0;
+    virtual DeviceType GetDeviceType() const = 0;
 
     /// Register relevant clusters on the given endpoint
     virtual CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,

@@ -20,17 +20,16 @@ using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-constexpr DeviceTypeId kContactSensorDeviceType         = 0x0015;
 constexpr DeviceTypeId kContactSensorDeviceTypeRevision = 2;
 
-BridgedDeviceType ContactSensorDevice::GetDeviceType() const
+DeviceType ContactSensorDevice::GetDeviceType() const
 {
-    return BridgedDeviceType::kContactSensor;
+    return DeviceType::kContactSensor;
 }
 
 CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = kContactSensorDeviceType,
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kContactSensor),
                                                        .revision   = kContactSensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 

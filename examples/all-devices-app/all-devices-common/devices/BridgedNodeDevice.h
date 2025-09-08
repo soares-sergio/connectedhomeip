@@ -29,7 +29,7 @@ public:
     BridgedNodeDevice(std::string id) : Device(std::move(id)) {}
     ~BridgedNodeDevice() override = default;
 
-    BridgedDeviceType GetDeviceType() const override;
+    DeviceType GetDeviceType() const override;
 
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                         EndpointId parentId = kInvalidEndpointId) override;
