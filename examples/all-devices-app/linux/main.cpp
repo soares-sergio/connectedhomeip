@@ -75,20 +75,10 @@ DataModel::DeviceTypeEntry deviceTypesEp0[] = {
     { 0x0016, 3 }, // ma_rootdevice, version 3
 };
 
-DataModel::DeviceTypeEntry deviceTypesEp1[] = {
-    { 0x000E, 2 }, // aggregator
-};
-
 SpanEndpoint endpoint0 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp0)).Build();
-SpanEndpoint endpoint1 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp1)).Build();
 
 EndpointInterfaceRegistration endpointRegistration0(endpoint0,
                                                     { .id                 = 0,
-                                                      .parentId           = kInvalidEndpointId,
-                                                      .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
-
-EndpointInterfaceRegistration endpointRegistration1(endpoint1,
-                                                    { .id                 = 1,
                                                       .parentId           = kInvalidEndpointId,
                                                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
 
@@ -116,7 +106,8 @@ std::map<std::string, DeviceType> kValidApps = { { kBridgeApp, DeviceType::kAggr
                                                     { kLightApp, DeviceType::kOnOffLight },
                                                     { kPlugApp, DeviceType::kOnOffPlug } };
 
-DeviceType deviceType = DeviceType::kAggregator; // Using a bridge as default
+DeviceType deviceType   = DeviceType::kAggregator; // Using a bridge as default
+const char * deviceName = kBridgeApp;
 
 chip::ArgParser::OptionDef sAllDevicesAppOptionDefs[] = {
     { "device", chip::ArgParser::kArgumentRequired, kOptionDeviceType },
@@ -134,6 +125,7 @@ bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int i
         }
         ChipLogProgress(AppServer, "Using the device type of %s", value);
         deviceType = kValidApps[value];
+        deviceName = value;
         return true;
     default:
         ChipLogError(Support, "%s: INTERNAL ERROR: Unhandled option: %s\n", program, name);
@@ -167,7 +159,7 @@ void StopSignalHandler(int /* signal */)
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
-    gDeviceManager = std::make_unique<DeviceManager>(10 /* start endpoint id */, dataModelProvider);
+    gDeviceManager = std::make_unique<DeviceManager>(1 /* start endpoint id */, dataModelProvider);
 
     // register real code driven clusters
     static GeneralCommissioningCluster clusterGeneralCommissioning({}, {});
@@ -235,14 +227,7 @@ void StopSignalHandler(int /* signal */)
         chipDie();
     }
 
-    if (deviceType == DeviceType::kAggregator)
-    {
-        VerifyOrDie(RegisterNewDevice(deviceType, "aggregator", kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
-    }
-    else
-    {
-        VerifyOrDie(RegisterNewDevice(deviceType, "sensor", kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
-    }
+    VerifyOrDie(RegisterNewDevice(deviceType, deviceName, kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
 
     rpc::Start(33000, *gDeviceManager);
 
