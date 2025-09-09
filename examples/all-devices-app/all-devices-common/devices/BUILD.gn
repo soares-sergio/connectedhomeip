@@ -26,6 +26,7 @@ source_set("devices") {
 
   public_deps = [
     "${chip_root}/examples/all-devices-app/all-devices-common/cluster-impl",
+    "${chip_root}/src/app/clusters/descriptor",
     "${chip_root}/src/data-model-providers/codedriven",
     "${chip_root}/src/lib/core:error",
     "${chip_root}/src/lib/support",

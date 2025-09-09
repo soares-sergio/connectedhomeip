@@ -27,6 +27,7 @@
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
 #include <app/clusters/wifi-network-diagnostics-server/wifi-network-diagnostics-cluster.h>
+#include <app/clusters/descriptor/descriptor-cluster.h>
 #include <app/persistence/DefaultAttributePersistenceProvider.h>
 #include <app/server-cluster/ServerClusterInterfaceRegistry.h>
 #include <app/server/Dnssd.h>
@@ -47,7 +48,6 @@
 // Code driven clusters made for this app, these are clusters that
 // need some additional work before landing upstream
 #include <cluster-impl/access-control-cluster.h>
-#include <cluster-impl/descriptor-cluster.h>
 #include <cluster-impl/identify-cluster.h>
 #include <cluster-impl/operational-credentials-cluster.h>
 

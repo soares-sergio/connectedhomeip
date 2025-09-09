@@ -63,4 +63,10 @@ CHIP_ERROR Device::ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const
     return CHIP_NO_ERROR;
 }
 
+#if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+MutableCharSpan Device::EndpointUniqueId() const {
+    return {};
+}
+#endif
+
 } // namespace chip::app

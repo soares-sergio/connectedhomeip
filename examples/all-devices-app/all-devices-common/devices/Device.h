@@ -2,7 +2,7 @@
 
 #include <app/util/basic-types.h>
 #include <cluster-impl/bridged-device-basic-information-cluster.h>
-#include <cluster-impl/descriptor-cluster.h>
+#include <app/clusters/descriptor/descriptor-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
 
@@ -52,6 +52,10 @@ public:
     CHIP_ERROR SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) const override;
     CHIP_ERROR DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) const override;
     CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const override;
+
+#if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+    MutableCharSpan EndpointUniqueId() const override;
+#endif
 
 protected:
     /// Internal registration functions for common device clusters

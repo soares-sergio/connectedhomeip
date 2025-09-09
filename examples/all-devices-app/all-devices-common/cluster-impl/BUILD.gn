@@ -6,28 +6,6 @@ config("includes") {
   include_dirs = [ ".." ]
 }
 
-source_set("descriptor") {
-  sources = [
-    "descriptor-cluster.cpp",
-    "descriptor-cluster.h",
-  ]
-
-  public_deps = [
-    "${chip_root}/src/app:attribute-access",
-    "${chip_root}/src/app:interaction-model",
-    "${chip_root}/src/app/data-model-provider:metadata",
-    "${chip_root}/src/app/server-cluster",
-    "${chip_root}/src/lib/core:error",
-    "${chip_root}/src/lib/support",
-    "${chip_root}/zzz_generated/app-common/clusters/Descriptor",
-  ]
-
-  public_configs = [
-    ":includes",
-    "${chip_root}/src:includes",
-  ]
-}
-
 source_set("identify") {
   sources = [
     "identify-cluster.cpp",
@@ -213,7 +191,6 @@ group("cluster-impl") {
     ":access-control-cluster",
     ":boolean-state-cluster",
     ":bridged-device-basic-information",
-    ":descriptor",
     ":groups-cluster",
     ":identify",
     ":occupancy-sensor",

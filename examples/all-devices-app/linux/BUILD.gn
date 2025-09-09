@@ -52,6 +52,7 @@ executable("all-devices-app") {
     "${chip_root}/src/app/clusters/network-commissioning",
     "${chip_root}/src/app/clusters/software-diagnostics-server",
     "${chip_root}/src/app/clusters/wifi-network-diagnostics-server",
+    "${chip_root}/src/app/clusters/descriptor",
     "${chip_root}/src/app/persistence",
     "${chip_root}/src/app/persistence:default",
     "${chip_root}/src/data-model-providers/codedriven",
