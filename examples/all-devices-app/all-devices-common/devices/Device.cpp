@@ -14,11 +14,7 @@ CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataM
     mDeviceType = deviceType;
     mEndpointId = endpoint;
 
-    /// std::initializer_list does not work well with std::forward, so use the
-    /// vector constructor instead
-    std::vector<DescriptorCluster::DeviceType> deviceTypes{ deviceType };
-
-    mDescriptorCluster.Create(endpoint, deviceTypes);
+    mDescriptorCluster.Create(endpoint, BitFlags<Descriptor::Feature>(0));
     ReturnErrorOnFailure(provider.AddCluster(mDescriptorCluster.Registration()));
 
     mEndpointRegistration.endpointEntry = DataModel::EndpointEntry{
@@ -42,12 +38,7 @@ CHIP_ERROR Device::UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & p
 
 CHIP_ERROR Device::DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) const
 {
-    ReturnErrorOnFailure(out.EnsureAppendCapacity(2));
-
-    ReturnErrorOnFailure(out.Append(DataModel::DeviceTypeEntry{
-        .deviceTypeId       = static_cast<DeviceTypeId>(DeviceType::kBridgedNodeDevice),
-        .deviceTypeRevision = kBridgedNodeDeviceTypeRevision,
-    }));
+    ReturnErrorOnFailure(out.EnsureAppendCapacity(1));
 
     if (mDescriptorCluster.IsConstructed())
     {

@@ -19,12 +19,8 @@ public:
     /// Creates a descriptor cluster for the given `endpointId`
     ///
     /// Associates the given device types to the descriptor (should be at least 1)
-    DescriptorCluster(EndpointId endpointId, std::initializer_list<DeviceType> deviceTypes) :
-        DefaultServerCluster({ endpointId, Descriptor::Id }), mDeviceTypes(deviceTypes)
-    {}
-
-    DescriptorCluster(EndpointId endpointId, std::vector<DeviceType> deviceTypes) :
-        DefaultServerCluster({ endpointId, Descriptor::Id }), mDeviceTypes(std::move(deviceTypes))
+    DescriptorCluster(EndpointId endpointId, BitFlags<Descriptor::Feature> featureFlags) :
+        DefaultServerCluster({ endpointId, Descriptor::Id }), mFeatureFlags(featureFlags)
     {}
 
     CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
@@ -32,9 +28,7 @@ public:
                                                 AttributeValueEncoder & encoder) override;
 
 private:
-    // TODO: is a parts list needed instead of using the old part list with read attribute code?
-    std::vector<DeviceType> mDeviceTypes;
-    CHIP_ERROR ReadPartsAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
+    BitFlags<Descriptor::Feature> mFeatureFlags;
 };
 
 } // namespace chip::app::Clusters

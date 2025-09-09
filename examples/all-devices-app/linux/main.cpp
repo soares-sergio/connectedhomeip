@@ -201,10 +201,7 @@ void StopSignalHandler(int /* signal */)
     static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
     VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
 
-    static std::vector<DescriptorCluster::DeviceType> tmp{
-        { 0x0016, 3 },
-    };
-    static DescriptorCluster clusterDescriptor(0, tmp);
+    static DescriptorCluster clusterDescriptor(0, BitFlags<Descriptor::Feature>(0));
     static ServerClusterRegistration descriptor(clusterDescriptor);
     VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
 
