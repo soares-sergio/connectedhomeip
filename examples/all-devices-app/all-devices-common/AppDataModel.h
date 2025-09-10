@@ -23,8 +23,9 @@
 #include <devices/Device.h>
 #include <devices/Manager.h>
 #include <memory>
+#include <platform/NetworkCommissioning.h>
 
 using chip::app::DeviceType;
 
 CHIP_ERROR RegisterNewDevice(DeviceType deviceType, std::string unique_id, chip::EndpointId parentEndpointId,
-                             chip::app::DeviceManager & deviceManager);
+                             chip::app::DeviceManager & deviceManager, chip::DeviceLayer::NetworkCommissioning::WiFiDriver * wifiDriver = nullptr);

@@ -58,6 +58,7 @@
 #endif
 
 #include <AppMain.h>
+#include <devices/RootNodeDevice.h>
 #include <map>
 #include <string>
 
@@ -83,7 +84,6 @@ EndpointInterfaceRegistration endpointRegistration0(endpoint0,
                                                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
 
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
-RegisteredServerCluster<NetworkCommissioningCluster> sWifiNetworkCommissioningCluster(kRootEndpointId, &sWiFiDriver);
 
 DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
@@ -159,71 +159,9 @@ void StopSignalHandler(int /* signal */)
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
-    gDeviceManager = std::make_unique<DeviceManager>(1 /* start endpoint id */, dataModelProvider);
+    gDeviceManager = std::make_unique<DeviceManager>(0 /* start endpoint id */, dataModelProvider);
 
-    // register real code driven clusters
-    static GeneralCommissioningCluster clusterGeneralCommissioning({}, {});
-    static ServerClusterRegistration serverClusterGeneralCommissioning(clusterGeneralCommissioning);
-    VerifyOrDie(dataModelProvider.AddCluster(serverClusterGeneralCommissioning) == CHIP_NO_ERROR);
-
-    static AdministratorCommissioningWithBasicCommissioningWindowCluster clusterAdminCommissioning(0, {});
-    static ServerClusterRegistration serverClusterAdminCommissioning(clusterAdminCommissioning);
-    VerifyOrDie(dataModelProvider.AddCluster(serverClusterAdminCommissioning) == CHIP_NO_ERROR);
-
-    static ServerClusterRegistration basicInfo(BasicInformationCluster::Instance());
-    BasicInformationCluster()
-        .Instance()
-        .OptionalAttributes()
-        .Set<BasicInformation::Attributes::ManufacturingDate::Id>()
-        .Set<BasicInformation::Attributes::PartNumber::Id>()
-        .Set<BasicInformation::Attributes::ProductURL::Id>()
-        .Set<BasicInformation::Attributes::ProductLabel::Id>()
-        .Set<BasicInformation::Attributes::SerialNumber::Id>()
-        .Set<BasicInformation::Attributes::LocalConfigDisabled::Id>()
-        .Set<BasicInformation::Attributes::Reachable::Id>()
-        .Set<BasicInformation::Attributes::ProductAppearance::Id>();
-
-    VerifyOrDie(dataModelProvider.AddCluster(basicInfo) == CHIP_NO_ERROR);
-
-    static GeneralDiagnosticsCluster clusterGeneralDiagnostics({});
-    static ServerClusterRegistration generalDiagnostics(clusterGeneralDiagnostics);
-    VerifyOrDie(dataModelProvider.AddCluster(generalDiagnostics) == CHIP_NO_ERROR);
-
-    static GroupKeyManagementCluster clusterGroupKeyManagement;
-    static ServerClusterRegistration groupKeyManagement(clusterGroupKeyManagement);
-    VerifyOrDie(dataModelProvider.AddCluster(groupKeyManagement) == CHIP_NO_ERROR);
-
-    static SoftwareDiagnosticsServerCluster clusterSoftwareDiagnostics({});
-    static ServerClusterRegistration softwareDiagnostics(clusterSoftwareDiagnostics);
-    VerifyOrDie(dataModelProvider.AddCluster(softwareDiagnostics) == CHIP_NO_ERROR);
-
-    static WiFiDiagnosticsServerCluster clusterWifiDiagnostics(0, DeviceLayer::GetDiagnosticDataProvider(), {}, {});
-    static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
-    VerifyOrDie(dataModelProvider.AddCluster(wifiDiagnostics) == CHIP_NO_ERROR);
-
-    static DescriptorCluster clusterDescriptor(0, BitFlags<Descriptor::Feature>(0));
-    static ServerClusterRegistration descriptor(clusterDescriptor);
-    VerifyOrDie(dataModelProvider.AddCluster(descriptor) == CHIP_NO_ERROR);
-
-    static AccessControlCluster clusterAccessControl({});
-    static ServerClusterRegistration accessControl(clusterAccessControl);
-    VerifyOrDie(dataModelProvider.AddCluster(accessControl) == CHIP_NO_ERROR);
-
-    static OperationalCredentialsCluster clusterOperationalCredenitals(0);
-    static ServerClusterRegistration operationalCredentials(clusterOperationalCredenitals);
-    VerifyOrDie(dataModelProvider.AddCluster(operationalCredentials) == CHIP_NO_ERROR);
-
-    VerifyOrDie(dataModelProvider.AddCluster(sWifiNetworkCommissioningCluster.Registration()) == CHIP_NO_ERROR);
-
-    // Add Endpoint 0 Registration
-    // TODO: Create a Root Node Device type and move this inside RegisterNewDevice
-    CHIP_ERROR err = dataModelProvider.AddEndpoint(endpointRegistration0);
-    if (err != CHIP_NO_ERROR)
-    {
-        ChipLogError(AppServer, "Cannot register Endpoint 0: %" CHIP_ERROR_FORMAT, err.Format());
-        chipDie();
-    }
-
+    VerifyOrDie(RegisterNewDevice(DeviceType::kRootNode, "root-node", kInvalidEndpointId, *gDeviceManager, &sWiFiDriver) == CHIP_NO_ERROR);
     VerifyOrDie(RegisterNewDevice(deviceType, deviceName, kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
 
     rpc::Start(33000, *gDeviceManager);

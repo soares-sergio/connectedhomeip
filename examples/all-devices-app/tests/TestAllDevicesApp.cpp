@@ -81,6 +81,17 @@ void VerifyServerClusters(CodeDrivenDataModelProvider & provider, EndpointId end
 }
 } // namespace
 
+#include <platform/Linux/NetworkCommissioningDriver.h>
+
+namespace {
+chip::DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sLinuxWiFiDriver;
+}
+
+chip::DeviceLayer::NetworkCommissioning::WiFiDriver & GetWifiDriverInstance()
+{
+    return sLinuxWiFiDriver;
+}
+
 TEST_F(TestAllDevicesApp, RegisterNewDevice_ContactSensor)
 {
     chip::KvsPersistentStorageDelegate storage;
@@ -94,9 +105,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_ContactSensor)
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
     ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
     auto deviceTypes = deviceTypesBuilder.TakeBuffer();
-    ASSERT_EQ(deviceTypes.size(), 2u);
-    ASSERT_EQ(deviceTypes[1].deviceTypeId, kContactSensorDeviceType);
-    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, kContactSensorDeviceTypeRevision);
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, kContactSensorDeviceType);
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, kContactSensorDeviceTypeRevision);
 
     // Check server clusters
     VerifyServerClusters(
@@ -117,9 +128,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OccupancySensor)
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
     ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
     auto deviceTypes = deviceTypesBuilder.TakeBuffer();
-    ASSERT_EQ(deviceTypes.size(), 2u);
-    ASSERT_EQ(deviceTypes[1].deviceTypeId, kOccupancySensorDeviceType);
-    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, kOccupancySensorDeviceTypeRevision);
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, kOccupancySensorDeviceType);
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, kOccupancySensorDeviceTypeRevision);
 
     // Check server clusters
     VerifyServerClusters(
@@ -140,9 +151,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffLight)
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
     ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
     auto deviceTypes = deviceTypesBuilder.TakeBuffer();
-    ASSERT_EQ(deviceTypes.size(), 2u);
-    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(0x0100));
-    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 3);
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kOnOffLight));
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, 3);
 
     // Check server clusters
     VerifyServerClusters(provider, kTestEndpointId,
@@ -163,9 +174,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffPlug)
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
     ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
     auto deviceTypes = deviceTypesBuilder.TakeBuffer();
-    ASSERT_EQ(deviceTypes.size(), 2u);
-    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(0x010A));
-    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 4);
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kOnOffPlug));
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, 4);
 
     // Check server clusters
     VerifyServerClusters(provider, kTestEndpointId,
@@ -186,9 +197,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_BridgedNodeDevice)
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
     ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
     auto deviceTypes = deviceTypesBuilder.TakeBuffer();
-    ASSERT_EQ(deviceTypes.size(), 2u);
-    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kBridgedNodeDevice));
-    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 3);
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kBridgedNodeDevice));
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, 3);
 
     // Check server clusters
     VerifyServerClusters(provider, kTestEndpointId,
@@ -208,10 +219,33 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_Aggregator)
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
     ASSERT_EQ(provider.DeviceTypes(kTestEndpointId, deviceTypesBuilder), CHIP_NO_ERROR);
     auto deviceTypes = deviceTypesBuilder.TakeBuffer();
-    ASSERT_EQ(deviceTypes.size(), 2u);
-    ASSERT_EQ(deviceTypes[1].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kAggregator));
-    ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 2);
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kAggregator));
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, 2);
 
     // Check server clusters
     VerifyServerClusters(provider, kTestEndpointId, { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id });
+}
+
+TEST_F(TestAllDevicesApp, RegisterNewDevice_RootNode)
+{
+    chip::KvsPersistentStorageDelegate storage;
+    chip::app::DefaultAttributePersistenceProvider attributeProvider;
+    CodeDrivenDataModelProvider provider(storage, attributeProvider);
+    chip::app::DeviceManager deviceManager(0, provider);
+    CHIP_ERROR err = RegisterNewDevice(DeviceType::kRootNode, "rootnode-1", chip::kInvalidEndpointId, deviceManager);
+    ASSERT_EQ(err, CHIP_NO_ERROR);
+
+    // Check device types
+    ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesBuilder;
+    ASSERT_EQ(provider.DeviceTypes(0, deviceTypesBuilder), CHIP_NO_ERROR);
+    auto deviceTypes = deviceTypesBuilder.TakeBuffer();
+    ASSERT_EQ(deviceTypes.size(), 1u);
+    ASSERT_EQ(deviceTypes[0].deviceTypeId, static_cast<chip::DeviceTypeId>(DeviceType::kRootNode));
+    ASSERT_EQ(deviceTypes[0].deviceTypeRevision, 3);
+
+    // Check server clusters
+    VerifyServerClusters(
+        provider, 0,
+        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::BasicInformation::Id, chip::app::Clusters::GeneralCommissioning::Id, chip::app::Clusters::AdministratorCommissioning::Id, chip::app::Clusters::GeneralDiagnostics::Id, chip::app::Clusters::GroupKeyManagement::Id, chip::app::Clusters::SoftwareDiagnostics::Id, chip::app::Clusters::WiFiNetworkDiagnostics::Id, chip::app::Clusters::AccessControl::Id, chip::app::Clusters::OperationalCredentials::Id, chip::app::Clusters::NetworkCommissioning::Id });
 }
