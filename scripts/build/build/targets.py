@@ -137,6 +137,7 @@ def BuildHostTarget():
         TargetPart('address-resolve-tool', app=HostApp.ADDRESS_RESOLVE),
         TargetPart('contact-sensor-code-driven', app=HostApp.CONTACT_SENSOR_CODE_DRIVEN),
         TargetPart('contact-sensor', app=HostApp.CONTACT_SENSOR),
+        TargetPart('contact-sensor-codedriven', app=HostApp.CONTACT_SENSOR_CODEDRIVEN),
         TargetPart('all-devices-app', app=HostApp.ALL_DEVICES_APP),
         TargetPart('dishwasher', app=HostApp.DISHWASHER),
         TargetPart('microwave-oven', app=HostApp.MICROWAVE_OVEN),

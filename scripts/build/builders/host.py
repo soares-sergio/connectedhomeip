@@ -77,6 +77,7 @@ class HostApp(Enum):
     JAVA_MATTER_CONTROLLER = auto()
     KOTLIN_MATTER_CONTROLLER = auto()
     CONTACT_SENSOR = auto()
+    CONTACT_SENSOR_CODEDRIVEN = auto()
     ALL_DEVICES_APP = auto()
     CONTACT_SENSOR_CODE_DRIVEN = auto()
     DISHWASHER = auto()
@@ -148,6 +149,8 @@ class HostApp(Enum):
             return 'kotlin-matter-controller'
         elif self == HostApp.CONTACT_SENSOR:
             return 'contact-sensor-app/linux'
+        elif self == HostApp.CONTACT_SENSOR_CODEDRIVEN:
+            return 'contact-sensor-codedriven/linux'
         elif self == HostApp.ALL_DEVICES_APP:
             return 'all-devices-app/linux'
         elif self == HostApp.CONTACT_SENSOR_CODE_DRIVEN:
@@ -277,6 +280,9 @@ class HostApp(Enum):
         elif self == HostApp.CONTACT_SENSOR:
             yield 'contact-sensor-app'
             yield 'contact-sensor-app.map'
+        elif self == HostApp.CONTACT_SENSOR_CODEDRIVEN:
+            yield 'contact-sensor-codedriven'
+            yield 'contact-sensor-codedriven.map'
         elif self == HostApp.ALL_DEVICES_APP:
             yield 'all-devices-app'
             yield 'all-devices-app.map'
