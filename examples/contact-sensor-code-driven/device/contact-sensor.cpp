@@ -26,17 +26,15 @@ ContactSensor::ContactSensor(EndpointId parentEndpointId, EndpointId endpointId)
                       .id                 = endpointId,
                       .parentId           = parentEndpointId,
                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily,
-                  }),
-    mBooleanStateCluster(endpointId),                       //
-    mBooleanStateClusterRegistration(mBooleanStateCluster), //
-    mIdentifyCluster(endpointId),                           //
-    mIdentifyClusterRegistration(mIdentifyCluster)
+                  }),                 //
+    mBooleanStateCluster(endpointId), //
+    mIdentifyCluster(endpointId)
 {}
 
 CHIP_ERROR ContactSensor::Register(CodeDrivenDataModelProvider & dataModelProvider)
 {
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(mBooleanStateClusterRegistration));
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(mIdentifyClusterRegistration));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mBooleanStateCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mIdentifyCluster.Registration()));
 
     return dataModelProvider.AddEndpoint(mRegistration);
 }

@@ -40,11 +40,8 @@ public:
 private:
     EndpointInterfaceRegistration mRegistration;
 
-    Clusters::BooleanStateCluster mBooleanStateCluster;
-    ServerClusterRegistration mBooleanStateClusterRegistration;
-
-    Clusters::IdentifyCluster mIdentifyCluster;
-    ServerClusterRegistration mIdentifyClusterRegistration;
+    RegisteredServerCluster<Clusters::BooleanStateCluster> mBooleanStateCluster;
+    RegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
 };
 
 } // namespace chip::app
