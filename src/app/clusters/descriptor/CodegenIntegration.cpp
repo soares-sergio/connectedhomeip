@@ -42,9 +42,14 @@ public:
         return gServer.Registration();
     }
 
-    ServerClusterInterface & FindRegistration(unsigned emberEndpointIndex) override { return gServer.Cluster(); }
+    ServerClusterInterface * FindRegistration(unsigned emberEndpointIndex) override
+    {
+        VerifyOrReturnValue(gServer.IsConstructed(), nullptr);
+        return &gServer.Cluster();
+    }
     void ReleaseRegistration(unsigned emberEndpointIndex) override { gServer.Destroy(); }
-}
+};
+
 } // namespace
 
 void emberAfDescriptorClusterServerInitCallback(EndpointId endpointId)
@@ -53,12 +58,12 @@ void emberAfDescriptorClusterServerInitCallback(EndpointId endpointId)
 
     CodegenClusterIntegration::RegisterServer(
         {
-            .endpointId                      = endpointId,
-            .clusterId                       = Descriptor::Id,
-            .fixedClusterServerEndpointCount = kDescriptorFixedClusterCount,
-            .maxEndpointCount                = kDescriptorMaxClusterCount,
-            .fetchFeatureMap                 = true,
-            .fetchOptionalAttributes         = false,
+            .endpointId                = endpointId,
+            .clusterId                 = Descriptor::Id,
+            .fixedClusterInstanceCount = kDescriptorFixedClusterCount,
+            .maxClusterInstanceCount   = kDescriptorMaxClusterCount,
+            .fetchFeatureMap           = true,
+            .fetchOptionalAttributes   = false,
         },
         integrationDelegate);
 }
@@ -69,10 +74,10 @@ void MatterDescriptorClusterServerShutdownCallback(EndpointId endpointId)
 
     CodegenClusterIntegration::UnregisterServer(
         {
-            .endpointId                      = endpointId,
-            .clusterId                       = Descriptor::Id,
-            .fixedClusterServerEndpointCount = kDescriptorFixedClusterCount,
-            .maxEndpointCount                = kDescriptorMaxClusterCount,
+            .endpointId                = endpointId,
+            .clusterId                 = Descriptor::Id,
+            .fixedClusterInstanceCount = kDescriptorFixedClusterCount,
+            .maxClusterInstanceCount   = kDescriptorMaxClusterCount,
         },
         integrationDelegate);
 }
