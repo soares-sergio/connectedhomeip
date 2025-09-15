@@ -3,6 +3,8 @@ import("//build_overrides/chip.gni")
 
 source_set("device") {
   sources = [
+    "contact-sensor.cpp",
+    "contact-sensor.h",
     "root-node.cpp",
     "root-node.h",
   ]
@@ -11,6 +13,7 @@ source_set("device") {
     "${chip_root}/examples/contact-sensor-code-driven/cluster-impl",
     "${chip_root}/src/app/clusters/administrator-commissioning-server",
     "${chip_root}/src/app/clusters/basic-information",
+    "${chip_root}/src/app/clusters/boolean-state-server",
     "${chip_root}/src/app/clusters/descriptor",
     "${chip_root}/src/app/clusters/general-commissioning-server",
     "${chip_root}/src/app/clusters/general-diagnostics-server",

@@ -15,35 +15,21 @@
  */
 #pragma once
 
-#include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
-#include <app/clusters/basic-information/BasicInformationCluster.h>
-#include <app/clusters/descriptor/descriptor-cluster.h>
-#include <app/clusters/general-commissioning-server/general-commissioning-cluster.h>
-#include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
-#include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
-#include <app/clusters/network-commissioning/network-commissioning.h>
-#include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
-#include <app/clusters/wifi-network-diagnostics-server/wifi-network-diagnostics-cluster.h>
+#include <app/clusters/boolean-state-server/boolean-state-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 
 // Code driven clusters made for this app, these are clusters that
 // need some additional work before landing upstream
-#include <cluster-impl/access-control-cluster.h>
 #include <cluster-impl/identify-cluster.h>
-#include <cluster-impl/operational-credentials-cluster.h>
 
 namespace chip::app {
 
-/// Represents a root endpoint
-class RootEndpoint : public EndpointInterface
+// Represents a contact sensor node
+class ContactSensor : public EndpointInterface
 {
 public:
-    RootEndpoint(chip::app::Clusters::NetworkCommissioningCluster & networkCommissioning);
-    ~RootEndpoint() override = default;
+    ContactSensor(EndpointId parentEndpointId, EndpointId endpointId);
 
-    /// Adds all relevant clusters on the given provider.
-    ///
-    /// and returns the necessary registration for it
     CHIP_ERROR Register(CodeDrivenDataModelProvider & dataModelProvider);
 
     // Endpoint interface
@@ -53,7 +39,12 @@ public:
 
 private:
     EndpointInterfaceRegistration mRegistration;
-    chip::app::ServerClusterRegistration mNetworkCommissioningClusterRegistration;
+
+    Clusters::BooleanStateCluster mBooleanStateCluster;
+    ServerClusterRegistration mBooleanStateClusterRegistration;
+
+    Clusters::IdentifyCluster mIdentifyCluster;
+    ServerClusterRegistration mIdentifyClusterRegistration;
 };
 
 } // namespace chip::app

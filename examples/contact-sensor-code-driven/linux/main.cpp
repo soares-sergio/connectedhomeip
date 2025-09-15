@@ -34,6 +34,7 @@
 #include <LinuxCommissionableDataProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 
+#include <device/contact-sensor.h>
 #include <device/root-node.h>
 
 #if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
@@ -57,7 +58,10 @@ AppMainLoopImplementation * gMainLoopImplementation = nullptr;
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
 NetworkCommissioningCluster sWifiNetworkCommissioningCluster(kRootEndpointId, &sWiFiDriver);
 
+constexpr EndpointId kContactSensorEndpointId = 1;
+
 RootEndpoint sRootEndpoint(sWifiNetworkCommissioningCluster);
+ContactSensor sContactSensor(kRootEndpointId, kContactSensorEndpointId);
 
 DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
@@ -84,10 +88,7 @@ chip::app::DataModel::Provider * PopulateCodeDrivenDataModelProvider(PersistentS
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
     VerifyOrDie(sRootEndpoint.Register(dataModelProvider) == CHIP_NO_ERROR);
-
-#if 0
-    VerifyOrDie(RegisterNewDevice(deviceType, deviceName, kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
-#endif
+    VerifyOrDie(sContactSensor.Register(dataModelProvider) == CHIP_NO_ERROR);
 
     return &dataModelProvider;
 }
