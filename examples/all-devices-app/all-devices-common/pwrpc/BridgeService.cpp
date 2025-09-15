@@ -129,8 +129,7 @@ pw::Status Bridge::UpdateDevice(const all_devices_rpc_UpdateDeviceRequest & requ
 
     if (request.has_occupied)
     {
-        VerifyOrReturnError(device->GetDeviceType() == chip::app::DeviceType::kOccupancySensor,
-                            pw::Status::InvalidArgument());
+        VerifyOrReturnError(device->GetDeviceType() == chip::app::DeviceType::kOccupancySensor, pw::Status::InvalidArgument());
 
         chip::app::OccupancySensorDevice * occ = static_cast<chip::app::OccupancySensorDevice *>(device);
         occ->Cluster().SetOccupied(request.occupied);

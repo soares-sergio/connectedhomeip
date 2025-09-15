@@ -64,7 +64,8 @@ CHIP_ERROR Device::ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const
 }
 
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
-MutableCharSpan Device::EndpointUniqueId() const {
+MutableCharSpan Device::EndpointUniqueId() const
+{
     return {};
 }
 #endif

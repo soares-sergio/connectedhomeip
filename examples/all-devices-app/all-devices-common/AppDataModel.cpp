@@ -23,7 +23,8 @@ CHIP_ERROR RegisterNewDevice(DeviceType deviceType, std::string unique_id, chip:
         return deviceManager.AddDevice(std::make_unique<chip::app::OnOffDevice>(unique_id, DeviceType::kOnOffLight),
                                        parentEndpointId);
     case DeviceType::kOnOffPlug:
-        return deviceManager.AddDevice(std::make_unique<chip::app::OnOffDevice>(unique_id, DeviceType::kOnOffPlug), parentEndpointId);
+        return deviceManager.AddDevice(std::make_unique<chip::app::OnOffDevice>(unique_id, DeviceType::kOnOffPlug),
+                                       parentEndpointId);
     case DeviceType::kAggregator:
         return deviceManager.AddDevice(std::make_unique<chip::app::AggregatorDevice>(unique_id), parentEndpointId);
     case DeviceType::kBridgedNodeDevice:

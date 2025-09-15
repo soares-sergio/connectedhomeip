@@ -145,9 +145,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffLight)
     ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 3);
 
     // Check server clusters
-    VerifyServerClusters(
-        provider, kTestEndpointId,
-        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OnOff::Id, chip::app::Clusters::Groups::Id });
+    VerifyServerClusters(provider, kTestEndpointId,
+                         { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OnOff::Id,
+                           chip::app::Clusters::Groups::Id });
 }
 
 TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffPlug)
@@ -168,9 +168,9 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_OnOffPlug)
     ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 4);
 
     // Check server clusters
-    VerifyServerClusters(
-        provider, kTestEndpointId,
-        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OnOff::Id, chip::app::Clusters::Groups::Id });
+    VerifyServerClusters(provider, kTestEndpointId,
+                         { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id, chip::app::Clusters::OnOff::Id,
+                           chip::app::Clusters::Groups::Id });
 }
 
 TEST_F(TestAllDevicesApp, RegisterNewDevice_BridgedNodeDevice)
@@ -191,9 +191,8 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_BridgedNodeDevice)
     ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 3);
 
     // Check server clusters
-    VerifyServerClusters(
-        provider, kTestEndpointId,
-        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::BridgedDeviceBasicInformation::Id });
+    VerifyServerClusters(provider, kTestEndpointId,
+                         { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::BridgedDeviceBasicInformation::Id });
 }
 
 TEST_F(TestAllDevicesApp, RegisterNewDevice_Aggregator)
@@ -214,7 +213,5 @@ TEST_F(TestAllDevicesApp, RegisterNewDevice_Aggregator)
     ASSERT_EQ(deviceTypes[1].deviceTypeRevision, 2);
 
     // Check server clusters
-    VerifyServerClusters(
-        provider, kTestEndpointId,
-        { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id });
+    VerifyServerClusters(provider, kTestEndpointId, { chip::app::Clusters::Descriptor::Id, chip::app::Clusters::Identify::Id });
 }

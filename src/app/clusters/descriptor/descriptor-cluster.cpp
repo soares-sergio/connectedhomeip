@@ -43,7 +43,7 @@ bool IsDescendantOf(const DataModel::EndpointEntry * __restrict__ childEndpoint,
     }
 }
 
-CHIP_ERROR ReadTagListAttribute(DataModel::Provider &provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
+CHIP_ERROR ReadTagListAttribute(DataModel::Provider & provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
     ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
     ReturnErrorOnFailure(provider.SemanticTags(endpoint, semanticTagsList));
@@ -57,7 +57,7 @@ CHIP_ERROR ReadTagListAttribute(DataModel::Provider &provider, EndpointId endpoi
     });
 }
 
-CHIP_ERROR ReadDeviceAttribute(DataModel::Provider &provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
+CHIP_ERROR ReadDeviceAttribute(DataModel::Provider & provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
     ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> deviceTypesList;
     ReturnErrorOnFailure(provider.DeviceTypes(endpoint, deviceTypesList));
@@ -79,7 +79,7 @@ CHIP_ERROR ReadDeviceAttribute(DataModel::Provider &provider, EndpointId endpoin
     return err;
 }
 
-CHIP_ERROR ReadPartsAttribute(DataModel::Provider &provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
+CHIP_ERROR ReadPartsAttribute(DataModel::Provider & provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
     ReadOnlyBufferBuilder<DataModel::EndpointEntry> endpointsList;
     ReturnErrorOnFailure(provider.Endpoints(endpointsList));
