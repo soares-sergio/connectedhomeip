@@ -1,0 +1,108 @@
+import("//build_overrides/build.gni")
+import("//build_overrides/chip.gni")
+
+config("includes") {
+  # allows includes like "cluster-impl/..."
+  include_dirs = [ ".." ]
+}
+
+source_set("identify") {
+  sources = [
+    "identify-cluster.cpp",
+    "identify-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/Identify",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
+source_set("boolean-state") {
+  sources = [
+    "boolean-state-cluster.cpp",
+    "boolean-state-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/BooleanState",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
+source_set("access-control") {
+  sources = [
+    "access-control-cluster.cpp",
+    "access-control-cluster.h",
+  ]
+
+  defines = [ "CHIP_CONFIG_USE_ACCESS_RESTRICTIONS=0" ]
+
+  #deps = [
+  #  "${chip_root}/src/app:attribute-access",
+  #]
+
+  public_deps = [
+    #"${chip_root}/src/access:access_buildconfig",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/AccessControl",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
+source_set("operational-credentials") {
+  sources = [
+    "operational-credentials-cluster.cpp",
+    "operational-credentials-cluster.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app:attribute-access",
+    "${chip_root}/src/app/data-model-provider:metadata",
+    "${chip_root}/src/app/server",
+    "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/lib/core:error",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/OperationalCredentials",
+  ]
+
+  public_configs = [
+    ":includes",
+    "${chip_root}/src:includes",
+  ]
+}
+
+group("cluster-impl") {
+  public_deps = [
+    ":access-control",
+    ":boolean-state",
+    ":identify",
+    ":operational-credentials",
+  ]
+}

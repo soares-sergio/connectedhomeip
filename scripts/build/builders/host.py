@@ -78,6 +78,7 @@ class HostApp(Enum):
     KOTLIN_MATTER_CONTROLLER = auto()
     CONTACT_SENSOR = auto()
     ALL_DEVICES_APP = auto()
+    CONTACT_SENSOR_CODE_DRIVEN = auto()
     DISHWASHER = auto()
     MICROWAVE_OVEN = auto()
     REFRIGERATOR = auto()
@@ -149,6 +150,8 @@ class HostApp(Enum):
             return 'contact-sensor-app/linux'
         elif self == HostApp.ALL_DEVICES_APP:
             return 'all-devices-app/linux'
+        elif self == HostApp.CONTACT_SENSOR_CODE_DRIVEN:
+            return 'contact-sensor-code-driven/linux'
         elif self == HostApp.DISHWASHER:
             return 'dishwasher-app/linux'
         elif self == HostApp.MICROWAVE_OVEN:
@@ -277,6 +280,9 @@ class HostApp(Enum):
         elif self == HostApp.ALL_DEVICES_APP:
             yield 'all-devices-app'
             yield 'all-devices-app.map'
+        elif self == HostApp.CONTACT_SENSOR_CODE_DRIVEN:
+            yield 'contact-sensor'
+            yield 'contact-sensor.map'
         elif self == HostApp.DISHWASHER:
             yield 'dishwasher-app'
             yield 'dishwasher-app.map'

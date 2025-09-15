@@ -135,6 +135,7 @@ def BuildHostTarget():
         TargetPart('tests', app=HostApp.TESTS),
         TargetPart('chip-cert', app=HostApp.CERT_TOOL),
         TargetPart('address-resolve-tool', app=HostApp.ADDRESS_RESOLVE),
+        TargetPart('contact-sensor-code-driven', app=HostApp.CONTACT_SENSOR_CODE_DRIVEN),
         TargetPart('contact-sensor', app=HostApp.CONTACT_SENSOR),
         TargetPart('all-devices-app', app=HostApp.ALL_DEVICES_APP),
         TargetPart('dishwasher', app=HostApp.DISHWASHER),
