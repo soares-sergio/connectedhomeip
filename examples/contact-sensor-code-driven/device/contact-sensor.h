@@ -16,6 +16,7 @@
 #pragma once
 
 #include <app/clusters/boolean-state-server/boolean-state-cluster.h>
+#include <app/clusters/descriptor/descriptor-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 
 // Code driven clusters made for this app, these are clusters that
@@ -42,6 +43,7 @@ private:
 
     RegisteredServerCluster<Clusters::BooleanStateCluster> mBooleanStateCluster;
     RegisteredServerCluster<Clusters::IdentifyCluster> mIdentifyCluster;
+    RegisteredServerCluster<Clusters::DescriptorCluster> mDescriptorCluster;
 };
 
 } // namespace chip::app
