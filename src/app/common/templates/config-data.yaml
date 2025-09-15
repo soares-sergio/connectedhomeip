@@ -73,6 +73,7 @@ CommandHandlerInterfaceOnlyClusters:
     - Zone Management
     - Soil Measurement
     - Basic Information
+    - Boolean State
     - Descriptor
 
 # We need a more configurable way of deciding which clusters have which init functions....
@@ -80,6 +81,7 @@ CommandHandlerInterfaceOnlyClusters:
 ClustersWithInitFunctions:
     - Administrator Commissioning
     - Basic Information
+    - Boolean State
     - Color Control
     - Ethernet Network Diagnostics
     - General Diagnostics
@@ -115,6 +117,7 @@ ClustersWithShutdownFunctions:
     - Administrator Commissioning
     - Barrier Control
     - Basic Information
+    - Boolean State
     - Color Control
     - Door Lock
     - General Diagnostics
