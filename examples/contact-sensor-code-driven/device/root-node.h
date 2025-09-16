@@ -54,6 +54,20 @@ public:
 private:
     EndpointInterfaceRegistration mRegistration;
     chip::app::ServerClusterRegistration mNetworkCommissioningClusterRegistration;
+
+    RegisteredServerCluster<Clusters::GeneralCommissioningCluster> mGeneralCommissioningCluster;
+    RegisteredServerCluster<Clusters::AdministratorCommissioningWithBasicCommissioningWindowCluster> mAdminCommissioningCluster;
+    RegisteredServerCluster<Clusters::GeneralDiagnosticsCluster> mGeneralDiagnosticsCluster;
+    RegisteredServerCluster<Clusters::GroupKeyManagementCluster> mGroupKeyManagementCluster;
+    RegisteredServerCluster<Clusters::SoftwareDiagnosticsServerCluster> mSoftwareDiagnosticsCluster;
+    // TODO: WIFI diagnostics is wifi specific ... should not be here
+    RegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWifiDiagnosticsCluster;
+    RegisteredServerCluster<Clusters::DescriptorCluster> mDescriptorCluster;
+    RegisteredServerCluster<Clusters::AccessControlCluster> mAccessControlCluster;
+    RegisteredServerCluster<Clusters::OperationalCredentialsCluster> mOperationalCredentialsCluster;
+
+    // This uses a singleton ... not great
+    ServerClusterRegistration mBasicInformationClusterRegistration;
 };
 
 } // namespace chip::app

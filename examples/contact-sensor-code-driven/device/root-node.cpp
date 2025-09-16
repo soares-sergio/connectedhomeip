@@ -27,7 +27,18 @@ RootEndpoint::RootEndpoint(NetworkCommissioningCluster & networkCommissioningClu
                       .parentId           = kInvalidEndpointId,
                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily,
                   }),
-    mNetworkCommissioningClusterRegistration(networkCommissioningCluster)
+    mNetworkCommissioningClusterRegistration(networkCommissioningCluster),
+    mGeneralCommissioningCluster(BitFlags<GeneralCommissioning::Feature>(), GeneralCommissioningCluster::OptionalAttributes()),
+    mAdminCommissioningCluster(kRootEndpointId, BitFlags<AdministratorCommissioning::Feature>()),
+    mGeneralDiagnosticsCluster(GeneralDiagnosticsCluster::OptionalAttributeSet()), //
+    mGroupKeyManagementCluster(),                                                  //
+    mSoftwareDiagnosticsCluster(SoftwareDiagnosticsLogic::OptionalAttributeSet()),
+    mWifiDiagnosticsCluster(kRootEndpointId, DeviceLayer::GetDiagnosticDataProvider(),
+                            WiFiDiagnosticsServerLogic::OptionalAttributeSet(), BitFlags<WiFiNetworkDiagnostics::Feature>()),
+    mDescriptorCluster(kRootEndpointId, BitFlags<Descriptor::Feature>(0)),
+    mAccessControlCluster(AccessControlCluster::OptionalAttributeSet()), //
+    mOperationalCredentialsCluster(kRootEndpointId),                     //
+    mBasicInformationClusterRegistration(BasicInformationCluster::Instance())
 {}
 
 CHIP_ERROR RootEndpoint::SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) const
@@ -51,15 +62,9 @@ CHIP_ERROR RootEndpoint::ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) 
 
 CHIP_ERROR RootEndpoint::Register(CodeDrivenDataModelProvider & dataModelProvider)
 {
-    static GeneralCommissioningCluster clusterGeneralCommissioning({}, {});
-    static ServerClusterRegistration serverClusterGeneralCommissioning(clusterGeneralCommissioning);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(serverClusterGeneralCommissioning));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mGeneralCommissioningCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mAdminCommissioningCluster.Registration()));
 
-    static AdministratorCommissioningWithBasicCommissioningWindowCluster clusterAdminCommissioning(0, {});
-    static ServerClusterRegistration serverClusterAdminCommissioning(clusterAdminCommissioning);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(serverClusterAdminCommissioning));
-
-    static ServerClusterRegistration basicInfo(BasicInformationCluster::Instance());
     BasicInformationCluster()
         .Instance()
         .OptionalAttributes()
@@ -71,37 +76,15 @@ CHIP_ERROR RootEndpoint::Register(CodeDrivenDataModelProvider & dataModelProvide
         .Set<BasicInformation::Attributes::LocalConfigDisabled::Id>()
         .Set<BasicInformation::Attributes::Reachable::Id>()
         .Set<BasicInformation::Attributes::ProductAppearance::Id>();
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mBasicInformationClusterRegistration));
 
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(basicInfo));
-
-    static GeneralDiagnosticsCluster clusterGeneralDiagnostics({});
-    static ServerClusterRegistration generalDiagnostics(clusterGeneralDiagnostics);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(generalDiagnostics));
-
-    static GroupKeyManagementCluster clusterGroupKeyManagement;
-    static ServerClusterRegistration groupKeyManagement(clusterGroupKeyManagement);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(groupKeyManagement));
-
-    static SoftwareDiagnosticsServerCluster clusterSoftwareDiagnostics({});
-    static ServerClusterRegistration softwareDiagnostics(clusterSoftwareDiagnostics);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(softwareDiagnostics));
-
-    static WiFiDiagnosticsServerCluster clusterWifiDiagnostics(0, DeviceLayer::GetDiagnosticDataProvider(), {}, {});
-    static ServerClusterRegistration wifiDiagnostics(clusterWifiDiagnostics);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(wifiDiagnostics));
-
-    static DescriptorCluster clusterDescriptor(0, BitFlags<Descriptor::Feature>(0));
-    static ServerClusterRegistration descriptor(clusterDescriptor);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(descriptor));
-
-    static AccessControlCluster clusterAccessControl({});
-    static ServerClusterRegistration accessControl(clusterAccessControl);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(accessControl));
-
-    static OperationalCredentialsCluster clusterOperationalCredenitals(0);
-    static ServerClusterRegistration operationalCredentials(clusterOperationalCredenitals);
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(operationalCredentials));
-
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mGeneralDiagnosticsCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mGroupKeyManagementCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mSoftwareDiagnosticsCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mWifiDiagnosticsCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mDescriptorCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mAccessControlCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mOperationalCredentialsCluster.Registration()));
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mNetworkCommissioningClusterRegistration));
 
     return dataModelProvider.AddEndpoint(mRegistration);
