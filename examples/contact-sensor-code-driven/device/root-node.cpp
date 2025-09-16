@@ -20,21 +20,18 @@ using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-RootEndpoint::RootEndpoint(NetworkCommissioningCluster & networkCommissioningCluster) :
+RootEndpoint::RootEndpoint() :
     mRegistration(*this,
                   {
                       .id                 = kRootEndpointId,
                       .parentId           = kInvalidEndpointId,
                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily,
                   }),
-    mNetworkCommissioningClusterRegistration(networkCommissioningCluster),
     mGeneralCommissioningCluster(BitFlags<GeneralCommissioning::Feature>(), GeneralCommissioningCluster::OptionalAttributes()),
     mAdminCommissioningCluster(kRootEndpointId, BitFlags<AdministratorCommissioning::Feature>()),
     mGeneralDiagnosticsCluster(GeneralDiagnosticsCluster::OptionalAttributeSet()), //
     mGroupKeyManagementCluster(),                                                  //
     mSoftwareDiagnosticsCluster(SoftwareDiagnosticsLogic::OptionalAttributeSet()),
-    mWifiDiagnosticsCluster(kRootEndpointId, DeviceLayer::GetDiagnosticDataProvider(),
-                            WiFiDiagnosticsServerLogic::OptionalAttributeSet(), BitFlags<WiFiNetworkDiagnostics::Feature>()),
     mDescriptorCluster(kRootEndpointId, BitFlags<Descriptor::Feature>(0)),
     mAccessControlCluster(AccessControlCluster::OptionalAttributeSet()), //
     mOperationalCredentialsCluster(kRootEndpointId),                     //
@@ -81,13 +78,26 @@ CHIP_ERROR RootEndpoint::Register(CodeDrivenDataModelProvider & dataModelProvide
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mGeneralDiagnosticsCluster.Registration()));
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mGroupKeyManagementCluster.Registration()));
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mSoftwareDiagnosticsCluster.Registration()));
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(mWifiDiagnosticsCluster.Registration()));
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mDescriptorCluster.Registration()));
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mAccessControlCluster.Registration()));
     ReturnErrorOnFailure(dataModelProvider.AddCluster(mOperationalCredentialsCluster.Registration()));
-    ReturnErrorOnFailure(dataModelProvider.AddCluster(mNetworkCommissioningClusterRegistration));
 
     return dataModelProvider.AddEndpoint(mRegistration);
+}
+
+WiFiRootEndpoint::WiFiRootEndpoint(DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver) :
+    mNetworkCommissioningCluster(kRootEndpointId, &wifiDriver),
+    mWifiDiagnosticsCluster(kRootEndpointId, DeviceLayer::GetDiagnosticDataProvider(),
+                            WiFiDiagnosticsServerLogic::OptionalAttributeSet(), BitFlags<WiFiNetworkDiagnostics::Feature>())
+{}
+
+CHIP_ERROR
+WiFiRootEndpoint::Register(CodeDrivenDataModelProvider & dataModelProvider)
+{
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mNetworkCommissioningCluster.Registration()));
+    ReturnErrorOnFailure(dataModelProvider.AddCluster(mWifiDiagnosticsCluster.Registration()));
+
+    return RootEndpoint::Register(dataModelProvider);
 }
 
 } // namespace chip::app

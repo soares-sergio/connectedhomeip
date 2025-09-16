@@ -28,8 +28,7 @@ ContactSensor::ContactSensor(EndpointId parentEndpointId, EndpointId endpointId)
                       .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily,
                   }),                 //
     mBooleanStateCluster(endpointId), //
-    mIdentifyCluster(endpointId),
-    mDescriptorCluster(endpointId, BitFlags<Descriptor::Feature>(0))
+    mIdentifyCluster(endpointId), mDescriptorCluster(endpointId, BitFlags<Descriptor::Feature>(0))
 {}
 
 CHIP_ERROR ContactSensor::Register(CodeDrivenDataModelProvider & dataModelProvider)

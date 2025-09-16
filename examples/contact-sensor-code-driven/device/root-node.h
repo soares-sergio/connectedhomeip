@@ -38,36 +38,50 @@ namespace chip::app {
 class RootEndpoint : public EndpointInterface
 {
 public:
-    RootEndpoint(chip::app::Clusters::NetworkCommissioningCluster & networkCommissioning);
     ~RootEndpoint() override = default;
 
     /// Adds all relevant clusters on the given provider.
     ///
     /// and returns the necessary registration for it
-    CHIP_ERROR Register(CodeDrivenDataModelProvider & dataModelProvider);
+    virtual CHIP_ERROR Register(CodeDrivenDataModelProvider & dataModelProvider);
 
-    // Endpoint interface
+    // Endpoint interface implementation
     CHIP_ERROR SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) const override;
     CHIP_ERROR DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) const override;
     CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const override;
 
+protected:
+    // Most implementations require network commissioning, so only subclasses have access to this.
+    RootEndpoint();
+
 private:
     EndpointInterfaceRegistration mRegistration;
-    chip::app::ServerClusterRegistration mNetworkCommissioningClusterRegistration;
 
     RegisteredServerCluster<Clusters::GeneralCommissioningCluster> mGeneralCommissioningCluster;
     RegisteredServerCluster<Clusters::AdministratorCommissioningWithBasicCommissioningWindowCluster> mAdminCommissioningCluster;
     RegisteredServerCluster<Clusters::GeneralDiagnosticsCluster> mGeneralDiagnosticsCluster;
     RegisteredServerCluster<Clusters::GroupKeyManagementCluster> mGroupKeyManagementCluster;
     RegisteredServerCluster<Clusters::SoftwareDiagnosticsServerCluster> mSoftwareDiagnosticsCluster;
-    // TODO: WIFI diagnostics is wifi specific ... should not be here
-    RegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWifiDiagnosticsCluster;
     RegisteredServerCluster<Clusters::DescriptorCluster> mDescriptorCluster;
     RegisteredServerCluster<Clusters::AccessControlCluster> mAccessControlCluster;
     RegisteredServerCluster<Clusters::OperationalCredentialsCluster> mOperationalCredentialsCluster;
 
     // This uses a singleton ... not great
     ServerClusterRegistration mBasicInformationClusterRegistration;
+};
+
+/// A root endpoint that supports wifi network commissioning
+class WiFiRootEndpoint : public RootEndpoint
+{
+public:
+    WiFiRootEndpoint(DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver);
+    ~WiFiRootEndpoint() override = default;
+
+    CHIP_ERROR Register(CodeDrivenDataModelProvider & dataModelProvider) override;
+
+private:
+    RegisteredServerCluster<Clusters::NetworkCommissioningCluster> mNetworkCommissioningCluster;
+    RegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWifiDiagnosticsCluster;
 };
 
 } // namespace chip::app

@@ -56,11 +56,10 @@ namespace {
 AppMainLoopImplementation * gMainLoopImplementation = nullptr;
 
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
-NetworkCommissioningCluster sWifiNetworkCommissioningCluster(kRootEndpointId, &sWiFiDriver);
 
 constexpr EndpointId kContactSensorEndpointId = 1;
 
-RootEndpoint sRootEndpoint(sWifiNetworkCommissioningCluster);
+WiFiRootEndpoint sRootEndpoint(sWiFiDriver);
 ContactSensor sContactSensor(kRootEndpointId, kContactSensorEndpointId);
 
 DeviceInfoProviderImpl gExampleDeviceInfoProvider;
