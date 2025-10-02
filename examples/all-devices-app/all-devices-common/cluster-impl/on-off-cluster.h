@@ -35,7 +35,7 @@ public:
                                         OnOff::Attributes::OffWaitTime::Id, OnOff::Attributes::StartUpOnOff::Id>;
 
     OnOffCluster(EndpointId endpoint, OptionalAttributeSet optionalAttributeSet, BitFlags<OnOff::Feature> featureFlags) :
-        DefaultServerCluster({ endpoint, OnOff::Id }), mFeatureFlags(featureFlags)
+        DefaultServerCluster({ endpoint, OnOff::Id }), mOptionalAttributeSet(optionalAttributeSet), mFeatureFlags(featureFlags)
     {}
 
     std::optional<DataModel::ActionReturnStatus> InvokeCommand(const DataModel::InvokeRequest & request,
