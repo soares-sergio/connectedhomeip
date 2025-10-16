@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2022-2025 Project CHIP Authors
+ *    Copyright (c) 2021-2025 Project CHIP Authors
  *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 #include "general-commissioning-cluster.h"
 
 #include <app/AppConfig.h>
+#include <app/reporting/reporting.h>
 #include <app/server-cluster/AttributeListBuilder.h>
 #include <app/server/Server.h>
 #include <clusters/GeneralCommissioning/AttributeIds.h>
@@ -34,13 +36,14 @@
 #include <app/server/TermsAndConditionsProvider.h> //nogncheck
 #endif
 
+using namespace chip;
+using namespace chip::app;
+using namespace chip::app::Clusters;
 using namespace chip::DeviceLayer;
 using namespace chip::app::Clusters::GeneralCommissioning;
 using namespace chip::app::Clusters::GeneralCommissioning::Attributes;
 using chip::Transport::SecureSession;
 using chip::Transport::Session;
-
-namespace chip::app::Clusters {
 
 namespace {
 
@@ -67,29 +70,6 @@ CHIP_ERROR ReadIfSupported(CHIP_ERROR (ConfigurationManager::*getter)(uint8_t &)
         return err;
     }
     return aEncoder.Encode(data);
-}
-
-void OnPlatformEventHandler(const DeviceLayer::ChipDeviceEvent * event, intptr_t arg)
-{
-    if (event->Type == DeviceLayer::DeviceEventType::kFailSafeTimerExpired)
-    {
-        // Spec says to reset Breadcrumb attribute to 0.
-        reinterpret_cast<GeneralCommissioningCluster *>(arg)->SetBreadCrumb(0);
-
-#if CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
-        if (event->FailSafeTimerExpired.updateTermsAndConditionsHasBeenInvoked)
-        {
-            // Clear terms and conditions acceptance on failsafe timer expiration
-            TermsAndConditionsProvider * tcProvider = TermsAndConditionsManager::GetInstance();
-            TermsAndConditionsState initialState, updatedState;
-            VerifyOrReturn(nullptr != tcProvider);
-            VerifyOrReturn(CHIP_NO_ERROR == GetTermsAndConditionsAttributeState(tcProvider, initialState));
-            VerifyOrReturn(CHIP_NO_ERROR == tcProvider->RevertAcceptance());
-            VerifyOrReturn(CHIP_NO_ERROR == GetTermsAndConditionsAttributeState(tcProvider, updatedState));
-            NotifyTermsAndConditionsAttributeChangeIfRequired(initialState, updatedState);
-        }
-#endif // CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
-    }
 }
 
 #if CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
@@ -121,7 +101,6 @@ void NotifyTermsAndConditionsAttributeChangeIfRequired(const TermsAndConditionsS
     // Notify on TCAcknowledgementsRequired change
     if (initialState.acknowledgementsRequired != updatedState.acknowledgementsRequired)
     {
-        // FIXME: this is NOT OK
         MatterReportingAttributeChangeCallback(kRootEndpointId, GeneralCommissioning::Id, TCAcknowledgementsRequired::Id);
     }
 
@@ -130,7 +109,6 @@ void NotifyTermsAndConditionsAttributeChangeIfRequired(const TermsAndConditionsS
         (initialState.acceptance.HasValue() &&
          (initialState.acceptance.Value().GetVersion() != updatedState.acceptance.Value().GetVersion())))
     {
-        // FIXME: this is NOT OK
         MatterReportingAttributeChangeCallback(kRootEndpointId, GeneralCommissioning::Id, TCAcceptedVersion::Id);
     }
 
@@ -139,7 +117,6 @@ void NotifyTermsAndConditionsAttributeChangeIfRequired(const TermsAndConditionsS
         (initialState.acceptance.HasValue() &&
          (initialState.acceptance.Value().GetValue() != updatedState.acceptance.Value().GetValue())))
     {
-        // FIXME: this is NOT OK
         MatterReportingAttributeChangeCallback(kRootEndpointId, GeneralCommissioning::Id, TCAcknowledgements::Id);
     }
 
@@ -149,7 +126,6 @@ void NotifyTermsAndConditionsAttributeChangeIfRequired(const TermsAndConditionsS
          (initialState.requirements.Value().GetVersion() != updatedState.requirements.Value().GetVersion() ||
           initialState.requirements.Value().GetValue() != updatedState.requirements.Value().GetValue())))
     {
-        // FIXME: this is NOT OK
         MatterReportingAttributeChangeCallback(kRootEndpointId, GeneralCommissioning::Id, TCMinRequiredVersion::Id);
     }
 
@@ -158,15 +134,43 @@ void NotifyTermsAndConditionsAttributeChangeIfRequired(const TermsAndConditionsS
         (initialState.updateAcceptanceDeadline.HasValue() &&
          (initialState.updateAcceptanceDeadline.Value() != updatedState.updateAcceptanceDeadline.Value())))
     {
-        // FIXME: this is NOT OK
         MatterReportingAttributeChangeCallback(kRootEndpointId, GeneralCommissioning::Id, TCUpdateDeadline::Id);
     }
 }
 #endif // CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
 
+void OnPlatformEventHandler(const DeviceLayer::ChipDeviceEvent * event, intptr_t /* arg */)
+{
+    if (event->Type == DeviceLayer::DeviceEventType::kFailSafeTimerExpired)
+    {
+        // Spec says to reset Breadcrumb attribute to 0.
+        GeneralCommissioningCluster::Instance().SetBreadCrumb(0);
+
+#if CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
+        if (event->FailSafeTimerExpired.updateTermsAndConditionsHasBeenInvoked)
+        {
+            // Clear terms and conditions acceptance on failsafe timer expiration
+            TermsAndConditionsProvider * tcProvider = TermsAndConditionsManager::GetInstance();
+            TermsAndConditionsState initialState, updatedState;
+            VerifyOrReturn(nullptr != tcProvider);
+            VerifyOrReturn(CHIP_NO_ERROR == GetTermsAndConditionsAttributeState(tcProvider, initialState));
+            VerifyOrReturn(CHIP_NO_ERROR == tcProvider->RevertAcceptance());
+            VerifyOrReturn(CHIP_NO_ERROR == GetTermsAndConditionsAttributeState(tcProvider, updatedState));
+            NotifyTermsAndConditionsAttributeChangeIfRequired(initialState, updatedState);
+        }
+#endif // CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
+    }
+}
+
+GeneralCommissioningCluster gInstance;
 } // anonymous namespace
 
-GeneralCommissioningCluster * GeneralCommissioningCluster::gGlobalInstance = nullptr;
+namespace chip::app::Clusters {
+
+GeneralCommissioningCluster & GeneralCommissioningCluster::Instance()
+{
+    return gInstance;
+}
 
 DataModel::ActionReturnStatus GeneralCommissioningCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                                          AttributeValueEncoder & encoder)
@@ -174,7 +178,7 @@ DataModel::ActionReturnStatus GeneralCommissioningCluster::ReadAttribute(const D
     switch (request.path.mAttributeId)
     {
     case FeatureMap::Id:
-        return encoder.Encode(mFeatures);
+        return encoder.Encode(kFeatures);
     case ClusterRevision::Id:
         return encoder.Encode(GeneralCommissioning::kRevision);
     case Breadcrumb::Id:
@@ -264,8 +268,20 @@ DataModel::ActionReturnStatus GeneralCommissioningCluster::ReadAttribute(const D
 DataModel::ActionReturnStatus GeneralCommissioningCluster::WriteAttribute(const DataModel::WriteAttributeRequest & request,
                                                                           AttributeValueDecoder & decoder)
 {
-    // TODO: implement
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    using namespace GeneralCommissioning::Attributes;
+    switch (request.path.mAttributeId)
+    {
+    case Breadcrumb::Id: {
+        uint64_t value;
+        ReturnErrorOnFailure(decoder.Decode(value));
+        // SetBreadCrumb handles notification internally via NotifyAttributeChanged(),
+        // so we don't need to call NotifyAttributeChangedIfSuccess here.
+        SetBreadCrumb(value);
+        return CHIP_NO_ERROR;
+    }
+    default:
+        return Protocols::InteractionModel::Status::UnsupportedWrite;
+    }
 }
 
 std::optional<DataModel::ActionReturnStatus> GeneralCommissioningCluster::InvokeCommand(const DataModel::InvokeRequest & request,
@@ -304,7 +320,7 @@ std::optional<DataModel::ActionReturnStatus> GeneralCommissioningCluster::Invoke
 CHIP_ERROR GeneralCommissioningCluster::AcceptedCommands(const ConcreteClusterPath & path,
                                                          ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
 {
-    if (mFeatures.Has(GeneralCommissioning::Feature::kTermsAndConditions))
+    if constexpr (kFeatures.Has(GeneralCommissioning::Feature::kTermsAndConditions))
     {
         ReturnErrorOnFailure(builder.AppendElements({ Commands::SetTCAcknowledgements::kMetadataEntry }));
     }
@@ -320,7 +336,7 @@ CHIP_ERROR GeneralCommissioningCluster::GeneratedCommands(const ConcreteClusterP
                                                           ReadOnlyBufferBuilder<CommandId> & builder)
 {
 
-    if (mFeatures.Has(GeneralCommissioning::Feature::kTermsAndConditions))
+    if constexpr (kFeatures.Has(GeneralCommissioning::Feature::kTermsAndConditions))
     {
         ReturnErrorOnFailure(builder.AppendElements({ Commands::SetTCAcknowledgementsResponse::Id }));
     }
@@ -336,7 +352,7 @@ CHIP_ERROR GeneralCommissioningCluster::Attributes(const ConcreteClusterPath & p
                                                    ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
 {
 
-    if (mFeatures.Has(GeneralCommissioning::Feature::kTermsAndConditions))
+    if constexpr (kFeatures.Has(GeneralCommissioning::Feature::kTermsAndConditions))
     {
         ReturnErrorOnFailure(builder.AppendElements({
             TCAcceptedVersion::kMetadataEntry,
@@ -347,7 +363,7 @@ CHIP_ERROR GeneralCommissioningCluster::Attributes(const ConcreteClusterPath & p
         }));
     }
 
-    if (mFeatures.Has(GeneralCommissioning::Feature::kNetworkRecovery))
+    if constexpr (kFeatures.Has(GeneralCommissioning::Feature::kNetworkRecovery))
     {
         ReturnErrorOnFailure(builder.AppendElements({
             RecoveryIdentifier::kMetadataEntry,
@@ -393,20 +409,15 @@ void GeneralCommissioningCluster::SetBreadCrumb(uint64_t value)
 
 CHIP_ERROR GeneralCommissioningCluster::Startup(ServerClusterContext & context)
 {
-    gGlobalInstance = this;
     ReturnErrorOnFailure(DefaultServerCluster::Startup(context));
-    PlatformMgrImpl().AddEventHandler(OnPlatformEventHandler, reinterpret_cast<intptr_t>(this));
+    PlatformMgrImpl().AddEventHandler(OnPlatformEventHandler, 0);
     Server::GetInstance().GetFabricTable().AddFabricDelegate(this);
     return CHIP_NO_ERROR;
 }
 
 void GeneralCommissioningCluster::Shutdown()
 {
-    if (gGlobalInstance == this)
-    {
-        gGlobalInstance = nullptr;
-    }
-    PlatformMgrImpl().RemoveEventHandler(OnPlatformEventHandler, reinterpret_cast<intptr_t>(this));
+    PlatformMgrImpl().RemoveEventHandler(OnPlatformEventHandler, 0);
     Server::GetInstance().GetFabricTable().RemoveFabricDelegate(this);
     DefaultServerCluster::Shutdown();
 }
@@ -506,8 +517,8 @@ GeneralCommissioningCluster::HandleCommissioningComplete(const DataModel::Invoke
         if (requiredTermsAndConditionsMaybe.HasValue() && !acceptedTermsAndConditionsMaybe.HasValue())
         {
             response.errorCode = CommissioningErrorEnum::kTCAcknowledgementsNotReceived;
-            ctx.mCommandHandler.AddResponse(ctx.mRequestPath, response);
-            return;
+            handler->AddResponse(request.path, response);
+            return std::nullopt;
         }
 
         if (requiredTermsAndConditionsMaybe.HasValue() && acceptedTermsAndConditionsMaybe.HasValue())
@@ -518,15 +529,15 @@ GeneralCommissioningCluster::HandleCommissioningComplete(const DataModel::Invoke
             if (!requiredTermsAndConditions.ValidateVersion(acceptedTermsAndConditions))
             {
                 response.errorCode = CommissioningErrorEnum::kTCMinVersionNotMet;
-                ctx.mCommandHandler.AddResponse(ctx.mRequestPath, response);
-                return;
+                handler->AddResponse(request.path, response);
+                return std::nullopt;
             }
 
             if (!requiredTermsAndConditions.ValidateValue(acceptedTermsAndConditions))
             {
                 response.errorCode = CommissioningErrorEnum::kRequiredTCNotAccepted;
-                ctx.mCommandHandler.AddResponse(ctx.mRequestPath, response);
-                return;
+                handler->AddResponse(request.path, response);
+                return std::nullopt;
             }
         }
 
@@ -548,7 +559,6 @@ GeneralCommissioningCluster::HandleCommissioningComplete(const DataModel::Invoke
     }
 #endif // CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
 
-    // FIXME: how do I grab the current excahge session handle ????
     SessionHandle handle = mContext->interactionContext.actionContext.CurrentExchange()->GetSessionHandle();
 
     // Ensure it's a valid CASE session

@@ -33,10 +33,9 @@ class GeneralCommissioningCluster : public DefaultServerCluster, chip::FabricTab
 public:
     using OptionalAttributes = OptionalAttributeSet<GeneralCommissioning::Attributes::IsCommissioningWithoutPower::Id>;
 
-    GeneralCommissioningCluster(BitFlags<GeneralCommissioning::Feature> features, OptionalAttributes optionalAttributes) :
-        DefaultServerCluster({ kRootEndpointId, GeneralCommissioning::Id }), mFeatures(features),
-        mOptionalAttributes(optionalAttributes)
-    {}
+    GeneralCommissioningCluster() : DefaultServerCluster({ kRootEndpointId, GeneralCommissioning::Id }), mOptionalAttributes(0) {}
+
+    OptionalAttributes & GetOptionalAttributes() { return mOptionalAttributes; }
 
     void SetBreadCrumb(uint64_t value);
 
@@ -57,16 +56,20 @@ public:
     // Fabric delegate
     void OnFabricRemoved(const FabricTable & fabricTable, FabricIndex fabricIndex) override;
 
-    // GeneralCommissioning is generally a singleton.
-    // This provides access to an instance where "Startup" has been called.
-    // TODO: this IS NOT OK and coupling should be cleaned up
-    static GeneralCommissioningCluster * Instance() { return gGlobalInstance; }
+    // GeneralCommissioning is a singleton cluster that exists only on the root endpoint.
+    static GeneralCommissioningCluster & Instance();
+
+    // Feature map constant based on compile-time defines. This ensures feature map
+    // is in sync with the actual supported features determined at build time.
+#if CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
+    static constexpr BitFlags<GeneralCommissioning::Feature> kFeatures =
+        BitFlags<GeneralCommissioning::Feature>(GeneralCommissioning::Feature::kTermsAndConditions);
+#else
+    static constexpr BitFlags<GeneralCommissioning::Feature> kFeatures = BitFlags<GeneralCommissioning::Feature>(0);
+#endif
 
 private:
-    static GeneralCommissioningCluster * gGlobalInstance;
-
-    const BitFlags<GeneralCommissioning::Feature> mFeatures;
-    const OptionalAttributes mOptionalAttributes;
+    OptionalAttributes mOptionalAttributes;
     uint64_t mBreadCrumb = 0;
 
     std::optional<DataModel::ActionReturnStatus>
@@ -79,8 +82,8 @@ private:
     HandleSetRegulatoryConfig(const DataModel::InvokeRequest & request, CommandHandler * handler,
                               const GeneralCommissioning::Commands::SetRegulatoryConfig::DecodableType & commandData);
 #if CHIP_CONFIG_TERMS_AND_CONDITIONS_REQUIRED
-    std::optional<DataModel::ActActionReturnStatus>
-    HandleSetTCAcknowledgements(const Datamodel::InvokeRequest & request, CommandHandler * handler,
+    std::optional<DataModel::ActionReturnStatus>
+    HandleSetTCAcknowledgements(const DataModel::InvokeRequest & request, CommandHandler * handler,
                                 const GeneralCommissioning::Commands::SetTCAcknowledgements::DecodableType & commandData);
 #endif
 };

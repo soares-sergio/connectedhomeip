@@ -59,7 +59,7 @@ SpanEndpoint SpanEndpoint::Builder::Build()
 }
 
 CHIP_ERROR
-SpanEndpoint::SemanticTags(ReadOnlyBufferBuilder<Clusters::Descriptor::Structs::SemanticTagStruct::Type> & out) const
+SpanEndpoint::SemanticTags(ReadOnlyBufferBuilder<SemanticTag> & out) const
 {
     return out.ReferenceExisting(mSemanticTags);
 }

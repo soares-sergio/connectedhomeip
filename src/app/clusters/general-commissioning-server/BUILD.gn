@@ -32,20 +32,6 @@ source_set("general-commissioning-server") {
   ]
 
   if (chip_terms_and_conditions_required) {
-    public_deps += [ "${chip_root}/src/app/server::terms_and_conditions" ]
+    public_deps += [ "${chip_root}/src/app/server:terms_and_conditions" ]
   }
-}
-
-# TODO: we have a dependency on GeneralCommissioning: setting a breadcrumb
-# via `GeneralCommissioning::SetBreadcrumb`. This should be decoupled when
-# GeneralCommissioning is turned into code-driven
-#
-# See https://github.com/project-chip/connectedhomeip/issues/39412
-#
-# This source set enablese other tests to share the coupling for test
-# purposes only (and breadcrumb setting in this case is a noop)
-source_set("test-only-temporary-coupling") {
-  sources = [ "TemporaryTestCoupling.cpp" ]
-  deps =
-      [ "${chip_root}/zzz_generated/app-common/clusters/GeneralCommissioning" ]
 }
