@@ -218,6 +218,6 @@ group("cluster-impl") {
     ":identify",
     ":occupancy-sensor",
     ":on-off-cluster",
-    ":operational-credentials-cluster",
+    #":operational-credentials-cluster",
   ]
 }

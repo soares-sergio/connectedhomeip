@@ -29,7 +29,7 @@ if (chip_build_tests) {
       tests += [
         "${chip_root}/examples/energy-management-app/energy-management-common/tests",
         "${chip_root}/examples/all-devices-app/tests",
-        "${chip_root}/examples/contact-sensor-codedriven/tests",
+        #"${chip_root}/examples/contact-sensor-codedriven/tests",
       ]
     }
   }

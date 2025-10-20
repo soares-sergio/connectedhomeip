@@ -37,8 +37,6 @@ public:
     const std::string & GetUniqueId() const { return mUniqueId; }
     EndpointId GetEndpointId() const { return mEndpointId; }
 
-    virtual DeviceType GetDeviceType() const = 0;
-
     /// Register relevant clusters on the given endpoint
     virtual CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                                 EndpointId parentId = kInvalidEndpointId) = 0;

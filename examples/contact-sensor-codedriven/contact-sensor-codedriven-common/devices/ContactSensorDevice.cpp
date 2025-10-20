@@ -22,14 +22,9 @@ namespace chip::app {
 
 constexpr DeviceTypeId kContactSensorDeviceTypeRevision = 2;
 
-DeviceType ContactSensorDevice::GetDeviceType() const
-{
-    return DeviceType::kContactSensor;
-}
-
 CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kContactSensor),
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(0x0015),
                                                        .revision   = kContactSensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 

@@ -18,12 +18,14 @@
 
 #include <TracingCommandLineArgument.h>
 #include <app-common/zap-generated/ids/Clusters.h>
+#include <app/clusters/access-control-server/access-control-cluster.h>
 #include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
 #include <app/clusters/basic-information/BasicInformationCluster.h>
 #include <app/clusters/general-commissioning-server/general-commissioning-cluster.h>
 #include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
 #include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
+#include <app/clusters/operational-credentials-server/operational-credentials-cluster.h>
 #include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
 #include <app/clusters/wifi-network-diagnostics-server/wifi-network-diagnostics-cluster.h>
 #include <app/persistence/DefaultAttributePersistenceProvider.h>
@@ -39,17 +41,17 @@
 #include <system/SystemLayer.h>
 #include <devices/ContactSensorDevice.h>
 #include <devices/RootNodeDevice.h>
-#include <devices/Manager.h>
+// #include <devices/Manager.h>
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 
 // Code driven clusters made for this app, these are clusters that
 // need some additional work before landing upstream
-#include <cluster-impl/access-control-cluster.h>
+// #include <cluster-impl/access-control-cluster.h>
 #include <cluster-impl/descriptor-cluster.h>
 #include <cluster-impl/identify-cluster.h>
-#include <cluster-impl/operational-credentials-cluster.h>
+// #include <cluster-impl/operational-credentials-cluster.h>
 
 #if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
 #include <imgui_ui/ui.h>
@@ -72,17 +74,6 @@ using namespace chip::ArgParser;
 namespace {
 AppMainLoopImplementation * gMainLoopImplementation = nullptr;
 
-DataModel::DeviceTypeEntry deviceTypesEp0[] = {
-    { 0x0016, 3 }, // ma_rootdevice, version 3
-};
-
-SpanEndpoint endpoint0 = SpanEndpoint::Builder().SetDeviceTypes(Span<const DataModel::DeviceTypeEntry>(deviceTypesEp0)).Build();
-
-EndpointInterfaceRegistration endpointRegistration0(endpoint0,
-                                                    { .id                 = 0,
-                                                      .parentId           = kInvalidEndpointId,
-                                                      .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily });
-
 DeviceLayer::NetworkCommissioning::LinuxWiFiDriver sWiFiDriver;
 
 DeviceInfoProviderImpl gExampleDeviceInfoProvider;
@@ -90,7 +81,8 @@ DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 // To hold SPAKE2+ verifier, discriminator, passcode
 LinuxCommissionableDataProvider gCommissionableDataProvider;
 
-std::unique_ptr<DeviceManager> gDeviceManager;
+RootNodeDevice rootNodeDevice("root", sWiFiDriver);
+ContactSensorDevice contactSensor("contact-sensot");
 
 void StopSignalHandler(int /* signal */)
 {
@@ -111,10 +103,8 @@ void StopSignalHandler(int /* signal */)
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
-    gDeviceManager = std::make_unique<DeviceManager>(0 /* start endpoint id */, dataModelProvider);
-
-    gDeviceManager->AddDevice(std::make_unique<chip::app::RootNodeDevice>("root-node", sWiFiDriver), kInvalidEndpointId);;
-    gDeviceManager->AddDevice(std::make_unique<chip::app::ContactSensorDevice>("contact-sensor"), kInvalidEndpointId);
+    rootNodeDevice.Register(kRootEndpointId, dataModelProvider, kInvalidEndpointId);
+    contactSensor.Register(1, dataModelProvider, kInvalidEndpointId);
 
     return &dataModelProvider;
 }
@@ -190,7 +180,6 @@ void RunApplication(AppMainLoopImplementation * mainLoop = nullptr)
     }
     gMainLoopImplementation = nullptr;
 
-    gDeviceManager.reset();
     Server::GetInstance().Shutdown();
     DeviceLayer::PlatformMgr().Shutdown();
     tracing_setup.StopTracing();

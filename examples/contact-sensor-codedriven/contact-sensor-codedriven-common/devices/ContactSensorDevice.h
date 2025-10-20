@@ -29,8 +29,6 @@ public:
     ContactSensorDevice(std::string id) : Device(std::move(id)) {}
     ~ContactSensorDevice() override = default;
 
-    DeviceType GetDeviceType() const override;
-
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                         EndpointId parentId = kInvalidEndpointId) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;

@@ -5,8 +5,6 @@ using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-constexpr uint16_t kBridgedNodeDeviceTypeRevision = 3;
-
 CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                                       const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId)
 {
@@ -24,9 +22,7 @@ CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataM
     mEndpointRegistration.endpointEntry = DataModel::EndpointEntry{
         .id                 = endpoint, //
         .parentId           = parentId, //
-        .compositionPattern = GetDeviceType() == DeviceType::kBridgedNodeDevice
-            ? DataModel::EndpointCompositionPattern::kTree
-            : DataModel::EndpointCompositionPattern::kFullFamily,
+        .compositionPattern = DataModel::EndpointCompositionPattern::kFullFamily,
     };
     return CHIP_NO_ERROR;
 }

@@ -12,8 +12,8 @@ source_set("devices") {
     "ContactSensorDevice.h",
     "Device.cpp",
     "Device.h",
-    "Manager.cpp",
-    "Manager.h",
+#    "Manager.cpp",
+#    "Manager.h",
     "RootNodeDevice.cpp",
     "RootNodeDevice.h",
   ]

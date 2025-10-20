@@ -30,15 +30,10 @@ using namespace chip::DeviceLayer;
 namespace chip {
 namespace app {
 
-DeviceType RootNodeDevice::GetDeviceType() const
+CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    return DeviceType::kRootNode;
-}
-
-CHIP_ERROR RootNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
-{
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<uint32_t>(GetDeviceType()), .revision = 3 };
-    ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
+    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<uint32_t>(0x0016), .revision = 3 };
+    ReturnErrorOnFailure(RegisterDescriptor(kRootEndpointId, provider, deviceType, parentId));
 
     mBasicInformationCluster.Create();
     mBasicInformationCluster.Cluster()
@@ -54,10 +49,10 @@ CHIP_ERROR RootNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataMod
 
     ReturnErrorOnFailure(provider.AddCluster(mBasicInformationCluster.Registration()));
 
-    mGeneralCommissioningCluster.Create(BitFlags<GeneralCommissioning::Feature>{}, GeneralCommissioningCluster::OptionalAttributes{});
+    mGeneralCommissioningCluster.Create();
     ReturnErrorOnFailure(provider.AddCluster(mGeneralCommissioningCluster.Registration()));
 
-    mAdministratorCommissioningCluster.Create(mEndpointId, BitFlags<AdministratorCommissioning::Feature>{});
+    mAdministratorCommissioningCluster.Create(endpointId, BitFlags<AdministratorCommissioning::Feature>{});
     ReturnErrorOnFailure(provider.AddCluster(mAdministratorCommissioningCluster.Registration()));
 
     mGeneralDiagnosticsCluster.Create(GeneralDiagnosticsCluster::OptionalAttributeSet{});
@@ -69,18 +64,22 @@ CHIP_ERROR RootNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataMod
     mSoftwareDiagnosticsServerCluster.Create(SoftwareDiagnosticsLogic::OptionalAttributeSet{});
     ReturnErrorOnFailure(provider.AddCluster(mSoftwareDiagnosticsServerCluster.Registration()));
 
-    mWiFiDiagnosticsServerCluster.Create(mEndpointId, DeviceLayer::GetDiagnosticDataProvider(),
+    mWiFiDiagnosticsServerCluster.Create(endpointId, DeviceLayer::GetDiagnosticDataProvider(),
                                        WiFiDiagnosticsServerLogic::OptionalAttributeSet{},
                                        BitFlags<WiFiNetworkDiagnostics::Feature>{});
     ReturnErrorOnFailure(provider.AddCluster(mWiFiDiagnosticsServerCluster.Registration()));
 
-    mAccessControlCluster.Create(AccessControlCluster::OptionalAttributeSet{});
+    mAccessControlCluster.Create();
     ReturnErrorOnFailure(provider.AddCluster(mAccessControlCluster.Registration()));
 
-    mOperationalCredentialsCluster.Create(mEndpointId);
+    mOperationalCredentialsCluster.Create(endpointId, OperationalCredentialsCluster::Context{ .fabricTable     = Server::GetInstance().GetFabricTable(),
+                                                       .failSafeContext = Server::GetInstance().GetFailSafeContext(),
+                                                       .sessionManager  = Server::GetInstance().GetSecureSessionManager(),
+                                                       .dnssdServer     = app::DnssdServer::Instance(),
+                                                       .commissioningWindowManager = Server::GetInstance().GetCommissioningWindowManager() });
     ReturnErrorOnFailure(provider.AddCluster(mOperationalCredentialsCluster.Registration()));
 
-    mNetworkCommissioningCluster.Create(mEndpointId, &mWifiDriver);
+    mNetworkCommissioningCluster.Create(endpointId, &mWifiDriver);
     ReturnErrorOnFailure(provider.AddCluster(mNetworkCommissioningCluster.Registration()));
 
     return provider.AddEndpoint(mEndpointRegistration);

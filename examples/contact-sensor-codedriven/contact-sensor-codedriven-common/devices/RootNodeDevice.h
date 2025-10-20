@@ -41,8 +41,6 @@ public:
     {}
     ~RootNodeDevice() override = default;
 
-    DeviceType GetDeviceType() const override;
-
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                         EndpointId parentId = kInvalidEndpointId) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
@@ -62,6 +60,17 @@ private:
 
     DeviceLayer::NetworkCommissioning::WiFiDriver & mWifiDriver;
 };
+
+// class WiFiRootEndpoint : public RootNodeDevice {
+// public:
+//     WiFiRootEndpoint(DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver);
+//     ~WiFiRootEndpoint() override = default;
+
+//     CHIP_ERROR Register(CodeDrivenDataModelProvider & dataModelProvider) override;
+// private:
+//     RegisteredServerCluster<Clusters::NetworkCommissioningCluster> mNetworkCommissioningCluster;
+//     RegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWifiDiagnosticsCluster;
+// }
 
 } // namespace app
 } // namespace chip
