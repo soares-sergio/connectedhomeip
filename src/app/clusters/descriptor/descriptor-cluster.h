@@ -1,34 +1,55 @@
+/**
+ *
+ *    Copyright (c) 2025 Project CHIP Authors
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 #pragma once
 
 #include <app/server-cluster/DefaultServerCluster.h>
+#include <app/server-cluster/OptionalAttributeSet.h>
+#include <clusters/Descriptor/AttributeIds.h>
 #include <clusters/Descriptor/ClusterId.h>
-#include <clusters/Descriptor/Structs.h>
-
-#include <initializer_list>
-#include <vector>
+#include <clusters/shared/Structs.h>
+#include <lib/support/BitFlags.h>
+#include <lib/support/Span.h>
 
 namespace chip::app::Clusters {
 
-/// Exposes mandatory attributes for the descriptor clusters (it does NOT implement
-/// optional bits yet.
 class DescriptorCluster : public DefaultServerCluster
 {
 public:
-    using DeviceType = Descriptor::Structs::DeviceTypeStruct::Type;
+    using SemanticTag           = Globals::Structs::SemanticTagStruct::Type;
+    using OptionalAttributesSet = OptionalAttributeSet<Descriptor::Attributes::EndpointUniqueID::Id>;
 
-    /// Creates a descriptor cluster for the given `endpointId`
-    ///
-    /// Associates the given device types to the descriptor (should be at least 1)
-    DescriptorCluster(EndpointId endpointId, BitFlags<Descriptor::Feature> featureFlags) :
-        DefaultServerCluster({ endpointId, Descriptor::Id }), mFeatureFlags(featureFlags)
+    /*
+     * The caller who provides the Span of semantic tags MUST ensure that the underlying data remains
+     * valid for the lifetime of the DescriptorCluster instance. This is a non-owning view of the
+     * semantic tag data.
+     */
+    DescriptorCluster(EndpointId endpointId, OptionalAttributesSet optionalAttributeSet, Span<const SemanticTag> semanticTags) :
+        DefaultServerCluster({ endpointId, Descriptor::Id }), mEnabledOptionalAttributes(optionalAttributeSet),
+        mSemanticTags(semanticTags)
     {}
 
     CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                 AttributeValueEncoder & encoder) override;
 
-private:
-    BitFlags<Descriptor::Feature> mFeatureFlags;
+protected:
+    OptionalAttributesSet mEnabledOptionalAttributes;
+    Span<const SemanticTag> mSemanticTags;
 };
 
 } // namespace chip::app::Clusters

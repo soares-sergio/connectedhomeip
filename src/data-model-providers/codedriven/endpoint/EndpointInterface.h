@@ -47,18 +47,14 @@ public:
 
     virtual CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const = 0;
 
+/**
+ * An implementation of the EndpointInterface MUST ensure that the underlying
+ * data returned here remains valid for the lifetime of the implementation instance.
+ * This is a non-owning view of the unique endpoint ID data.
+ */
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
-    virtual MutableCharSpan EndpointUniqueID() const = 0;
+    virtual CharSpan EndpointUniqueID() const = 0;
 #endif
-
-    /**
-     * @brief Populates the provided buffer with pointers to all ServerClusterInterface instances
-     *        hosted on this endpoint. The returned pointers shall be valid as long as the
-     *        EndpointInterface instance is valid.
-     *
-     * @param[out] out The buffer to fill with ServerClusterInterface pointers.
-     * @return CHIP_NO_ERROR on success or CHIP_ERROR_NO_MEMORY if the buffer is too small.
-     */
 };
 
 } // namespace app

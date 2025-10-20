@@ -1,15 +1,35 @@
-#include "descriptor-cluster.h"
+/**
+ *
+ *    Copyright (c) 2025 Project CHIP Authors
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 
+#include <app/clusters/descriptor/descriptor-cluster.h>
 #include <app/server-cluster/AttributeListBuilder.h>
+#include <clusters/Descriptor/Attributes.h>
 #include <clusters/Descriptor/ClusterId.h>
 #include <clusters/Descriptor/Metadata.h>
+#include <clusters/Descriptor/Structs.h>
+#include <clusters/shared/Structs.h>
 #include <lib/core/DataModelTypes.h>
 
+using namespace chip;
+using namespace chip::app;
+using namespace chip::app::Clusters;
 using namespace chip::app::Clusters::Descriptor;
 using namespace chip::app::Clusters::Descriptor::Attributes;
 using chip::Protocols::InteractionModel::Status;
-
-namespace chip::app::Clusters {
 
 namespace {
 /// Figures out if `childId` is a descendant of `parentId` given some specific endpoint entries
@@ -43,13 +63,11 @@ bool IsDescendantOf(const DataModel::EndpointEntry * __restrict__ childEndpoint,
     }
 }
 
-CHIP_ERROR ReadTagListAttribute(DataModel::Provider & provider, EndpointId endpoint, AttributeValueEncoder & aEncoder)
+CHIP_ERROR ReadTagListAttribute(Span<const Clusters::Globals::Structs::SemanticTagStruct::Type> semanticTagsList,
+                                EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
-    ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
-    ReturnErrorOnFailure(provider.SemanticTags(endpoint, semanticTagsList));
-
     return aEncoder.EncodeList([&semanticTagsList](const auto & encoder) -> CHIP_ERROR {
-        for (const auto & tag : semanticTagsList.TakeBuffer())
+        for (const auto & tag : semanticTagsList)
         {
             ReturnErrorOnFailure(encoder.Encode(tag));
         }
@@ -65,11 +83,10 @@ CHIP_ERROR ReadDeviceAttribute(DataModel::Provider & provider, EndpointId endpoi
     auto deviceTypes = deviceTypesList.TakeBuffer();
 
     CHIP_ERROR err = aEncoder.EncodeList([&deviceTypes](const auto & encoder) -> CHIP_ERROR {
-        Descriptor::Structs::DeviceTypeStruct::Type deviceStruct;
         for (const auto & type : deviceTypes)
         {
-            deviceStruct.deviceType = type.deviceTypeId;
-            deviceStruct.revision   = type.deviceTypeRevision;
+            Descriptor::Structs::DeviceTypeStruct::Type deviceStruct{ .deviceType = type.deviceTypeId,
+                                                                      .revision   = type.deviceTypeRevision };
             ReturnErrorOnFailure(encoder.Encode(deviceStruct));
         }
 
@@ -84,7 +101,7 @@ CHIP_ERROR ReadPartsAttribute(DataModel::Provider & provider, EndpointId endpoin
     ReadOnlyBufferBuilder<DataModel::EndpointEntry> endpointsList;
     ReturnErrorOnFailure(provider.Endpoints(endpointsList));
     auto endpoints = endpointsList.TakeBuffer();
-    if (endpoint == 0x00)
+    if (endpoint == kRootEndpointId)
     {
         return aEncoder.EncodeList([&endpoints](const auto & encoder) -> CHIP_ERROR {
             for (const auto & ep : endpoints)
@@ -152,11 +169,20 @@ CHIP_ERROR ReadPartsAttribute(DataModel::Provider & provider, EndpointId endpoin
 
 } // namespace
 
+namespace chip::app::Clusters {
 CHIP_ERROR DescriptorCluster::Attributes(const ConcreteClusterPath & path,
                                          ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
 {
     AttributeListBuilder listBuilder(builder);
-    return listBuilder.Append(Span(Descriptor::Attributes::kMandatoryMetadata), {});
+
+    AttributeListBuilder::OptionalAttributeEntry optionalAttributeEntries[] = {
+        { !mSemanticTags.empty(), TagList::kMetadataEntry },
+#if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+        { mEnabledOptionalAttributes.IsSet(EndpointUniqueID::Id), EndpointUniqueID::kMetadataEntry },
+#endif
+    };
+
+    return listBuilder.Append(Span(Attributes::kMandatoryMetadata), Span(optionalAttributeEntries));
 }
 
 DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
@@ -165,13 +191,12 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
     switch (request.path.mAttributeId)
     {
     case FeatureMap::Id: {
-        ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
-        CHIP_ERROR err = mContext->provider.SemanticTags(request.path.mEndpointId, semanticTagsList);
-        if (err == CHIP_NO_ERROR && !semanticTagsList.IsEmpty())
+        BitFlags<Descriptor::Feature> features;
+        if (!mSemanticTags.empty())
         {
-            mFeatureFlags.Set(Descriptor::Feature::kTagList);
+            features.Set(Descriptor::Feature::kTagList);
         }
-        return encoder.Encode(mFeatureFlags);
+        return encoder.Encode(features);
     }
     case ClusterRevision::Id:
         return encoder.Encode(Descriptor::kRevision);
@@ -179,7 +204,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
         return ReadDeviceAttribute(mContext->provider, request.path.mEndpointId, encoder);
     case ServerList::Id: {
         ReadOnlyBufferBuilder<DataModel::ServerClusterEntry> builder;
-        ReturnErrorOnFailure(mContext->provider.ServerClusters(mPath.mEndpointId, builder));
+        ReturnErrorOnFailure(mContext->provider.ServerClusters(request.path.mEndpointId, builder));
         ReadOnlyBuffer<DataModel::ServerClusterEntry> buffer = builder.TakeBuffer();
         return encoder.EncodeList([&buffer](const auto & itemEncoder) -> CHIP_ERROR {
             for (const auto & entry : buffer)
@@ -191,7 +216,7 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
     }
     case ClientList::Id: {
         ReadOnlyBufferBuilder<ClusterId> builder;
-        ReturnErrorOnFailure(mContext->provider.ClientClusters(mPath.mEndpointId, builder));
+        ReturnErrorOnFailure(mContext->provider.ClientClusters(request.path.mEndpointId, builder));
         ReadOnlyBuffer<ClusterId> buffer = builder.TakeBuffer();
         return encoder.EncodeList([&buffer](const auto & itemEncoder) -> CHIP_ERROR {
             for (const auto & clusterId : buffer)
@@ -204,13 +229,13 @@ DataModel::ActionReturnStatus DescriptorCluster::ReadAttribute(const DataModel::
     case PartsList::Id:
         return ReadPartsAttribute(mContext->provider, request.path.mEndpointId, encoder);
     case TagList::Id:
-        return ReadTagListAttribute(mContext->provider, request.path.mEndpointId, encoder);
+        return ReadTagListAttribute(mSemanticTags, request.path.mEndpointId, encoder);
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
     case EndpointUniqueID::Id: {
-        char buffer[chip::app::Clusters::Descriptor::Attributes::EndpointUniqueID::TypeInfo::MaxLength()] = { 0 };
+        char buffer[EndpointUniqueID::TypeInfo::MaxLength()] = { 0 };
         MutableCharSpan epUniqueId(buffer);
-        ReturnErrorOnFailure(mContext->provider.EndpointUniqueID(endpoint, epUniqueId));
-        return aEncoder.Encode(epUniqueId);
+        ReturnErrorOnFailure(mContext->provider.EndpointUniqueID(request.path.mEndpointId, epUniqueId));
+        return encoder.Encode(epUniqueId);
     }
 #endif
     default:

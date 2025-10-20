@@ -62,7 +62,11 @@ public:
         Builder & SetDeviceTypes(Span<const DataModel::DeviceTypeEntry> deviceTypes);
 
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+<<<<<<< HEAD
         Builder & SetEndpointUniqueId(MutableCharSpan endpointUniqueId);
+=======
+        Builder & SetEndpointUniqueId(CharSpan endpointUniqueId);
+>>>>>>> master
 #endif
         SpanEndpoint Build();
 
@@ -70,6 +74,10 @@ public:
         Span<const ClusterId> mClientClusters;
         Span<const SemanticTag> mSemanticTags;
         Span<const DataModel::DeviceTypeEntry> mDeviceTypes;
+
+#if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+        CharSpan mEndpointUniqueId;
+#endif
     };
 
     ~SpanEndpoint() override = default;
@@ -89,13 +97,18 @@ public:
     CHIP_ERROR ClientClusters(ReadOnlyBufferBuilder<ClusterId> & out) const override;
 
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
-    MutableCharSpan EndpointUniqueID();
+    CharSpan EndpointUniqueID() const override;
 #endif
 
 private:
     // Private constructor for Builder
+#if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
+    SpanEndpoint(const Span<const ClusterId> & clientClusters, const Span<const SemanticTag> & semanticTags,
+                 const Span<const DataModel::DeviceTypeEntry> & deviceTypes, const CharSpan & uniqueEndpointId);
+#else
     SpanEndpoint(const Span<const ClusterId> & clientClusters, const Span<const SemanticTag> & semanticTags,
                  const Span<const DataModel::DeviceTypeEntry> & deviceTypes);
+#endif
 
     // Iteration methods
     Span<const DataModel::DeviceTypeEntry> mDeviceTypes;
@@ -103,7 +116,7 @@ private:
     Span<const ClusterId> mClientClusters;
 
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
-    MutableCharSpan mEndpointUniqueId;
+    CharSpan mEndpointUniqueId;
 #endif
 };
 

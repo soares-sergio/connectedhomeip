@@ -16,9 +16,15 @@
  */
 
 #include <app/clusters/descriptor/descriptor-cluster.h>
+
+#if !CHIP_CONFIG_SKIP_APP_SPECIFIC_GENERATED_HEADER_INCLUDES
 #include <app/static-cluster-config/Descriptor.h>
+#endif // CHIP_CONFIG_SKIP_APP_SPECIFIC_GENERATED_HEADER_INCLUDES
+
+#include <app/util/attribute-storage.h>
 #include <app/util/config.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
+#include <lib/core/CHIPConfig.h>
 
 using namespace chip;
 using namespace chip::app;
@@ -27,32 +33,77 @@ using namespace chip::app::Clusters::Descriptor;
 
 namespace {
 
-static constexpr size_t kDescriptorFixedClusterCount = Descriptor::StaticApplicationConfig::kFixedClusterConfig.size();
-static constexpr size_t kDescriptorMaxClusterCount   = kDescriptorFixedClusterCount + CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT;
+/**
+ * This is a DescriptorCluster class made specifically to fetch the tag list once through ember before one of either the
+ * Attributes() or ReadAttribute() functions are called. This can NOT be called before endpoint init and passed to the constructor
+ * of the regular DescriptorCluster class. This is because for fixed endpoints, we define endpoints in emberAfEndpointConfigure()
+ * and init them in emberAfInit() with back to back calls in InitDataModelHandler(). For dynamic endpoints, we init endpoints in
+ * emberAfSetDynamicEndpointWithEpUniqueId() by calling emberAfEndpointEnableDisable(), which calls initializeEndpoint(). The tag
+ * list is a fixed attribute, but to maintain backwards compatiblility we get that information within the functions here.
+ */
+class EmberDescriptorCluster : public DescriptorCluster
+{
+public:
+    EmberDescriptorCluster(EndpointId endpointId, DescriptorCluster::OptionalAttributesSet optionalAttributeSet,
+                           Span<const SemanticTag> semanticTags) :
+        DescriptorCluster(endpointId, optionalAttributeSet, semanticTags)
+    {}
 
-LazyRegisteredServerCluster<DescriptorCluster> gServer;
+    CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override
+    {
+        if (!mFetchedSemanticTags)
+        {
+            GetSemanticTagsForEndpoint(path.mEndpointId, mSemanticTags);
+            mFetchedSemanticTags = true;
+        }
+        return DescriptorCluster::Attributes(path, builder);
+    }
+
+    DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
+                                                AttributeValueEncoder & encoder) override
+    {
+        if (!mFetchedSemanticTags)
+        {
+            GetSemanticTagsForEndpoint(request.path.mEndpointId, mSemanticTags);
+            mFetchedSemanticTags = true;
+        }
+        return DescriptorCluster::ReadAttribute(request, encoder);
+    }
+
+private:
+    bool mFetchedSemanticTags = false;
+};
+
+#if CHIP_CONFIG_SKIP_APP_SPECIFIC_GENERATED_HEADER_INCLUDES
+static constexpr size_t kDescriptorFixedClusterCount = 0;
+#else
+static constexpr size_t kDescriptorFixedClusterCount = Descriptor::StaticApplicationConfig::kFixedClusterConfig.size();
+#endif
+static constexpr size_t kDescriptorMaxClusterCount = kDescriptorFixedClusterCount + CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT;
+
+LazyRegisteredServerCluster<EmberDescriptorCluster> gServers[kDescriptorMaxClusterCount];
 
 class IntegrationDelegate : public CodegenClusterIntegration::Delegate
 {
 public:
-    ServerClusterRegistration & CreateRegistration(EndpointId endpointId, unsigned emberEndpointIndex,
+    ServerClusterRegistration & CreateRegistration(EndpointId endpointId, unsigned clusterInstanceIndex,
                                                    uint32_t optionalAttributeBits, uint32_t featureMap) override
     {
-        gServer.Create(endpointId, BitFlags<Descriptor::Feature>(featureMap));
-        return gServer.Registration();
+        gServers[clusterInstanceIndex].Create(endpointId, DescriptorCluster::OptionalAttributesSet(optionalAttributeBits),
+                                              Span<const Clusters::Descriptor::Structs::SemanticTagStruct::Type>());
+        return gServers[clusterInstanceIndex].Registration();
     }
 
-    ServerClusterInterface * FindRegistration(unsigned emberEndpointIndex) override
+    ServerClusterInterface * FindRegistration(unsigned clusterInstanceIndex) override
     {
-        VerifyOrReturnValue(gServer.IsConstructed(), nullptr);
-        return &gServer.Cluster();
+        VerifyOrReturnValue(gServers[clusterInstanceIndex].IsConstructed(), nullptr);
+        return &gServers[clusterInstanceIndex].Cluster();
     }
-    void ReleaseRegistration(unsigned emberEndpointIndex) override { gServer.Destroy(); }
+    void ReleaseRegistration(unsigned clusterInstanceIndex) override { gServers[clusterInstanceIndex].Destroy(); }
 };
-
 } // namespace
 
-void emberAfDescriptorClusterServerInitCallback(EndpointId endpointId)
+void MatterDescriptorClusterInitCallback(EndpointId endpointId)
 {
     IntegrationDelegate integrationDelegate;
 
@@ -62,13 +113,13 @@ void emberAfDescriptorClusterServerInitCallback(EndpointId endpointId)
             .clusterId                 = Descriptor::Id,
             .fixedClusterInstanceCount = kDescriptorFixedClusterCount,
             .maxClusterInstanceCount   = kDescriptorMaxClusterCount,
-            .fetchFeatureMap           = true,
-            .fetchOptionalAttributes   = false,
+            .fetchFeatureMap           = false,
+            .fetchOptionalAttributes   = true,
         },
         integrationDelegate);
 }
 
-void MatterDescriptorClusterServerShutdownCallback(EndpointId endpointId)
+void MatterDescriptorClusterShutdownCallback(EndpointId endpointId)
 {
     IntegrationDelegate integrationDelegate;
 
