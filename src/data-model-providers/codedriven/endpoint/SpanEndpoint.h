@@ -62,11 +62,7 @@ public:
         Builder & SetDeviceTypes(Span<const DataModel::DeviceTypeEntry> deviceTypes);
 
 #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID
-<<<<<<< HEAD
-        Builder & SetEndpointUniqueId(MutableCharSpan endpointUniqueId);
-=======
         Builder & SetEndpointUniqueId(CharSpan endpointUniqueId);
->>>>>>> master
 #endif
         SpanEndpoint Build();
 
