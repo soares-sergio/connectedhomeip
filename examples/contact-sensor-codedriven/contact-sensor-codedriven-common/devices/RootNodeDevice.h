@@ -17,8 +17,8 @@
 #pragma once
 
 #include <app/clusters/network-commissioning/network-commissioning.h>
-#include <cluster-impl/operational-credentials-cluster.h>
-#include <cluster-impl/access-control-cluster.h>
+#include <app/clusters/operational-credentials-server/operational-credentials-cluster.h>
+#include <app/clusters/access-control-server/access-control-cluster.h>
 #include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
 #include <app/clusters/basic-information/BasicInformationCluster.h>
 #include <app/clusters/general-commissioning-server/general-commissioning-cluster.h>
