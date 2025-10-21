@@ -24,11 +24,12 @@ constexpr DeviceTypeId kContactSensorDeviceTypeRevision = 2;
 
 CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(0x0015),
+    const Clusters::Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(0x0015),
                                                        .revision   = kContactSensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
-    mIdentifyCluster.Create(endpoint);
+    // mIdentifyCluster.Create(endpoint);
+    mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, mTimerDelegate));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
     mBooleanStateCluster.Create(endpoint);
@@ -40,7 +41,7 @@ CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDa
 void ContactSensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     provider.RemoveEndpoint(mEndpointId);
-    UnRegisterBridgedNodeClusters(provider);
+    // UnRegisterBridgedNodeClusters(provider);
     if (mBooleanStateCluster.IsConstructed())
     {
         provider.RemoveCluster(&mBooleanStateCluster.Cluster());

@@ -1,10 +1,12 @@
 #pragma once
 
 #include <app/util/basic-types.h>
-#include <cluster-impl/bridged-device-basic-information-cluster.h>
-#include <cluster-impl/descriptor-cluster.h>
+#include <app/clusters/descriptor/descriptor-cluster.h>
+// #include <cluster-impl/descriptor-cluster.h>
+// #include <cluster-impl/bridged-device-basic-information-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
+#include <clusters/Descriptor/Structs.h>
 
 #include <string>
 
@@ -55,12 +57,12 @@ protected:
     /// Internal registration functions for common device clusters
     /// Subclasses are expected to call these
     CHIP_ERROR RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
-                                  const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId);
-    CHIP_ERROR UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider);
+                                  const Clusters::Descriptor::Structs::DeviceTypeStruct::Type & deviceType, EndpointId parentId);
+    // CHIP_ERROR UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider);
 
     chip::EndpointId mEndpointId = kInvalidEndpointId;
     std::string mUniqueId;
-    Clusters::DescriptorCluster::DeviceType mDeviceType;
+    Clusters::Descriptor::Structs::DeviceTypeStruct::Type mDeviceType;
     EndpointInterfaceRegistration mEndpointRegistration;
 
     // Common clusters..

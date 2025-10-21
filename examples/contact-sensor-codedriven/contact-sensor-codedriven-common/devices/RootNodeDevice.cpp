@@ -32,7 +32,7 @@ namespace app {
 
 CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<uint32_t>(0x0016), .revision = 3 };
+    const Clusters::Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<uint32_t>(0x0016), .revision = 3 };
     ReturnErrorOnFailure(RegisterDescriptor(kRootEndpointId, provider, deviceType, parentId));
 
     mBasicInformationCluster.Create();
@@ -88,7 +88,7 @@ CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelPr
 void RootNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     provider.RemoveEndpoint(mEndpointId);
-    UnRegisterBridgedNodeClusters(provider);
+    // UnRegisterBridgedNodeClusters(provider);
     if (mBasicInformationCluster.IsConstructed())
     {
         provider.RemoveCluster(&mBasicInformationCluster.Cluster());

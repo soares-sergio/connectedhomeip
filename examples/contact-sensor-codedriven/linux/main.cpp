@@ -21,9 +21,13 @@
 #include <app/clusters/access-control-server/access-control-cluster.h>
 #include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
 #include <app/clusters/basic-information/BasicInformationCluster.h>
+#include <app/clusters/descriptor/descriptor-cluster.h>
+// #include <cluster-impl/descriptor-cluster.h>
 #include <app/clusters/general-commissioning-server/general-commissioning-cluster.h>
 #include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
 #include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
+#include <app/clusters/identify-server/IdentifyCluster.h>
+// #include <cluster-impl/identify-cluster.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <app/clusters/operational-credentials-server/operational-credentials-cluster.h>
 #include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
@@ -41,17 +45,9 @@
 #include <system/SystemLayer.h>
 #include <devices/ContactSensorDevice.h>
 #include <devices/RootNodeDevice.h>
-// #include <devices/Manager.h>
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
-
-// Code driven clusters made for this app, these are clusters that
-// need some additional work before landing upstream
-// #include <cluster-impl/access-control-cluster.h>
-#include <cluster-impl/descriptor-cluster.h>
-#include <cluster-impl/identify-cluster.h>
-// #include <cluster-impl/operational-credentials-cluster.h>
 
 #if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
 #include <imgui_ui/ui.h>

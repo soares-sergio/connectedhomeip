@@ -210,14 +210,14 @@ source_set("groups-cluster") {
 
 group("cluster-impl") {
   public_deps = [
-    ":access-control-cluster",
-    ":boolean-state-cluster",
-    ":bridged-device-basic-information",
-    ":descriptor",
-    ":groups-cluster",
-    ":identify",
-    ":occupancy-sensor",
-    ":on-off-cluster",
+    #":access-control-cluster",
+    #":boolean-state-cluster",
+    #":bridged-device-basic-information",
+    #":descriptor",
+    #":groups-cluster",
+    #":identify",
+    #":occupancy-sensor",
+    #":on-off-cluster",
     #":operational-credentials-cluster",
   ]
 }

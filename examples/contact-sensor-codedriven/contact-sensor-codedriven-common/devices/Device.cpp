@@ -6,7 +6,7 @@ using namespace chip::app::Clusters;
 namespace chip::app {
 
 CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
-                                      const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId)
+                                      const Clusters::Descriptor::Structs::DeviceTypeStruct::Type & deviceType, EndpointId parentId)
 {
     VerifyOrReturnError(mEndpointId == kInvalidEndpointId, CHIP_ERROR_INCORRECT_STATE);
     mDeviceType = deviceType;
@@ -14,9 +14,10 @@ CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataM
 
     /// std::initializer_list does not work well with std::forward, so use the
     /// vector constructor instead
-    std::vector<DescriptorCluster::DeviceType> deviceTypes{ deviceType };
+    // std::vector<DescriptorCluster::DeviceType> deviceTypes{ deviceType };
 
-    mDescriptorCluster.Create(endpoint, deviceTypes);
+    // mDescriptorCluster.Create(endpoint, deviceTypes);
+    mDescriptorCluster.Create(endpoint, DescriptorCluster::OptionalAttributesSet(0), Span<const SemanticTag>());
     ReturnErrorOnFailure(provider.AddCluster(mDescriptorCluster.Registration()));
 
     mEndpointRegistration.endpointEntry = DataModel::EndpointEntry{
@@ -27,14 +28,14 @@ CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataM
     return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR Device::UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider)
-{
-    ReturnErrorOnFailure(provider.RemoveCluster(&mDescriptorCluster.Cluster()));
+// CHIP_ERROR Device::UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider)
+// {
+//     ReturnErrorOnFailure(provider.RemoveCluster(&mDescriptorCluster.Cluster()));
 
-    mEndpointId = kInvalidEndpointId;
+//     mEndpointId = kInvalidEndpointId;
 
-    return CHIP_NO_ERROR;
-}
+//     return CHIP_NO_ERROR;
+// }
 
 CHIP_ERROR Device::DeviceTypes(ReadOnlyBufferBuilder<DataModel::DeviceTypeEntry> & out) const
 {

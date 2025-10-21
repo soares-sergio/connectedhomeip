@@ -46,28 +46,30 @@ bool IsDescendantOf(const DataModel::EndpointEntry * __restrict__ childEndpoint,
 
 CHIP_ERROR ReadFeatureMap(EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
-    BitFlags<Feature> featureFlags;
-    ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
-    CHIP_ERROR err = InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList);
-    if (err == CHIP_NO_ERROR && !semanticTagsList.IsEmpty())
-    {
-        featureFlags.Set(Descriptor::Feature::kTagList);
-    }
-    return aEncoder.Encode(featureFlags);
+    // BitFlags<Feature> featureFlags;
+    // ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
+    // CHIP_ERROR err = InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList);
+    // if (err == CHIP_NO_ERROR && !semanticTagsList.IsEmpty())
+    // {
+    //     featureFlags.Set(Descriptor::Feature::kTagList);
+    // }
+    // return aEncoder.Encode(featureFlags);
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR ReadTagListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
-    ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
-    ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList));
+    // ReadOnlyBufferBuilder<DataModel::Provider::SemanticTag> semanticTagsList;
+    // ReturnErrorOnFailure(InteractionModelEngine::GetInstance()->GetDataModelProvider()->SemanticTags(endpoint, semanticTagsList));
 
-    return aEncoder.EncodeList([&semanticTagsList](const auto & encoder) -> CHIP_ERROR {
-        for (const auto & tag : semanticTagsList.TakeBuffer())
-        {
-            ReturnErrorOnFailure(encoder.Encode(tag));
-        }
-        return CHIP_NO_ERROR;
-    });
+    // return aEncoder.EncodeList([&semanticTagsList](const auto & encoder) -> CHIP_ERROR {
+    //     for (const auto & tag : semanticTagsList.TakeBuffer())
+    //     {
+    //         ReturnErrorOnFailure(encoder.Encode(tag));
+    //     }
+    //     return CHIP_NO_ERROR;
+    // });
+    return CHIP_NO_ERROR;
 }
 
 // CHIP_ERROR ReadDeviceAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)

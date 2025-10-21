@@ -19,9 +19,13 @@ source_set("devices") {
   ]
 
   public_deps = [
-    "${chip_root}/examples/contact-sensor-codedriven/contact-sensor-codedriven-common/cluster-impl",
+    #"${chip_root}/examples/contact-sensor-codedriven/contact-sensor-codedriven-common/cluster-impl",
+    "${chip_root}/src/app/clusters/access-control-server",
     "${chip_root}/src/app/clusters/administrator-commissioning-server",
     "${chip_root}/src/app/clusters/basic-information",
+    "${chip_root}/src/app/clusters/boolean-state-server",
+    "${chip_root}/src/app/clusters/descriptor",
+    "${chip_root}/src/app/clusters/identify-server",
     "${chip_root}/src/app/clusters/general-commissioning-server",
     "${chip_root}/src/app/clusters/general-diagnostics-server",
     "${chip_root}/src/app/clusters/group-key-mgmt-server",
