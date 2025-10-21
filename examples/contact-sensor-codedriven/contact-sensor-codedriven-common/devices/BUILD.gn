@@ -12,14 +12,11 @@ source_set("devices") {
     "ContactSensorDevice.h",
     "Device.cpp",
     "Device.h",
-#    "Manager.cpp",
-#    "Manager.h",
     "RootNodeDevice.cpp",
     "RootNodeDevice.h",
   ]
 
   public_deps = [
-    #"${chip_root}/examples/contact-sensor-codedriven/contact-sensor-codedriven-common/cluster-impl",
     "${chip_root}/src/app/clusters/access-control-server",
     "${chip_root}/src/app/clusters/administrator-commissioning-server",
     "${chip_root}/src/app/clusters/basic-information",

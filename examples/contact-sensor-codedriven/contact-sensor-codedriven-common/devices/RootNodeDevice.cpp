@@ -88,7 +88,6 @@ CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelPr
 void RootNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     provider.RemoveEndpoint(mEndpointId);
-    // UnRegisterBridgedNodeClusters(provider);
     if (mBasicInformationCluster.IsConstructed())
     {
         provider.RemoveCluster(&mBasicInformationCluster.Cluster());

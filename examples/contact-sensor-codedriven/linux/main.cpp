@@ -22,12 +22,10 @@
 #include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
 #include <app/clusters/basic-information/BasicInformationCluster.h>
 #include <app/clusters/descriptor/descriptor-cluster.h>
-// #include <cluster-impl/descriptor-cluster.h>
 #include <app/clusters/general-commissioning-server/general-commissioning-cluster.h>
 #include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
 #include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
 #include <app/clusters/identify-server/IdentifyCluster.h>
-// #include <cluster-impl/identify-cluster.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <app/clusters/operational-credentials-server/operational-credentials-cluster.h>
 #include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>

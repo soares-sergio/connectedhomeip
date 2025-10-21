@@ -28,7 +28,6 @@ CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDa
                                                        .revision   = kContactSensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
-    // mIdentifyCluster.Create(endpoint);
     mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, mTimerDelegate));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
@@ -41,7 +40,6 @@ CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDa
 void ContactSensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     provider.RemoveEndpoint(mEndpointId);
-    // UnRegisterBridgedNodeClusters(provider);
     if (mBooleanStateCluster.IsConstructed())
     {
         provider.RemoveCluster(&mBooleanStateCluster.Cluster());

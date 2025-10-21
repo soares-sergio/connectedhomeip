@@ -18,7 +18,6 @@
 
 #include <app/clusters/boolean-state-server/boolean-state-cluster.h>
 #include <app/clusters/identify-server/IdentifyCluster.h>
-// #include <cluster-impl/identify-cluster.h>
 #include <app/TimerDelegates.h>
 #include <devices/Device.h>
 

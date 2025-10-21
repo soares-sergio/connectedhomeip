@@ -2,8 +2,6 @@
 
 #include <app/util/basic-types.h>
 #include <app/clusters/descriptor/descriptor-cluster.h>
-// #include <cluster-impl/descriptor-cluster.h>
-// #include <cluster-impl/bridged-device-basic-information-cluster.h>
 #include <data-model-providers/codedriven/CodeDrivenDataModelProvider.h>
 #include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
 #include <clusters/Descriptor/Structs.h>
