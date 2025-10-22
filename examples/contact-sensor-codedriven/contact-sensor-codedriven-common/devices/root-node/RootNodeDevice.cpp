@@ -64,11 +64,6 @@ CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelPr
     mSoftwareDiagnosticsServerCluster.Create(SoftwareDiagnosticsLogic::OptionalAttributeSet{});
     ReturnErrorOnFailure(provider.AddCluster(mSoftwareDiagnosticsServerCluster.Registration()));
 
-    mWiFiDiagnosticsServerCluster.Create(endpointId, DeviceLayer::GetDiagnosticDataProvider(),
-                                       WiFiDiagnosticsServerLogic::OptionalAttributeSet{},
-                                       BitFlags<WiFiNetworkDiagnostics::Feature>{});
-    ReturnErrorOnFailure(provider.AddCluster(mWiFiDiagnosticsServerCluster.Registration()));
-
     mAccessControlCluster.Create();
     ReturnErrorOnFailure(provider.AddCluster(mAccessControlCluster.Registration()));
 
@@ -78,9 +73,6 @@ CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelPr
                                                        .dnssdServer     = app::DnssdServer::Instance(),
                                                        .commissioningWindowManager = Server::GetInstance().GetCommissioningWindowManager() });
     ReturnErrorOnFailure(provider.AddCluster(mOperationalCredentialsCluster.Registration()));
-
-    mNetworkCommissioningCluster.Create(endpointId, &mWifiDriver);
-    ReturnErrorOnFailure(provider.AddCluster(mNetworkCommissioningCluster.Registration()));
 
     return provider.AddEndpoint(mEndpointRegistration);
 }
@@ -118,11 +110,6 @@ void RootNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider)
         provider.RemoveCluster(&mSoftwareDiagnosticsServerCluster.Cluster());
         mSoftwareDiagnosticsServerCluster.Destroy();
     }
-    if (mWiFiDiagnosticsServerCluster.IsConstructed())
-    {
-        provider.RemoveCluster(&mWiFiDiagnosticsServerCluster.Cluster());
-        mWiFiDiagnosticsServerCluster.Destroy();
-    }
     if (mAccessControlCluster.IsConstructed())
     {
         provider.RemoveCluster(&mAccessControlCluster.Cluster());
@@ -133,10 +120,34 @@ void RootNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider)
         provider.RemoveCluster(&mOperationalCredentialsCluster.Cluster());
         mOperationalCredentialsCluster.Destroy();
     }
+}
+
+CHIP_ERROR WifiRootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelProvider & provider, EndpointId parentId) 
+{
+    ReturnErrorOnFailure(RootNodeDevice::Register(endpointId, provider, parentId));
+    
+    mWifiDiagnosticsCluster.Create(kRootEndpointId, DeviceLayer::GetDiagnosticDataProvider(),
+                                    WiFiDiagnosticsServerLogic::OptionalAttributeSet{},
+                                    BitFlags<WiFiNetworkDiagnostics::Feature>{});
+    ReturnErrorOnFailure(provider.AddCluster(mWifiDiagnosticsCluster.Registration()));
+
+    mNetworkCommissioningCluster.Create(kRootEndpointId, mWifiDriver);
+    ReturnErrorOnFailure(provider.AddCluster(mNetworkCommissioningCluster.Registration()));
+    
+    return CHIP_NO_ERROR;
+}
+
+void WifiRootNodeDevice::UnRegister(CodeDrivenDataModelProvider & provider) {
+    RootNodeDevice::UnRegister(provider);
     if (mNetworkCommissioningCluster.IsConstructed())
     {
         provider.RemoveCluster(&mNetworkCommissioningCluster.Cluster());
         mNetworkCommissioningCluster.Destroy();
+    }
+    if (mWifiDiagnosticsCluster.IsConstructed())
+    {
+        provider.RemoveCluster(&mWifiDiagnosticsCluster.Cluster());
+        mWifiDiagnosticsCluster.Destroy();
     }
 }
 

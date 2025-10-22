@@ -128,7 +128,7 @@ void StopSignalHandler(int /* signal */)
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
-    static RootNodeDevice rootNodeDevice(sWiFiDriver);
+    static WifiRootNodeDevice rootNodeDevice(&sWiFiDriver);
     static std::unique_ptr<Device> constructedDevice;
 
     rootNodeDevice.Register(kRootEndpointId, dataModelProvider, kInvalidEndpointId);

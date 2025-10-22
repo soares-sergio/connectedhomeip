@@ -36,14 +36,15 @@ namespace app {
 class RootNodeDevice : public Device
 {
 public:
-    RootNodeDevice(DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver) :
-        Device(), mWifiDriver(wifiDriver)
-    {}
     ~RootNodeDevice() override = default;
 
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                         EndpointId parentId = kInvalidEndpointId) override;
     void UnRegister(CodeDrivenDataModelProvider & provider) override;
+
+protected:
+    // Most implementations require network commissioning, so only subclasses have access to this.
+    RootNodeDevice() : Device() {}
 
 private:
     LazyRegisteredServerCluster<Clusters::BasicInformationCluster> mBasicInformationCluster;
@@ -53,24 +54,25 @@ private:
     LazyRegisteredServerCluster<Clusters::GeneralDiagnosticsCluster> mGeneralDiagnosticsCluster;
     LazyRegisteredServerCluster<Clusters::GroupKeyManagementCluster> mGroupKeyManagementCluster;
     LazyRegisteredServerCluster<Clusters::SoftwareDiagnosticsServerCluster> mSoftwareDiagnosticsServerCluster;
-    LazyRegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWiFiDiagnosticsServerCluster;
     LazyRegisteredServerCluster<Clusters::AccessControlCluster> mAccessControlCluster;
     LazyRegisteredServerCluster<Clusters::OperationalCredentialsCluster> mOperationalCredentialsCluster;
-    LazyRegisteredServerCluster<Clusters::NetworkCommissioningCluster> mNetworkCommissioningCluster;
-
-    DeviceLayer::NetworkCommissioning::WiFiDriver & mWifiDriver;
 };
 
-// class WiFiRootEndpoint : public RootNodeDevice {
-// public:
-//     WiFiRootEndpoint(DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver);
-//     ~WiFiRootEndpoint() override = default;
+class WifiRootNodeDevice : public RootNodeDevice {
+public:
+    WifiRootNodeDevice(DeviceLayer::NetworkCommissioning::WiFiDriver *wifiDriver) : RootNodeDevice(), mWifiDriver(wifiDriver)
+    {}
 
-//     CHIP_ERROR Register(CodeDrivenDataModelProvider & dataModelProvider) override;
-// private:
-//     RegisteredServerCluster<Clusters::NetworkCommissioningCluster> mNetworkCommissioningCluster;
-//     RegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWifiDiagnosticsCluster;
-// }
+    ~WifiRootNodeDevice() override = default;
+
+    CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
+                        EndpointId parentId = kInvalidEndpointId) override;
+    void UnRegister(CodeDrivenDataModelProvider & provider) override;
+private:
+    LazyRegisteredServerCluster<Clusters::NetworkCommissioningCluster> mNetworkCommissioningCluster;
+    LazyRegisteredServerCluster<Clusters::WiFiDiagnosticsServerCluster> mWifiDiagnosticsCluster;
+    DeviceLayer::NetworkCommissioning::WiFiDriver *mWifiDriver;
+};
 
 } // namespace app
 } // namespace chip
