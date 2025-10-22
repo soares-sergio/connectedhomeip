@@ -1,3 +1,20 @@
+/*
+ *
+ *    Copyright (c) 2025 Project CHIP Authors
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 #pragma once
 
 #include <app/util/basic-types.h>
@@ -31,10 +48,9 @@ enum class DeviceType : DeviceTypeId
 class Device : public EndpointInterface
 {
 public:
-    Device(std::string id) : mUniqueId(std::move(id)), mEndpointRegistration(*this, {}) {}
+    Device() : mEndpointRegistration(*this, {}) {}
     virtual ~Device() = default;
 
-    const std::string & GetUniqueId() const { return mUniqueId; }
     EndpointId GetEndpointId() const { return mEndpointId; }
 
     /// Register relevant clusters on the given endpoint
@@ -56,10 +72,8 @@ protected:
     /// Subclasses are expected to call these
     CHIP_ERROR RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                                   const Clusters::Descriptor::Structs::DeviceTypeStruct::Type & deviceType, EndpointId parentId);
-    // CHIP_ERROR UnRegisterBridgedNodeClusters(CodeDrivenDataModelProvider & provider);
 
     chip::EndpointId mEndpointId = kInvalidEndpointId;
-    std::string mUniqueId;
     Clusters::Descriptor::Structs::DeviceTypeStruct::Type mDeviceType;
     EndpointInterfaceRegistration mEndpointRegistration;
 

@@ -41,8 +41,9 @@
 #include <platform/PlatformManager.h>
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <system/SystemLayer.h>
-#include <devices/ContactSensorDevice.h>
-#include <devices/RootNodeDevice.h>
+#include <devices/device-factory/DeviceFactory.h>
+#include <devices/contact-sensor/ContactSensorDevice.h>
+#include <devices/root-node/RootNodeDevice.h>
 #include <DeviceInfoProviderImpl.h>
 #include <LinuxCommissionableDataProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
@@ -54,7 +55,6 @@
 #endif
 
 #include <AppMain.h>
-#include <devices/RootNodeDevice.h>
 #include <map>
 #include <string>
 
@@ -75,8 +75,39 @@ DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 // To hold SPAKE2+ verifier, discriminator, passcode
 LinuxCommissionableDataProvider gCommissionableDataProvider;
 
-RootNodeDevice rootNodeDevice("root", sWiFiDriver);
-ContactSensorDevice contactSensor("contact-sensot");
+// App custom argument handling
+constexpr uint16_t kOptionDeviceType = 0xffd0;
+const char * deviceTypeName = "contact-sensor"; //defaulting to contact sensor if not specified
+
+chip::ArgParser::OptionDef sAllDevicesAppOptionDefs[] = {
+    { "device", chip::ArgParser::kArgumentRequired, kOptionDeviceType },
+};
+
+bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int identifier, const char * name, const char * value)
+{
+    switch (identifier)
+    {
+    case kOptionDeviceType:
+        if (value == nullptr || !DeviceFactory::GetInstance().IsValidDevice(value))
+        {
+            ChipLogError(Support, "INTERNAL ERROR: Invalid device type: %s\n", value);
+            return false;
+        }
+        ChipLogProgress(AppServer, "Using the device type of %s", value);
+        deviceTypeName = value;
+        return true;
+    default:
+        ChipLogError(Support, "%s: INTERNAL ERROR: Unhandled option: %s\n", program, name);
+        return false;
+    }
+
+    return true;
+}
+
+chip::ArgParser::OptionSet sCmdLineOptions = { AllDevicesAppOptionHandler, // handler function
+                                               sAllDevicesAppOptionDefs,   // array of option definitions
+                                               "PROGRAM OPTIONS",          // help group
+                                               "-d, --device <contact-sensor|water-leak-detector>\n" };
 
 void StopSignalHandler(int /* signal */)
 {
@@ -97,8 +128,12 @@ void StopSignalHandler(int /* signal */)
     static chip::app::CodeDrivenDataModelProvider dataModelProvider =
         chip::app::CodeDrivenDataModelProvider(*delegate, attributePersistenceProvider);
 
+    static RootNodeDevice rootNodeDevice(sWiFiDriver);
+    static std::unique_ptr<Device> constructedDevice;
+
     rootNodeDevice.Register(kRootEndpointId, dataModelProvider, kInvalidEndpointId);
-    contactSensor.Register(1, dataModelProvider, kInvalidEndpointId);
+    constructedDevice = DeviceFactory::GetInstance().Create(deviceTypeName);
+    constructedDevice->Register(1, dataModelProvider, kInvalidEndpointId);
 
     return &dataModelProvider;
 }
@@ -221,7 +256,7 @@ CHIP_ERROR Initialize(int argc, char * argv[])
 {
     ChipLogProgress(AppServer, "Initializing...");
     ReturnErrorOnFailure(Platform::MemoryInit());
-    ReturnErrorOnFailure(ParseArguments(argc, argv));
+    ReturnErrorOnFailure(ParseArguments(argc, argv, &sCmdLineOptions));
     ReturnErrorOnFailure(DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(CHIP_CONFIG_KVS_PATH));
     ReturnErrorOnFailure(DeviceLayer::PlatformMgr().InitChipStack());
 

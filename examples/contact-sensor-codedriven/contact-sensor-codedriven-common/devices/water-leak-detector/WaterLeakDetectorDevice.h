@@ -19,16 +19,16 @@
 #include <app/clusters/boolean-state-server/boolean-state-cluster.h>
 #include <app/clusters/identify-server/IdentifyCluster.h>
 #include <app/TimerDelegates.h>
-#include <devices/Device.h>
+#include <devices/base-device/Device.h>
 
 namespace chip {
 namespace app {
 
-class ContactSensorDevice : public Device
+class WaterLeakDetectorDevice : public Device
 {
 public:
-    ContactSensorDevice(std::string id) : Device(std::move(id)) {}
-    ~ContactSensorDevice() override = default;
+    WaterLeakDetectorDevice() : Device() {}
+    ~WaterLeakDetectorDevice() override = default;
 
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
                         EndpointId parentId = kInvalidEndpointId) override;

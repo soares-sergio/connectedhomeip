@@ -14,18 +14,18 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include <devices/ContactSensorDevice.h>
+#include <devices/water-leak-detector/WaterLeakDetectorDevice.h>
 
 using namespace chip::app::Clusters;
 
 namespace chip::app {
 
-constexpr DeviceTypeId kContactSensorDeviceTypeRevision = 2;
+constexpr DeviceTypeId kWaterLeakDetectorDeviceTypeRevision = 1;
 
-CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
+CHIP_ERROR WaterLeakDetectorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const Clusters::Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(0x0015),
-                                                       .revision   = kContactSensorDeviceTypeRevision };
+    const Clusters::Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(0x0043),
+                                                       .revision   = kWaterLeakDetectorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, mTimerDelegate));
@@ -37,7 +37,7 @@ CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDa
     return provider.AddEndpoint(mEndpointRegistration);
 }
 
-void ContactSensorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
+void WaterLeakDetectorDevice::UnRegister(CodeDrivenDataModelProvider & provider)
 {
     provider.RemoveEndpoint(mEndpointId);
     if (mBooleanStateCluster.IsConstructed())

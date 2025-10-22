@@ -27,7 +27,7 @@
 #include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
 #include <app/clusters/wifi-network-diagnostics-server/wifi-network-diagnostics-cluster.h>
 #include <app/server-cluster/ServerClusterInterfaceRegistry.h>
-#include <devices/Device.h>
+#include <devices/base-device/Device.h>
 #include <platform/Linux/NetworkCommissioningDriver.h>
 
 namespace chip {
@@ -36,8 +36,8 @@ namespace app {
 class RootNodeDevice : public Device
 {
 public:
-    RootNodeDevice(std::string id, DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver) :
-        Device(std::move(id)), mWifiDriver(wifiDriver)
+    RootNodeDevice(DeviceLayer::NetworkCommissioning::WiFiDriver & wifiDriver) :
+        Device(), mWifiDriver(wifiDriver)
     {}
     ~RootNodeDevice() override = default;
 
