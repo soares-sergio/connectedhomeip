@@ -30,6 +30,8 @@ DataModel::ActionReturnStatus BridgedDeviceBasicInformationCluster::ReadAttribut
         return encoder.Encode(true); // for now claim always reachable
     case UniqueID::Id:
         return encoder.Encode(Span(mUniqueID.c_str(), mUniqueID.size())); // for now claim always reachable
+    case ProductName::Id:
+        return encoder.Encode(Span(mUniqueID.c_str(), mUniqueID.size()));
     default:
         return Status::UnsupportedAttribute;
     }

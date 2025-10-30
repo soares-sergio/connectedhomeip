@@ -53,6 +53,9 @@
 #endif
 
 #include <AppMain.h>
+#include <devices/BridgedNodeDevice.h>
+#include <devices/Device.h>
+#include <devices/OnOffDevice.h>
 #include <devices/RootNodeDevice.h>
 #include <map>
 #include <string>
@@ -89,6 +92,7 @@ std::unique_ptr<DeviceManager> gDeviceManager;
 
 // App custom argument handling
 constexpr uint16_t kOptionDeviceType = 0xffd0;
+constexpr uint16_t kRepeatedDevices  = 0xffd2;
 
 constexpr const char * kBridgeApp            = "bridge";
 constexpr const char * kContactSensorApp     = "contact-sensor";
@@ -104,15 +108,20 @@ std::map<std::string, DeviceType> kValidApps = { { kBridgeApp, DeviceType::kAggr
 DeviceType deviceType   = DeviceType::kAggregator; // Using a bridge as default
 const char * deviceName = kBridgeApp;
 
+bool addRepeatedDevices = false;
+DeviceType deviceTypeAddedToBridge = DeviceType::kOnOffLight;
+int numDevicesAddedToBridge = 0;
+
 chip::ArgParser::OptionDef sAllDevicesAppOptionDefs[] = {
     { "device", chip::ArgParser::kArgumentRequired, kOptionDeviceType },
+    { "add-repeated-endpoint", chip::ArgParser::kArgumentRequired, kRepeatedDevices}
 };
 
 bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int identifier, const char * name, const char * value)
 {
     switch (identifier)
     {
-    case kOptionDeviceType:
+    case kOptionDeviceType: {
         if (value == nullptr || kValidApps.find(value) == kValidApps.end())
         {
             ChipLogError(Support, "INTERNAL ERROR: Invalid device type: %s\n", value);
@@ -122,6 +131,19 @@ bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int i
         deviceType = kValidApps[value];
         deviceName = value;
         return true;
+    }
+    case kRepeatedDevices:{
+        addRepeatedDevices = true;
+        
+        std::string token;
+        std::stringstream ss(value);
+        std::getline(ss, token, ',');
+        deviceTypeAddedToBridge = kValidApps[token.c_str()];
+        std::getline(ss, token, ',');
+        numDevicesAddedToBridge = std::stoi(token);
+
+        return true;
+    }
     default:
         ChipLogError(Support, "%s: INTERNAL ERROR: Unhandled option: %s\n", program, name);
         return false;
@@ -133,7 +155,8 @@ bool AllDevicesAppOptionHandler(const char * program, OptionSet * options, int i
 chip::ArgParser::OptionSet sCmdLineOptions = { AllDevicesAppOptionHandler, // handler function
                                                sAllDevicesAppOptionDefs,   // array of option definitions
                                                "PROGRAM OPTIONS",          // help group
-                                               "-d, --device <bridge|contact-sensor|occupancy-sensor|light>\n" };
+                                               "-d, --device <bridge|contact-sensor|occupancy-sensor|light|plug>\n" 
+                                               "-a, --add-repeated-endpoint <device,N>\n"};
 
 void StopSignalHandler(int /* signal */)
 {
@@ -157,9 +180,42 @@ void StopSignalHandler(int /* signal */)
     gDeviceManager = std::make_unique<DeviceManager>(0 /* start endpoint id */, dataModelProvider);
 
     VerifyOrDie(RegisterNewDevice(DeviceType::kRootNode, "root-node", kInvalidEndpointId, *gDeviceManager, &sWiFiDriver) == CHIP_NO_ERROR);
-    VerifyOrDie(RegisterNewDevice(deviceType, deviceName, kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
 
     rpc::Start(33000, *gDeviceManager);
+    
+    if (addRepeatedDevices) {
+        VerifyOrDie(RegisterNewDevice(DeviceType::kAggregator, "Multi-device Bridge", kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
+
+        for(int i = 0; i < numDevicesAddedToBridge; i++){
+            std::string lightId = "light " + std::to_string(i);
+            std::string parentBridgedNodeId =  lightId + std::string("_bridged_node_device_parent");
+    
+            // Add bridge node device
+            CHIP_ERROR err1 =
+                gDeviceManager->AddDevice(std::make_unique<chip::app::BridgedNodeDevice>(parentBridgedNodeId), 1);
+            if (err1 != CHIP_NO_ERROR)
+            {
+                ChipLogError(AppServer, "Parent Bridged Node Device add failed: %" CHIP_ERROR_FORMAT, err1.Format());
+                return nullptr;
+            }
+    
+            // Add Child Device
+            Device * parentBridgedNodeDevice = gDeviceManager->GetDevice(parentBridgedNodeId.c_str());
+            if (parentBridgedNodeDevice == nullptr) {
+                ChipLogError(AppServer, "Could not find parent bridged node device");
+                return nullptr;
+            }
+    
+            CHIP_ERROR err2 = gDeviceManager->AddDevice(std::move(std::make_unique<chip::app::OnOffDevice>(lightId, deviceTypeAddedToBridge)), parentBridgedNodeDevice->GetEndpointId());
+            if (err2 != CHIP_NO_ERROR)
+            {
+                ChipLogError(AppServer, "Device add failed: %" CHIP_ERROR_FORMAT, err2.Format());
+                return nullptr;
+            }
+        }
+    } else {
+        VerifyOrDie(RegisterNewDevice(deviceType, deviceName, kInvalidEndpointId, *gDeviceManager) == CHIP_NO_ERROR);
+    }
 
     return &dataModelProvider;
 }
