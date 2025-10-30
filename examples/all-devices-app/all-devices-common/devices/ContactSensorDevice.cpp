@@ -29,11 +29,11 @@ DeviceType ContactSensorDevice::GetDeviceType() const
 
 CHIP_ERROR ContactSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kContactSensor),
+    const Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kContactSensor),
                                                        .revision   = kContactSensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
-    mIdentifyCluster.Create(endpoint);
+    mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, *std::make_unique<DefaultTimerDelegate>()));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
     mBooleanStateCluster.Create(endpoint);

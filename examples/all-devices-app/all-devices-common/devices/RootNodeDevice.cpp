@@ -37,7 +37,7 @@ DeviceType RootNodeDevice::GetDeviceType() const
 
 CHIP_ERROR RootNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<uint32_t>(GetDeviceType()), .revision = 3 };
+    const Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<uint32_t>(GetDeviceType()), .revision = 3 };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
     mBasicInformationCluster.Create();
@@ -54,7 +54,7 @@ CHIP_ERROR RootNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataMod
 
     ReturnErrorOnFailure(provider.AddCluster(mBasicInformationCluster.Registration()));
 
-    mGeneralCommissioningCluster.Create(BitFlags<GeneralCommissioning::Feature>{}, GeneralCommissioningCluster::OptionalAttributes{});
+    mGeneralCommissioningCluster.Create();
     ReturnErrorOnFailure(provider.AddCluster(mGeneralCommissioningCluster.Registration()));
 
     mAdministratorCommissioningCluster.Create(mEndpointId, BitFlags<AdministratorCommissioning::Feature>{});
@@ -74,10 +74,15 @@ CHIP_ERROR RootNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataMod
                                        BitFlags<WiFiNetworkDiagnostics::Feature>{});
     ReturnErrorOnFailure(provider.AddCluster(mWiFiDiagnosticsServerCluster.Registration()));
 
-    mAccessControlCluster.Create(AccessControlCluster::OptionalAttributeSet{});
+    mAccessControlCluster.Create();
     ReturnErrorOnFailure(provider.AddCluster(mAccessControlCluster.Registration()));
 
-    mOperationalCredentialsCluster.Create(mEndpointId);
+    mOperationalCredentialsCluster.Create(mEndpointId, OperationalCredentialsCluster::Context{ .fabricTable     = Server::GetInstance().GetFabricTable(),
+                                                .failSafeContext = Server::GetInstance().GetFailSafeContext(),
+                                                .sessionManager  = Server::GetInstance().GetSecureSessionManager(),
+                                                .dnssdServer     = app::DnssdServer::Instance(),
+                                                .commissioningWindowManager =
+                                                    Server::GetInstance().GetCommissioningWindowManager() });
     ReturnErrorOnFailure(provider.AddCluster(mOperationalCredentialsCluster.Registration()));
 
     mNetworkCommissioningCluster.Create(mEndpointId, &mWifiDriver);

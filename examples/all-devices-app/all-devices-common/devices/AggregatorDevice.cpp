@@ -15,6 +15,7 @@
  *    limitations under the License.
  */
 #include <devices/AggregatorDevice.h>
+#include <app/TimerDelegates.h>
 
 using namespace chip::app::Clusters;
 
@@ -29,11 +30,11 @@ DeviceType AggregatorDevice::GetDeviceType() const
 
 CHIP_ERROR AggregatorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kAggregator),
+    const Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kAggregator),
                                                        .revision   = kAggregatorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
-    mIdentifyCluster.Create(endpoint);
+    mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, *std::make_unique<DefaultTimerDelegate>()));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
     return provider.AddEndpoint(mEndpointRegistration);

@@ -17,7 +17,7 @@
 #pragma once
 
 #include <cluster-impl/groups-cluster.h>
-#include <cluster-impl/identify-cluster.h>
+#include <app/clusters/identify-server/IdentifyCluster.h>
 #include <cluster-impl/on-off-cluster.h>
 #include <devices/Device.h>
 

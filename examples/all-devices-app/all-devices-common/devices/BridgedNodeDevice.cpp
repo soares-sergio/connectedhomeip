@@ -29,7 +29,7 @@ DeviceType BridgedNodeDevice::GetDeviceType() const
 
 CHIP_ERROR BridgedNodeDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kBridgedNodeDevice),
+    const Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kBridgedNodeDevice),
                                                        .revision   = kBridgedNodeDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 

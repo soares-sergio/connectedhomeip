@@ -29,11 +29,11 @@ DeviceType OccupancySensorDevice::GetDeviceType() const
 
 CHIP_ERROR OccupancySensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kOccupancySensor),
+    const Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = static_cast<DeviceTypeId>(DeviceType::kOccupancySensor),
                                                        .revision   = kOccupancySensorDeviceTypeRevision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
-    mIdentifyCluster.Create(endpoint);
+    mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, *std::make_unique<DefaultTimerDelegate>()));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
     mOccupancySensingCluster.Create(endpoint, BitFlags<OccupancySensing::Feature>(0));

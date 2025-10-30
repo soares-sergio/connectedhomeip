@@ -8,13 +8,13 @@ namespace chip::app {
 constexpr uint16_t kBridgedNodeDeviceTypeRevision = 3;
 
 CHIP_ERROR Device::RegisterDescriptor(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
-                                      const Clusters::DescriptorCluster::DeviceType & deviceType, EndpointId parentId)
+                                      const Clusters::Descriptor::Structs::DeviceTypeStruct::Type & deviceType, EndpointId parentId)
 {
     VerifyOrReturnError(mEndpointId == kInvalidEndpointId, CHIP_ERROR_INCORRECT_STATE);
     mDeviceType = deviceType;
     mEndpointId = endpoint;
 
-    mDescriptorCluster.Create(endpoint, BitFlags<Descriptor::Feature>(0));
+    mDescriptorCluster.Create(endpoint, DescriptorCluster::OptionalAttributesSet(0), Span<const SemanticTag>());
     ReturnErrorOnFailure(provider.AddCluster(mDescriptorCluster.Registration()));
 
     mEndpointRegistration.endpointEntry = DataModel::EndpointEntry{

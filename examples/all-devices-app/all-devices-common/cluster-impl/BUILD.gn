@@ -168,9 +168,9 @@ source_set("groups-cluster") {
   ]
 
   public_deps = [
-    ":identify",
     "${chip_root}/src/app:attribute-access",
     "${chip_root}/src/app:interaction-model",
+    "${chip_root}/src/app/clusters/identify-server",
     "${chip_root}/src/app/data-model-provider:metadata",
     "${chip_root}/src/app/server-cluster",
     "${chip_root}/src/credentials",
@@ -188,13 +188,9 @@ source_set("groups-cluster") {
 
 group("cluster-impl") {
   public_deps = [
-    ":access-control-cluster",
-    ":boolean-state-cluster",
     ":bridged-device-basic-information",
     ":groups-cluster",
-    ":identify",
     ":occupancy-sensor",
     ":on-off-cluster",
-    ":operational-credentials-cluster",
   ]
 }

@@ -26,6 +26,7 @@
 #include <app/clusters/general-diagnostics-server/general-diagnostics-cluster.h>
 #include <app/clusters/group-key-mgmt-server/group-key-mgmt-cluster.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
+#include <app/clusters/identify-server/IdentifyCluster.h>
 #include <app/clusters/software-diagnostics-server/software-diagnostics-cluster.h>
 #include <app/clusters/wifi-network-diagnostics-server/wifi-network-diagnostics-cluster.h>
 #include <app/persistence/DefaultAttributePersistenceProvider.h>
@@ -44,12 +45,6 @@
 #include <LinuxCommissionableDataProvider.h>
 #include <Rpc.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
-
-// Code driven clusters made for this app, these are clusters that
-// need some additional work before landing upstream
-#include <cluster-impl/access-control-cluster.h>
-#include <cluster-impl/identify-cluster.h>
-#include <cluster-impl/operational-credentials-cluster.h>
 
 #if defined(CHIP_IMGUI_ENABLED) && CHIP_IMGUI_ENABLED
 #include <imgui_ui/ui.h>

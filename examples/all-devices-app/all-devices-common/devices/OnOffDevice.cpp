@@ -19,11 +19,11 @@
 using namespace chip::app::Clusters;
 
 namespace {
-class IsDeviceIdendifyingImpl : public IsDeviceIdentifying
-{
-public:
-    bool IsIdentifying() const override { return false; }
-};
+// class IsDeviceIdendifyingImpl : public IsDeviceIdentifying
+// {
+// public:
+//     bool IsIdentifying() const override { return false; }
+// };
 
 constexpr uint16_t kOnOffLightDeviceTypeRevision = 3;
 constexpr uint16_t kOnOffPlugDeviceTypeRevision  = 4;
@@ -56,18 +56,17 @@ CHIP_ERROR OnOffDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelP
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
 
-    const DescriptorCluster::DeviceType deviceType = { .deviceType = deviceTypeId, .revision = revision };
+    const Descriptor::Structs::DeviceTypeStruct::Type deviceType = { .deviceType = deviceTypeId, .revision = revision };
     ReturnErrorOnFailure(RegisterDescriptor(endpoint, provider, deviceType, parentId));
 
-    mIdentifyCluster.Create(endpoint);
+    mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, *std::make_unique<DefaultTimerDelegate>()));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
     const OnOffCluster::OptionalAttributeSet optionalAttributeSet;
     mOnOffCluster.Create(endpoint, optionalAttributeSet, BitFlags<OnOff::Feature>(0));
     ReturnErrorOnFailure(provider.AddCluster(mOnOffCluster.Registration()));
 
-    const IsDeviceIdendifyingImpl identifying;
-    mGroupsCluster.Create(endpoint, BitFlags<Groups::Feature>(0), identifying);
+    mGroupsCluster.Create(endpoint, BitFlags<Groups::Feature>(0));
     ReturnErrorOnFailure(provider.AddCluster(mGroupsCluster.Registration()));
 
     return provider.AddEndpoint(mEndpointRegistration);

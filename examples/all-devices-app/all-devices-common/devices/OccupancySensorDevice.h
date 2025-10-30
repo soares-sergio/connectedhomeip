@@ -16,7 +16,7 @@
  */
 #pragma once
 
-#include <cluster-impl/identify-cluster.h>
+#include <app/clusters/identify-server/IdentifyCluster.h>
 #include <cluster-impl/occupancy-sensor-cluster.h>
 #include <devices/Device.h>
 
