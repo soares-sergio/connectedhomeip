@@ -17,6 +17,7 @@
 #include <devices/chime/impl/LoggingChimeDevice.h>
 #include <lib/support/StringBuilder.h>
 #include <lib/support/logging/CHIPLogging.h>
+#include <cstdlib>
 
 using namespace chip::app::Clusters;
 
@@ -68,6 +69,16 @@ Protocols::InteractionModel::Status LoggingChimeDevice::PlayChimeSound(uint8_t c
     }
 
     ChipLogProgress(AppServer, "LoggingChimeDevice: Playing sound %s", chip::NullTerminated(soundName).c_str());
+
+    if (chimeID == 0)
+    {
+        system("ffplay -nodisp -autoexit -loglevel quiet \"dragon-studio-doorbell-ding-dong-482879.mp3\" &");
+    }
+    else if (chimeID == 1)
+    {
+        system("ffplay -nodisp -autoexit -loglevel quiet \"freesound_community-cellfone_dexter-44376.mp3\" &");
+    }
+
     return Protocols::InteractionModel::Status::Success;
 }
 
