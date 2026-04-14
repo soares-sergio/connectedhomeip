@@ -188,12 +188,26 @@ void RunApplication(AppMainLoopImplementation * mainLoop = nullptr)
         .groupDataProvider = gGroupDataProvider,                     //
         .fabricTable       = Server::GetInstance().GetFabricTable(), //
         .timerDelegate     = gTimerDelegate,                         //
-
     });
 
     static chip::CommonCaseDeviceServerInitParams initParams;
 
     SuccessOrDie(initParams.InitializeStaticResourcesBeforeServerInit());
+
+
+#ifdef CHIP_CONFIG_KVS_PATH
+    CHIP_ERROR kvsErr = CHIP_NO_ERROR;
+    const char * kvsPath = LinuxDeviceOptions::GetInstance().KVS;
+    if (kvsPath == nullptr)
+    {
+        kvsPath = CHIP_CONFIG_KVS_PATH;
+    }
+    ChipLogProgress(AppServer, "Using KVS path: %s", kvsPath);
+    kvsErr = DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(kvsPath);
+    SuccessOrDie(kvsErr);
+#endif
+
+     // TODO: also hook-up commissioning method and discriminator/passcode from command line options
 
     gGroupDataProvider.SetStorageDelegate(initParams.persistentStorageDelegate);
     Credentials::SetGroupDataProvider(&gGroupDataProvider);
