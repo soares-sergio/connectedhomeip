@@ -4,13 +4,13 @@ import subprocess
 import sys
 
 
-def run_command(command, check=True):
+def run_command(command, check=True, capture=True):
     print(f"Running: {' '.join(command)}")
     try:
         result = subprocess.run(
-            command, check=check, text=True, capture_output=True
+            command, check=check, text=True, capture_output=capture
         )
-        return result.stdout
+        return result.stdout if capture else None
     except subprocess.CalledProcessError as e:
         print(f"Error running command: {e}")
         print(f"Stderr: {e.stderr}")
@@ -40,7 +40,7 @@ def main():
         run_command(["git", "add", test_file])
 
         # 4. Test "Just Restyle" (should fix trailing space)
-        run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "continue"])
+        run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "continue"], capture=False)
 
         with open(test_file, "r") as f:
             content = f.read()
@@ -69,7 +69,7 @@ def main():
         # Introduce uncommitted changes (edits)
         with open(test_file, "a") as f:
             f.write("# some edit\n")
-            
+
         # Run with abort, should fail
         print("Testing --on-uncommitted abort...")
         result = run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "abort"], check=False)
@@ -85,10 +85,10 @@ def main():
             f.write("import os \n")
         with open(test_file, "a") as f:
             f.write("# some edit\n")
-            
+
         print("Testing --on-uncommitted commit...")
         run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "commit"])
-        
+
         # Verify pre-restyle commit exists
         log_out = run_command(["git", "log", "-n", "2", "--oneline"])
         if "Pre-restyle commit" in log_out:
