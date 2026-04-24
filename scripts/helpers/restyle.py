@@ -51,7 +51,7 @@ def main() -> None:
     has_uncommitted = False
     if status_out:
         for line in status_out.splitlines():
-            if not line.startswith("??") and not line.startswith(" M third_party/"): 
+            if not line.startswith("??") and not line.startswith(" M third_party/"):
                 has_uncommitted = True
                 break
 
@@ -63,7 +63,7 @@ def main() -> None:
             print("  1. Abort")
             print("  2. Commit changes before running restyle")
             print("  3. Just restyle and commit all changes later")
-            
+
             choice = input("Enter choice [1-3]: ").strip()
             if choice == "1":
                 mode = "abort"
@@ -80,24 +80,26 @@ def main() -> None:
             sys.exit(1)
         elif mode == "commit":
             print("Committing uncommitted changes...")
-            run_command(["git", "add", "-u"]) # Add all tracked modifications
+            run_command(["git", "add", "-u"])  # Add all tracked modifications
             run_command(["git", "commit", "-m", "Pre-restyle commit of uncommitted changes"])
         elif mode == "continue":
             print("Continuing with uncommitted changes...")
 
     # 1. Find paths to restyle
-    git_cmd = ["git", "diff", "--ignore-submodules", "--name-only", "--merge-base", args.ref]
+    git_cmd = ["git", "diff", "--ignore-submodules", "--name-only", args.ref]
     paths_out = run_command(git_cmd)
-    
+
     paths = []
     if paths_out:
         paths = paths_out.splitlines()
-        
+
     if not paths:
         print("No files need restyling.")
         return
 
-    print(f"Found {len(paths)} files to restyle.")
+    print(f"Found {len(paths)} files to restyle:")
+    for p in paths:
+        print(f"  {p}")
 
     # 2. Run restyle command
     restyle_cmd = ["restyle", "--config-file=.restyled.yaml"] + paths
