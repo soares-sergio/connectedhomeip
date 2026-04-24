@@ -34,7 +34,7 @@ def main():
     try:
         # 3. Create a file with style issue
         with open(test_file, "w") as f:
-            f.write("import os \n")  # Trailing space
+            f.write("a = 1 \n")  # Trailing space
 
         # Track the file so git diff sees it
         run_command(["git", "add", test_file])
@@ -44,7 +44,7 @@ def main():
 
         with open(test_file, "r") as f:
             content = f.read()
-        if content == "import os\n":
+        if content == "a = 1\n":
             print("SUCCESS: Just Restyle worked.")
         else:
             print("FAILURE: Just Restyle failed.")
@@ -54,7 +54,7 @@ def main():
         # 5. Test "Restyle and Commit"
         # Add bug again
         with open(test_file, "w") as f:
-            f.write("import os \n")
+            f.write("a = 1 \n")
 
         run_command(["python3", "scripts/helpers/restyle.py", "--commit", "--on-uncommitted", "continue"])
 
@@ -83,7 +83,7 @@ def main():
         # 7. Test "--on-uncommitted commit"
         # Add bug again
         with open(test_file, "w") as f:
-            f.write("import os \n")
+            f.write("a = 1 \n")
         with open(test_file, "a") as f:
             f.write("# some edit\n")
 
