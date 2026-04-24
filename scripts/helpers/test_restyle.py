@@ -48,6 +48,7 @@ def main():
             print("SUCCESS: Just Restyle worked.")
         else:
             print("FAILURE: Just Restyle failed.")
+            print(f"Actual file content: '{content}'")
             sys.exit(1)
 
         # 5. Test "Restyle and Commit"
