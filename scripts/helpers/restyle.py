@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-import argparse 
-import os
+import argparse
 import subprocess
 import sys
 from typing import List, Optional
@@ -52,13 +51,14 @@ def main() -> None:
     # 2. If --commit or --push, handle Git operations
     if args.commit or args.push:
         # Check for modified tracked files after restyle
-        status_out = run_command(["git", "status", "--porcelain"])
+        diff_out = run_command(["git", "diff", "--name-only"])
 
         modified_files = []
-        if status_out:
-            for line in status_out.splitlines():
-                if line.startswith(" M "):
-                    modified_files.append(line[3:])
+        if diff_out:
+            for line in diff_out.splitlines():
+                path = line.strip()
+                if path and not path.startswith("third_party/"):
+                    modified_files.append(path)
 
         if not modified_files:
             print("No files were modified by the restyler.")
