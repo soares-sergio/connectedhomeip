@@ -73,7 +73,7 @@ def main():
 
         # Run with abort, should fail
         print("Testing --on-uncommitted abort...")
-        result = run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "abort"], check=False)
+        result = run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "abort"], check=False, capture=False)
         if result is None:
             print("SUCCESS: --on-uncommitted abort worked.")
         else:
@@ -101,7 +101,7 @@ def main():
     finally:
         # Cleanup
         print("Cleaning up...")
-        run_command(["git", "checkout", current_branch])
+        run_command(["git", "checkout", "-f", current_branch])
         run_command(["git", "branch", "-D", test_branch])
         if os.path.exists(test_file):
             os.remove(test_file)
