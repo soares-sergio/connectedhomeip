@@ -37,6 +37,10 @@ def main() -> None:
         default="origin",
         help="Remote name for pushing changes (default: origin)",
     )
+    parser.add_argument(
+        "--branch",
+        help="Target branch name for pushing (default: current branch)",
+    )
 
     parser.add_argument(
         "ref",
@@ -46,8 +50,6 @@ def main() -> None:
     )
 
     args = parser.parse_args()
-
-
 
     # 1. Find paths to restyle
     git_cmd = ["git", "diff", "--ignore-submodules", "--name-only", args.ref]
@@ -103,12 +105,14 @@ def main() -> None:
         branch_out = run_command(["git", "branch", "--show-current"])
         branch_name = branch_out.strip() if branch_out else ""
 
-        if not branch_name:
-            print("Error: Could not determine current branch name.")
+        target_branch = args.branch if args.branch else branch_name
+        
+        if not target_branch:
+            print("Error: Could not determine branch name to push.")
             sys.exit(1)
 
-        print(f"Pushing branch {branch_name} to {args.remote}...")
-        run_command(["git", "push", args.remote, branch_name])
+        print(f"Pushing branch {target_branch} to {args.remote}...")
+        run_command(["git", "push", args.remote, target_branch])
 
 
 if __name__ == "__main__":
