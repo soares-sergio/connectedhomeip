@@ -68,6 +68,30 @@ def main():
 
 
 
+        # 6. Test "--push" with custom remote (using a local bare repo as remote)
+        print("Testing --push with custom remote...")
+        
+        dummy_remote = "dummy_remote"
+        dummy_path = os.path.abspath("dummy_repo")
+        
+        # Create a bare repository to act as remote
+        os.makedirs(dummy_path, exist_ok=True)
+        run_command(["git", "init", "--bare", dummy_path])
+        
+        # Add the dummy remote to our test repo
+        run_command(["git", "remote", "add", dummy_remote, dummy_path])
+        
+        # Run with --push and --remote pointing to dummy
+        run_command(["python3", "scripts/helpers/restyle.py", "--push", "--remote", dummy_remote])
+        
+        # Verify that the branch was pushed to the dummy repo
+        dummy_status = run_command(["git", "-C", dummy_path, "branch"])
+        if test_branch in dummy_status:
+            print("SUCCESS: --push with custom remote worked.")
+        else:
+            print("FAILURE: --push with custom remote failed.")
+            sys.exit(1)
+
     finally:
         # Cleanup
         print("Cleaning up...")
@@ -75,6 +99,12 @@ def main():
         run_command(["git", "branch", "-D", test_branch])
         if os.path.exists(test_file):
             os.remove(test_file)
+            
+        # Clean up dummy repo
+        dummy_path = os.path.abspath("dummy_repo")
+        if os.path.exists(dummy_path):
+            import shutil
+            shutil.rmtree(dummy_path)
 
 
 if __name__ == "__main__":

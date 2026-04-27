@@ -32,6 +32,11 @@ def main() -> None:
     parser.add_argument(
         "--push", action="store_true", help="Push changes to tracking branch"
     )
+    parser.add_argument(
+        "--remote",
+        default="origin",
+        help="Remote name for pushing changes (default: origin)",
+    )
 
     parser.add_argument(
         "ref",
@@ -102,8 +107,8 @@ def main() -> None:
             print("Error: Could not determine current branch name.")
             sys.exit(1)
 
-        print(f"Pushing branch {branch_name} to origin...")
-        run_command(["git", "push", "origin", branch_name])
+        print(f"Pushing branch {branch_name} to {args.remote}...")
+        run_command(["git", "push", args.remote, branch_name])
 
 
 if __name__ == "__main__":
