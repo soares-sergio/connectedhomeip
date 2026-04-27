@@ -40,7 +40,7 @@ def main():
         run_command(["git", "add", test_file])
 
         # 4. Test "Just Restyle" (should fix trailing space)
-        run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "continue"], capture=False)
+        run_command(["python3", "scripts/helpers/restyle.py"], capture=False)
 
         with open(test_file, "r") as f:
             content = f.read()
@@ -56,7 +56,7 @@ def main():
         with open(test_file, "w") as f:
             f.write("a = 1 \n")
 
-        run_command(["python3", "scripts/helpers/restyle.py", "--commit", "--on-uncommitted", "continue"])
+        run_command(["python3", "scripts/helpers/restyle.py", "--commit"])
 
         # Check if committed
         log_out = run_command(["git", "log", "-n", "1", "--oneline"])
@@ -66,37 +66,7 @@ def main():
             print("FAILURE: Restyle and Commit failed.")
             sys.exit(1)
 
-        # 6. Test "--on-uncommitted abort"
-        # Introduce uncommitted changes (edits)
-        with open(test_file, "a") as f:
-            f.write("# some edit\n")
 
-        # Run with abort, should fail
-        print("Testing --on-uncommitted abort...")
-        result = run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "abort"], check=False, capture=False)
-        if result is None:
-            print("SUCCESS: --on-uncommitted abort worked.")
-        else:
-            print("FAILURE: --on-uncommitted abort failed.")
-            sys.exit(1)
-
-        # 7. Test "--on-uncommitted commit"
-        # Add bug again
-        with open(test_file, "w") as f:
-            f.write("a = 1 \n")
-        with open(test_file, "a") as f:
-            f.write("# some edit\n")
-
-        print("Testing --on-uncommitted commit...")
-        run_command(["python3", "scripts/helpers/restyle.py", "--on-uncommitted", "commit"])
-
-        # Verify pre-restyle commit exists
-        log_out = run_command(["git", "log", "-n", "2", "--oneline"])
-        if "Pre-restyle commit" in log_out:
-            print("SUCCESS: --on-uncommitted commit worked.")
-        else:
-            print("FAILURE: --on-uncommitted commit failed.")
-            sys.exit(1)
 
     finally:
         # Cleanup
