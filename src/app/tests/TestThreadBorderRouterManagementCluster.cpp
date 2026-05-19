@@ -207,6 +207,7 @@ public:
 
     static void TearDownTestSuite()
     {
+        sTestFailsafeContext.DisarmFailSafe();
         DeviceLayer::PlatformMgr().Shutdown();
         Platform::MemoryShutdown();
     }
@@ -291,7 +292,7 @@ TEST_F_FROM_FIXTURE(TestThreadBorderRouterManagementCluster, TestCommandHandle)
     req1.activeDataset = ByteSpan(invalidDataset);
     // SetActiveDatasetRequest is FailsafeRequired.
     EXPECT_EQ(sTestSeverInstance.HandleSetActiveDatasetRequest(ctx, req1), Status::FailsafeRequired);
-    EXPECT_EQ(sTestFailsafeContext.ArmFailSafe(kTestAccessingFabricIndex, System::Clock::Seconds16(1)), CHIP_NO_ERROR);
+    EXPECT_EQ(sTestFailsafeContext.ArmFailSafe(kTestAccessingFabricIndex, System::Clock::Seconds16(60)), CHIP_NO_ERROR);
     // SetActiveDatasetRequest should return InvalidCommand when dataset is invalid.
     EXPECT_EQ(sTestSeverInstance.HandleSetActiveDatasetRequest(ctx, req1), Status::InvalidCommand);
     req1.activeDataset = ByteSpan(validDataset);
@@ -312,7 +313,7 @@ TEST_F_FROM_FIXTURE(TestThreadBorderRouterManagementCluster, TestCommandHandle)
     activeDatasetTimestamp = sTestSeverInstance.ReadActiveDatasetTimestamp();
     // activeDatasetTimestamp should have value.
     EXPECT_TRUE(activeDatasetTimestamp.has_value());
-    EXPECT_EQ(sTestFailsafeContext.ArmFailSafe(kTestAccessingFabricIndex, System::Clock::Seconds16(1)), CHIP_NO_ERROR);
+    EXPECT_EQ(sTestFailsafeContext.ArmFailSafe(kTestAccessingFabricIndex, System::Clock::Seconds16(60)), CHIP_NO_ERROR);
     // When ActiveDatasetTimestamp is not null, the set active dataset request should return InvalidInState.
     EXPECT_EQ(sTestSeverInstance.HandleSetActiveDatasetRequest(ctx, req1), Status::InvalidInState);
     sTestFailsafeContext.DisarmFailSafe();
