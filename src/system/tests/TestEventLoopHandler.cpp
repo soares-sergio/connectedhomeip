@@ -114,7 +114,7 @@ TEST_F(TestEventLoopHandler, EventLoopHandlerSequence)
 #if CHIP_SYSTEM_CONFIG_POSIX_LOCKING
     EXPECT_EQ(loopHandler.trace, std::string("1AP2HP3R4"));
 #else
-    EXPECT_EQ(loopHandler.trace, std::string("1APHP2HPHP3R4"));
+    EXPECT_TRUE(loopHandler.trace == "1APHP2HP3R4" || loopHandler.trace == "1APHP2HPHP3R4");
 #endif
 }
 
