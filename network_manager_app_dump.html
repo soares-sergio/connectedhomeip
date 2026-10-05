@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matter Device Data Model Dump</title>
+  <style>
+    :root {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --secondary: #f1f5f9;
+      --muted-foreground: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-foreground: #ffffff;
+      --accent: #10b981;
+      --accent-bg: rgba(16, 185, 129, 0.14);
+      --accent-border: rgba(16, 185, 129, 0.35);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #0f172a;
+        --foreground: #f8fafc;
+        --card: #1e293b;
+        --secondary: #334155;
+        --muted-foreground: #94a3b8;
+        --border: #334155;
+        --primary: #3b82f6;
+        --primary-foreground: #ffffff;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input {
+      font-family: inherit;
+      color: inherit;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .title-row h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    h1, h2 { margin: 0; }
+    .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: var(--muted-foreground);
+    }
+    .badge-primary {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      background-color: var(--secondary);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+    }
+    .badge-accent {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background-color: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background-color: var(--secondary);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-active {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+      font-weight: 700;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .info-box {
+      background-color: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .info-label {
+      font-size: 11px;
+      color: var(--muted-foreground);
+    }
+    .info-val {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 2px;
+      word-break: break-word;
+    }
+    .search-input {
+      width: 100%;
+      margin-top: 14px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      background-color: var(--secondary);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input::placeholder { color: var(--muted-foreground); }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted-foreground);
+    }
+    .tree-scroll {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 75vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .nav-item {
+      width: 100%;
+      text-align: left;
+      padding: 7px 12px;
+      border-radius: 7px;
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.15s ease, opacity 0.15s ease;
+    }
+    .nav-item:hover { border-color: var(--primary); }
+    .nav-item.selected {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+    .nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mono { font-family: var(--font-mono); }
+    .muted { color: var(--muted-foreground); }
+    .selected .muted { color: var(--primary-foreground); opacity: 0.85; }
+    .pill-count {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background-color: var(--secondary);
+      color: var(--muted-foreground);
+      flex-shrink: 0;
+    }
+    .selected .pill-count {
+      background-color: rgba(0, 0, 0, 0.22);
+      color: var(--primary-foreground);
+    }
+    .tree-toggle {
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .tree-toggle:hover { background-color: rgba(0, 0, 0, 0.12); }
+    .overview-branch {
+      margin-left: 22px;
+      padding-left: 16px;
+      border-left: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .overview-node {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+    .overview-node:hover { border-color: var(--primary); }
+    .flex-wrap-gap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-divider {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .cluster-card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .cluster-header {
+      width: 100%;
+      text-align: left;
+      padding: 14px 20px;
+      background-color: var(--secondary);
+      border: none;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .cluster-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    table.attr-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+    table.attr-table th {
+      padding: 8px 12px 8px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted-foreground);
+      font-weight: 600;
+    }
+    table.attr-table td {
+      padding: 10px 12px 10px 0;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.attr-table tr:last-child td { border-bottom: none; }
+    pre.json-pre {
+      margin: 0;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: var(--secondary);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      overflow-x: auto;
+      max-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container"></div>
+
+  <script>
+    const DUMP_DATA = {"device_info":{"DataModelRevision":19,"VendorName":"TEST_VENDOR","VendorID":65521,"ProductName":"TEST_PRODUCT","ProductID":32787,"NodeLabel":"","Location":"XX","HardwareVersion":0,"HardwareVersionString":"TEST_VERSION","SoftwareVersion":1,"SoftwareVersionString":"1.0","ManufacturingDate":"20200101","PartNumber":"","ProductURL":"","ProductLabel":"","SerialNumber":"TEST_SN","LocalConfigDisabled":false,"Reachable":true,"UniqueID":"C3E57D3A3356D0D7","CapabilityMinima":{"CaseSessionsPerFabric":3,"SubscriptionsPerFabric":10000,"SimultaneousInvocationsSupported":4,"SimultaneousWritesSupported":4,"ReadPathsSupported":144,"SubscribePathsSupported":144},"SpecificationVersion":17170432,"MaxPathsPerInvoke":1,"ConfigurationVersion":1,"GeneratedCommandList":[],"AcceptedCommandList":[],"AttributeList":[0,1,2,3,4,5,6,7,8,9,10,19,21,22,24,11,12,13,14,15,16,17,18,65532,65533,65528,65529,65531],"FeatureMap":0,"ClusterRevision":6,"SpecificationVersionFormatted":"1.6.0 (0x01060000)"},"endpoints":[{"id":0,"label":"","device_types":[{"id":22,"hex":"0x0016","name":"Root Node","revision":5}],"semantic_tags":[],"server_list":[{"id":49,"hex":"0x0031","name":"Network Commissioning"},{"id":63,"hex":"0x003F","name":"Group Key Management"},{"id":62,"hex":"0x003E","name":"Operational Credentials"},{"id":60,"hex":"0x003C","name":"Administrator Commissioning"},{"id":51,"hex":"0x0033","name":"General Diagnostics"},{"id":48,"hex":"0x0030","name":"General Commissioning"},{"id":40,"hex":"0x0028","name":"Basic Information"},{"id":31,"hex":"0x001F","name":"Access Control"},{"id":29,"hex":"0x001D","name":"Descriptor"}],"client_list":[],"parts_list":[1],"parent_id":null,"children":[1],"breadcrumbs":[{"id":0,"summary":"Root Node"}],"clusters":[{"id":29,"hex":"0x001D","name":"Descriptor","revision":3,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"DeviceTypeList","type":"list[DeviceTypeStruct]","is_global":false,"value":[{"DeviceType":22,"Revision":5}]},{"id":1,"hex":"0x0001","name":"ServerList","type":"list[cluster-id]","is_global":false,"value":[49,63,62,60,51,48,40,31,29]},{"id":2,"hex":"0x0002","name":"ClientList","type":"list[cluster-id]","is_global":false,"value":[]},{"id":3,"hex":"0x0003","name":"PartsList","type":"list[endpoint-no]","is_global":false,"value":[1]},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]},{"id":40,"hex":"0x0028","name":"Basic Information","revision":6,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"DataModelRevision","type":"uint16","is_global":false,"value":19},{"id":1,"hex":"0x0001","name":"VendorName","type":"string","is_global":false,"value":"TEST_VENDOR"},{"id":2,"hex":"0x0002","name":"VendorID","type":"vendor-id","is_global":false,"value":65521},{"id":3,"hex":"0x0003","name":"ProductName","type":"string","is_global":false,"value":"TEST_PRODUCT"},{"id":4,"hex":"0x0004","name":"ProductID","type":"uint16","is_global":false,"value":32787},{"id":5,"hex":"0x0005","name":"NodeLabel","type":"string","is_global":false,"value":""},{"id":6,"hex":"0x0006","name":"Location","type":"string","is_global":false,"value":"XX"},{"id":7,"hex":"0x0007","name":"HardwareVersion","type":"uint16","is_global":false,"value":0},{"id":8,"hex":"0x0008","name":"HardwareVersionString","type":"string","is_global":false,"value":"TEST_VERSION"},{"id":9,"hex":"0x0009","name":"SoftwareVersion","type":"uint32","is_global":false,"value":1},{"id":10,"hex":"0x000A","name":"SoftwareVersionString","type":"string","is_global":false,"value":"1.0"},{"id":11,"hex":"0x000B","name":"ManufacturingDate","type":"string","is_global":false,"value":"20200101"},{"id":12,"hex":"0x000C","name":"PartNumber","type":"string","is_global":false,"value":""},{"id":13,"hex":"0x000D","name":"ProductURL","type":"string","is_global":false,"value":""},{"id":14,"hex":"0x000E","name":"ProductLabel","type":"string","is_global":false,"value":""},{"id":15,"hex":"0x000F","name":"SerialNumber","type":"string","is_global":false,"value":"TEST_SN"},{"id":16,"hex":"0x0010","name":"LocalConfigDisabled","type":"bool","is_global":false,"value":false},{"id":17,"hex":"0x0011","name":"Reachable","type":"bool","is_global":false,"value":true},{"id":18,"hex":"0x0012","name":"UniqueID","type":"string","is_global":false,"value":"C3E57D3A3356D0D7"},{"id":19,"hex":"0x0013","name":"CapabilityMinima","type":"CapabilityMinimaStruct","is_global":false,"value":{"CaseSessionsPerFabric":3,"SubscriptionsPerFabric":10000,"SimultaneousInvocationsSupported":4,"SimultaneousWritesSupported":4,"ReadPathsSupported":144,"SubscribePathsSupported":144}},{"id":21,"hex":"0x0015","name":"SpecificationVersion","type":"uint32","is_global":false,"value":17170432},{"id":22,"hex":"0x0016","name":"MaxPathsPerInvoke","type":"uint16","is_global":false,"value":1},{"id":24,"hex":"0x0018","name":"ConfigurationVersion","type":"uint32","is_global":false,"value":1},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,4,5,6,7,8,9,10,19,21,22,24,11,12,13,14,15,16,17,18,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":6}]},{"id":31,"hex":"0x001F","name":"Access Control","revision":3,"feature_map":2,"feature_map_hex":"0x0002","features":[{"mask":"0x0002","code":"MNGD","name":"ManagedDevice"}],"accepted_commands":[{"id":0,"hex":"0x00","name":"ReviewFabricRestrictions"}],"generated_commands":[{"id":1,"hex":"0x01","name":"ReviewFabricRestrictionsResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"ACL","type":"list[AccessControlEntryStruct]","is_global":false,"value":[{"Privilege":"Administer (5)","AuthMode":"CASE (2)","Subjects":[112233],"Targets":null,"254":1}]},{"id":2,"hex":"0x0002","name":"SubjectsPerAccessControlEntry","type":"uint16","is_global":false,"value":4},{"id":3,"hex":"0x0003","name":"TargetsPerAccessControlEntry","type":"uint16","is_global":false,"value":3},{"id":4,"hex":"0x0004","name":"AccessControlEntriesPerFabric","type":"uint16","is_global":false,"value":4},{"id":5,"hex":"0x0005","name":"CommissioningARL","type":"list[CommissioningAccessRestrictionEntryStruct]","is_global":false,"value":[]},{"id":6,"hex":"0x0006","name":"ARL","type":"list[AccessRestrictionEntryStruct]","is_global":false,"value":[]},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[1]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,2,3,4,5,6,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":2},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]},{"id":48,"hex":"0x0030","name":"General Commissioning","revision":2,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"ArmFailSafe"},{"id":2,"hex":"0x02","name":"SetRegulatoryConfig"},{"id":4,"hex":"0x04","name":"CommissioningComplete"}],"generated_commands":[{"id":1,"hex":"0x01","name":"ArmFailSafeResponse"},{"id":3,"hex":"0x03","name":"SetRegulatoryConfigResponse"},{"id":5,"hex":"0x05","name":"CommissioningCompleteResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"Breadcrumb","type":"uint64","is_global":false,"value":0},{"id":1,"hex":"0x0001","name":"BasicCommissioningInfo","type":"BasicCommissioningInfo","is_global":false,"value":{"FailSafeExpiryLengthSeconds":60,"MaxCumulativeFailsafeSeconds":900}},{"id":2,"hex":"0x0002","name":"RegulatoryConfig","type":"RegulatoryLocationTypeEnum","is_global":false,"value":"Indoor (0)"},{"id":3,"hex":"0x0003","name":"LocationCapability","type":"RegulatoryLocationTypeEnum","is_global":false,"value":"IndoorOutdoor (2)"},{"id":4,"hex":"0x0004","name":"SupportsConcurrentConnection","type":"bool","is_global":false,"value":true},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[1,3,5]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,2,4]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,4,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":2}]},{"id":49,"hex":"0x0031","name":"Network Commissioning","revision":3,"feature_map":4,"feature_map_hex":"0x0004","features":[{"mask":"0x0004","code":"ET","name":"EthernetNetworkInterface"}],"accepted_commands":[],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"MaxNetworks","type":"uint8","is_global":false,"value":1},{"id":1,"hex":"0x0001","name":"Networks","type":"list[NetworkInfoStruct]","is_global":false,"value":[{"NetworkID":"hex:656e7334","Connected":true}]},{"id":4,"hex":"0x0004","name":"InterfaceEnabled","type":"bool","is_global":false,"value":true},{"id":5,"hex":"0x0005","name":"LastNetworkingStatus","type":"NetworkCommissioningStatusEnum","is_global":false,"value":"Success (0)"},{"id":6,"hex":"0x0006","name":"LastNetworkID","type":"octstr","is_global":false,"value":"hex:656e7334"},{"id":7,"hex":"0x0007","name":"LastConnectErrorValue","type":"int32","is_global":false,"value":null},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,4,5,6,7,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":4},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]},{"id":51,"hex":"0x0033","name":"General Diagnostics","revision":3,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"TestEventTrigger"},{"id":1,"hex":"0x01","name":"TimeSnapshot"}],"generated_commands":[{"id":2,"hex":"0x02","name":"TimeSnapshotResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"NetworkInterfaces","type":"list[NetworkInterface]","is_global":false,"value":[{"Name":"docker0","IsOperational":false,"OffPremiseServicesReachableIPv4":null,"OffPremiseServicesReachableIPv6":null,"HardwareAddress":"hex:228383684915","IPv4Addresses":["hex:c0a80901"],"IPv6Addresses":["hex:fe800000000000000000000000000001"],"Type":"Unspecified (0)"},{"Name":"ens4","IsOperational":true,"OffPremiseServicesReachableIPv4":null,"OffPremiseServicesReachableIPv6":null,"HardwareAddress":"hex:4201ac1282e9","IPv4Addresses":["hex:ac1282e9"],"IPv6Addresses":["hex:fe800000000000000b9c7dc014f4459a"],"Type":"Ethernet (2)"},{"Name":"lo","IsOperational":true,"OffPremiseServicesReachableIPv4":null,"OffPremiseServicesReachableIPv6":null,"HardwareAddress":"hex:000000000000","IPv4Addresses":["hex:7f000001"],"IPv6Addresses":["hex:00000000000000000000000000000001"],"Type":"Unspecified (0)"}]},{"id":1,"hex":"0x0001","name":"RebootCount","type":"uint16","is_global":false,"value":1},{"id":2,"hex":"0x0002","name":"UpTime","type":"uint64","is_global":false,"value":27},{"id":3,"hex":"0x0003","name":"TotalOperationalHours","type":"uint32","is_global":false,"value":0},{"id":4,"hex":"0x0004","name":"BootReason","type":"BootReasonEnum","is_global":false,"value":"Unspecified (0)"},{"id":8,"hex":"0x0008","name":"TestEventTriggersEnabled","type":"bool","is_global":false,"value":false},{"id":10,"hex":"0x000A","name":"DeviceLoadStatus","type":"DeviceLoadStruct","is_global":false,"value":{"CurrentSubscriptions":0,"CurrentSubscriptionsForFabric":0,"TotalSubscriptionsEstablished":0,"TotalInteractionModelMessagesSent":14,"TotalInteractionModelMessagesReceived":15}},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[2]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,1]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,8,3,4,2,10,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]},{"id":60,"hex":"0x003C","name":"Administrator Commissioning","revision":1,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"OpenCommissioningWindow"},{"id":2,"hex":"0x02","name":"RevokeCommissioning"}],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"WindowStatus","type":"CommissioningWindowStatusEnum","is_global":false,"value":"WindowNotOpen (0)"},{"id":1,"hex":"0x0001","name":"AdminFabricIndex","type":"fabric-idx","is_global":false,"value":null},{"id":2,"hex":"0x0002","name":"AdminVendorId","type":"vendor-id","is_global":false,"value":null},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,2]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":1}]},{"id":62,"hex":"0x003E","name":"Operational Credentials","revision":2,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"AttestationRequest"},{"id":2,"hex":"0x02","name":"CertificateChainRequest"},{"id":4,"hex":"0x04","name":"CSRRequest"},{"id":6,"hex":"0x06","name":"AddNOC"},{"id":7,"hex":"0x07","name":"UpdateNOC"},{"id":9,"hex":"0x09","name":"UpdateFabricLabel"},{"id":10,"hex":"0x0A","name":"RemoveFabric"},{"id":11,"hex":"0x0B","name":"AddTrustedRootCertificate"},{"id":12,"hex":"0x0C","name":"SetVIDVerificationStatement"},{"id":13,"hex":"0x0D","name":"SignVIDVerificationRequest"}],"generated_commands":[{"id":1,"hex":"0x01","name":"AttestationResponse"},{"id":3,"hex":"0x03","name":"CertificateChainResponse"},{"id":5,"hex":"0x05","name":"CSRResponse"},{"id":8,"hex":"0x08","name":"NOCResponse"},{"id":14,"hex":"0x0E","name":"SignVIDVerificationResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"NOCs","type":"list[NOCStruct]","is_global":false,"value":[{"NOC":"hex:1530010101240201370324130218260480228127260580254d3a37062415012611214334121824070124080130094104cdd8158bc57e83e5c36f370e487cc2e211d6826ccd342863bcc882a4dd54e596501068c87eeaa04fbff72e7094447966cf162405b45476f5b834ca3ff2aa5dbe370a350128011824020136030402040118300414b18928488043aacb3677933c07e0105e3f6195f2300514c8caf58a3ed6840abf37259fad0259f2d984da8f30067930770603551d110470046e414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414118300b40493bde83b485b0e0098c06291c2e384d05a282a3b33202748231e210a0f71c334f73241da43a3486b0b3c2bbd9d2bb0afa6e63b013796bdb70005cf61a53ea2a18","ICAC":"hex:1530010101240201370324140118260480228127260580254d3a370624130218240701240801300941041d44c087a16d6eb0a15599ce2336f749463e94b59dc9c09405ca3300510ba18e718039fda553ecb416655db894014a38ca446449d0e0e03acf8390564fc8a9ff370a3501290118240260300414c8caf58a3ed6840abf37259fad0259f2d984da8f300514a9bd6327f809cab6cdc21263fd23312493d6bce73006a63081a30603551d1104819b048198414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414118300b40d9ba3ecb06de3cec3fd1333d122bc53a7bed9838e0042b21e6f37141c3313b7f1bf0143ba23af96b18befc2d476be7ab5ca9bdf97d76f6ff945ca5a6086a5db518","254":1}]},{"id":1,"hex":"0x0001","name":"Fabrics","type":"list[FabricDescriptorStruct]","is_global":false,"value":[{"RootPublicKey":"hex:043175b4c7e28f74d8f3e9adc517f3614893ce1d76ab9beefd479046e60c8d7e6c8c28aace6e8c3ec57d8709bc919b5593bb8bc9d22d79b3da2899a31d6f743984","VendorID":65521,"FabricID":1,"NodeID":305414945,"Label":"","254":1}]},{"id":2,"hex":"0x0002","name":"SupportedFabrics","type":"uint8","is_global":false,"value":16},{"id":3,"hex":"0x0003","name":"CommissionedFabrics","type":"uint8","is_global":false,"value":1},{"id":4,"hex":"0x0004","name":"TrustedRootCertificates","type":"list[octstr]","is_global":false,"value":["hex:1530010101240201370324140118260480228127260580254d3a370624140118240701240801300941043175b4c7e28f74d8f3e9adc517f3614893ce1d76ab9beefd479046e60c8d7e6c8c28aace6e8c3ec57d8709bc919b5593bb8bc9d22d79b3da2899a31d6f743984370a3501290118240260300414a9bd6327f809cab6cdc21263fd23312493d6bce7300514a9bd6327f809cab6cdc21263fd23312493d6bce73006a63081a30603551d1104819b048198414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414118300b40bc0cceb92d07287cacd781669e43f0a98186d45a00a6d95bcecf449a6911648b949e69c92cab3c79289006d3b45d7dc9aa7e6ceb972cd1fca38874cf465aef8518"]},{"id":5,"hex":"0x0005","name":"CurrentFabricIndex","type":"uint8","is_global":false,"value":1},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[1,3,5,8,14]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,2,4,6,7,9,10,11,12,13]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,4,5,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":2}]},{"id":63,"hex":"0x003F","name":"Group Key Management","revision":3,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"KeySetWrite"},{"id":1,"hex":"0x01","name":"KeySetRead"},{"id":3,"hex":"0x03","name":"KeySetRemove"},{"id":4,"hex":"0x04","name":"KeySetReadAllIndices"}],"generated_commands":[{"id":5,"hex":"0x05","name":"KeySetReadAllIndicesResponse"},{"id":2,"hex":"0x02","name":"KeySetReadResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"GroupKeyMap","type":"list[GroupKeyMapStruct]","is_global":false,"value":[]},{"id":1,"hex":"0x0001","name":"GroupTable","type":"list[GroupInfoMapStruct]","is_global":false,"value":[]},{"id":2,"hex":"0x0002","name":"MaxGroupsPerFabric","type":"uint16","is_global":false,"value":5},{"id":3,"hex":"0x0003","name":"MaxGroupKeysPerFabric","type":"uint16","is_global":false,"value":4},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[5,2]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,1,3,4]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]}]},{"id":1,"label":"","device_types":[{"id":144,"hex":"0x0090","name":"Network Infrastructure Manager","revision":1}],"semantic_tags":[],"server_list":[{"id":1107,"hex":"0x0453","name":"Thread Network Directory"},{"id":1106,"hex":"0x0452","name":"Thread Border Router Management"},{"id":1105,"hex":"0x0451","name":"Wi-Fi Network Management"},{"id":1104,"hex":"0x0450","name":"Cluster 0x0450"},{"id":53,"hex":"0x0035","name":"Thread Network Diagnostics"},{"id":29,"hex":"0x001D","name":"Descriptor"}],"client_list":[],"parts_list":[],"parent_id":0,"children":[],"breadcrumbs":[{"id":0,"summary":"Root Node"},{"id":1,"summary":"Network Infrastructure Manager"}],"clusters":[{"id":29,"hex":"0x001D","name":"Descriptor","revision":3,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"DeviceTypeList","type":"list[DeviceTypeStruct]","is_global":false,"value":[{"DeviceType":144,"Revision":1}]},{"id":1,"hex":"0x0001","name":"ServerList","type":"list[cluster-id]","is_global":false,"value":[1107,1106,1105,1104,53,29]},{"id":2,"hex":"0x0002","name":"ClientList","type":"list[cluster-id]","is_global":false,"value":[]},{"id":3,"hex":"0x0003","name":"PartsList","type":"list[endpoint-no]","is_global":false,"value":[]},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]},{"id":53,"hex":"0x0035","name":"Thread Network Diagnostics","revision":3,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"Channel","type":"uint16","is_global":false,"value":null},{"id":1,"hex":"0x0001","name":"RoutingRole","type":"RoutingRoleEnum","is_global":false,"value":null},{"id":2,"hex":"0x0002","name":"NetworkName","type":"string","is_global":false,"value":null},{"id":3,"hex":"0x0003","name":"PanId","type":"uint16","is_global":false,"value":null},{"id":4,"hex":"0x0004","name":"ExtendedPanId","type":"uint64","is_global":false,"value":null},{"id":5,"hex":"0x0005","name":"MeshLocalPrefix","type":"ipv6pre","is_global":false,"value":null},{"id":7,"hex":"0x0007","name":"NeighborTable","type":"list[NeighborTableStruct]","is_global":false,"value":[]},{"id":8,"hex":"0x0008","name":"RouteTable","type":"list[RouteTableStruct]","is_global":false,"value":[]},{"id":9,"hex":"0x0009","name":"PartitionId","type":"uint32","is_global":false,"value":null},{"id":10,"hex":"0x000A","name":"Weighting","type":"uint16","is_global":false,"value":null},{"id":11,"hex":"0x000B","name":"DataVersion","type":"uint16","is_global":false,"value":null},{"id":12,"hex":"0x000C","name":"StableDataVersion","type":"uint16","is_global":false,"value":null},{"id":13,"hex":"0x000D","name":"LeaderRouterId","type":"uint8","is_global":false,"value":null},{"id":59,"hex":"0x003B","name":"SecurityPolicy","type":"SecurityPolicy","is_global":false,"value":null},{"id":60,"hex":"0x003C","name":"ChannelPage0Mask","type":"octstr","is_global":false,"value":null},{"id":61,"hex":"0x003D","name":"OperationalDatasetComponents","type":"OperationalDatasetComponents","is_global":false,"value":null},{"id":62,"hex":"0x003E","name":"ActiveNetworkFaultsList","type":"list[NetworkFaultEnum]","is_global":false,"value":[]},{"id":63,"hex":"0x003F","name":"ExtAddress","type":"uint64","is_global":false,"value":null},{"id":64,"hex":"0x0040","name":"Rloc16","type":"uint16","is_global":false,"value":null},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,4,5,7,8,9,10,11,12,13,59,60,61,62,63,64,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":3}]},{"id":1104,"hex":"0x0450","name":"Cluster 0x0450","revision":1,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"Command 0x00"},{"id":2,"hex":"0x02","name":"Command 0x02"},{"id":3,"hex":"0x03","name":"Command 0x03"},{"id":64,"hex":"0x40","name":"Command 0x40"},{"id":65,"hex":"0x41","name":"Command 0x41"}],"generated_commands":[{"id":1,"hex":"0x01","name":"Command 0x01"},{"id":4,"hex":"0x04","name":"Command 0x04"},{"id":66,"hex":"0x42","name":"Command 0x42"}],"attributes":[{"id":0,"hex":"0x0000","name":"Attribute 0x0000","type":"ARRAY-?","is_global":false,"value":[]},{"id":1,"hex":"0x0001","name":"Attribute 0x0001","type":"ARRAY-?","is_global":false,"value":[]},{"id":2,"hex":"0x0002","name":"Attribute 0x0002","type":"UINT","is_global":false,"value":500},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[1,4,66]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,2,3,64,65]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":1}]},{"id":1105,"hex":"0x0451","name":"Wi-Fi Network Management","revision":1,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"NetworkPassphraseRequest"}],"generated_commands":[{"id":1,"hex":"0x01","name":"NetworkPassphraseResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"SSID","type":"octstr","is_global":false,"value":"hex:4d61747465724150"},{"id":1,"hex":"0x0001","name":"PassphraseSurrogate","type":"uint64","is_global":false,"value":1791233245822},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[1]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":1}]},{"id":1106,"hex":"0x0452","name":"Thread Border Router Management","revision":1,"feature_map":1,"feature_map_hex":"0x0001","features":[{"mask":"0x0001","code":"PC","name":"PANChange"}],"accepted_commands":[{"id":0,"hex":"0x00","name":"GetActiveDatasetRequest"},{"id":1,"hex":"0x01","name":"GetPendingDatasetRequest"},{"id":3,"hex":"0x03","name":"SetActiveDatasetRequest"},{"id":4,"hex":"0x04","name":"SetPendingDatasetRequest"}],"generated_commands":[],"attributes":[{"id":0,"hex":"0x0000","name":"BorderRouterName","type":"string","is_global":false,"value":"netman-br"},{"id":1,"hex":"0x0001","name":"BorderAgentID","type":"octstr","is_global":false,"value":"hex:00112233445566778899aabbccddeeff"},{"id":2,"hex":"0x0002","name":"ThreadVersion","type":"uint16","is_global":false,"value":5},{"id":3,"hex":"0x0003","name":"InterfaceEnabled","type":"bool","is_global":false,"value":false},{"id":4,"hex":"0x0004","name":"ActiveDatasetTimestamp","type":"uint64","is_global":false,"value":null},{"id":5,"hex":"0x0005","name":"PendingDatasetTimestamp","type":"uint64","is_global":false,"value":null},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,1,3,4]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,3,4,5,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":1},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":1}]},{"id":1107,"hex":"0x0453","name":"Thread Network Directory","revision":1,"feature_map":0,"feature_map_hex":"0x0000","features":[],"accepted_commands":[{"id":0,"hex":"0x00","name":"AddNetwork"},{"id":1,"hex":"0x01","name":"RemoveNetwork"},{"id":2,"hex":"0x02","name":"GetOperationalDataset"}],"generated_commands":[{"id":3,"hex":"0x03","name":"OperationalDatasetResponse"}],"attributes":[{"id":0,"hex":"0x0000","name":"PreferredExtendedPanID","type":"octstr","is_global":false,"value":null},{"id":1,"hex":"0x0001","name":"ThreadNetworks","type":"list[ThreadNetworkStruct]","is_global":false,"value":[]},{"id":2,"hex":"0x0002","name":"ThreadNetworkTableSize","type":"uint8","is_global":false,"value":32},{"id":65528,"hex":"0xFFF8","name":"GeneratedCommandList","type":"list[command-id]","is_global":true,"value":[3]},{"id":65529,"hex":"0xFFF9","name":"AcceptedCommandList","type":"list[command-id]","is_global":true,"value":[0,1,2]},{"id":65531,"hex":"0xFFFB","name":"AttributeList","type":"list[attrib-id]","is_global":true,"value":[0,1,2,65532,65533,65528,65529,65531]},{"id":65532,"hex":"0xFFFC","name":"FeatureMap","type":"bitmap32","is_global":true,"value":0},{"id":65533,"hex":"0xFFFD","name":"ClusterRevision","type":"uint16","is_global":true,"value":1}]}]}]};
+    const EP_BY_ID = Object.fromEntries(DUMP_DATA.endpoints.map(ep => [ep.id, ep]));
+
+    let selectedView = DUMP_DATA.endpoints.length > 2 ? 'tree' : (DUMP_DATA.endpoints[1]?.id ?? DUMP_DATA.endpoints[0]?.id ?? 0);
+    let searchQuery = '';
+    let showGlobalAttributes = false;
+    const collapsedClusters = new Set();
+    const collapsedTreeNodes = new Set();
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderValue(val) {
+      if (val === null || val === undefined) {
+        return `<span class="badge mono muted" style="font-style:italic">null</span>`;
+      }
+      if (typeof val === 'boolean') {
+        const cls = val ? 'badge-accent mono' : 'badge mono muted';
+        return `<span class="${cls}">${val}</span>`;
+      }
+      if (typeof val === 'number') {
+        const hex = val >= 0 ? `0x${val.toString(16).toUpperCase()}` : '';
+        return `<span class="mono">${val}${hex && val > 9 ? ` <span class="muted">(${hex})</span>` : ''}</span>`;
+      }
+      if (typeof val === 'string') {
+        if (val === '') {
+          return `<span class="mono muted" style="font-style:italic">"" (empty)</span>`;
+        }
+        return `<span class="mono" style="word-break:break-all">${escapeHtml(val)}</span>`;
+      }
+      if (Array.isArray(val)) {
+        if (val.length === 0) {
+          return `<span class="mono muted">[]</span>`;
+        }
+        const allPrimitive = val.every(item => typeof item !== 'object' || item === null);
+        if (allPrimitive && val.length <= 16) {
+          return `<div class="flex-wrap-gap">${val.map(item =>
+            `<span class="badge mono">${escapeHtml(item)}</span>`
+          ).join('')}</div>`;
+        }
+        return `<pre class="json-pre">${escapeHtml(JSON.stringify(val, null, 2))}</pre>`;
+      }
+      if (typeof val === 'object') {
+        return `<pre class="json-pre">${escapeHtml(JSON.stringify(val, null, 2))}</pre>`;
+      }
+      return `<span class="mono">${escapeHtml(String(val))}</span>`;
+    }
+
+    function endpointMatchesSearch(ep, query) {
+      if (!query) return true;
+      const q = query.toLowerCase();
+      if (`ep ${ep.id}`.includes(q) || `endpoint ${ep.id}`.includes(q) || String(ep.id) === q) return true;
+      if (ep.label && ep.label.toLowerCase().includes(q)) return true;
+      if (ep.device_types.some(dt => dt.name.toLowerCase().includes(q) || dt.hex.toLowerCase().includes(q))) return true;
+      if (ep.semantic_tags.some(t => t.display.toLowerCase().includes(q))) return true;
+      return ep.clusters.some(cl => matchesSearch(cl, query));
+    }
+
+    function subtreeMatchesSearch(epId, query) {
+      if (!query) return true;
+      const ep = EP_BY_ID[epId];
+      if (!ep) return false;
+      if (endpointMatchesSearch(ep, query)) return true;
+      return ep.children.some(cid => subtreeMatchesSearch(cid, query));
+    }
+
+    function matchesSearch(cluster, query) {
+      if (!query) return true;
+      const q = query.toLowerCase();
+      if (cluster.name.toLowerCase().includes(q) || cluster.hex.toLowerCase().includes(q) || String(cluster.id).includes(q)) {
+        return true;
+      }
+      if (cluster.attributes.some(a => a.name.toLowerCase().includes(q) || a.hex.toLowerCase().includes(q) || String(a.value).toLowerCase().includes(q))) {
+        return true;
+      }
+      if (cluster.accepted_commands.some(c => c.name.toLowerCase().includes(q) || c.hex.toLowerCase().includes(q))) {
+        return true;
+      }
+      if (cluster.generated_commands.some(c => c.name.toLowerCase().includes(q) || c.hex.toLowerCase().includes(q))) {
+        return true;
+      }
+      return false;
+    }
+
+    function selectEndpoint(viewOrEpId) {
+      selectedView = viewOrEpId;
+      render();
+    }
+
+    function toggleTreeNode(event, epId) {
+      event.stopPropagation();
+      if (collapsedTreeNodes.has(epId)) {
+        collapsedTreeNodes.delete(epId);
+      } else {
+        collapsedTreeNodes.add(epId);
+      }
+      render();
+    }
+
+    function expandOrCollapseTree(collapse) {
+      if (collapse) {
+        for (const ep of DUMP_DATA.endpoints) {
+          if (ep.children.length > 0 && ep.id !== 0 && ep.id !== 1) {
+            collapsedTreeNodes.add(ep.id);
+          }
+        }
+      } else {
+        collapsedTreeNodes.clear();
+      }
+      render();
+    }
+
+    function toggleCluster(key) {
+      if (collapsedClusters.has(key)) {
+        collapsedClusters.delete(key);
+      } else {
+        collapsedClusters.add(key);
+      }
+      render();
+    }
+
+    function jumpToCluster(epId, clusterId) {
+      selectedView = epId;
+      const key = `${epId}-${clusterId}`;
+      collapsedClusters.delete(key);
+      render();
+      const el = document.getElementById(`cluster-${key}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function expandOrCollapseAll(collapse) {
+      for (const ep of DUMP_DATA.endpoints) {
+        for (const cl of ep.clusters) {
+          const key = `${ep.id}-${cl.id}`;
+          if (collapse) {
+            collapsedClusters.add(key);
+          } else {
+            collapsedClusters.delete(key);
+          }
+        }
+      }
+      render();
+    }
+
+    function renderHeader() {
+      const info = DUMP_DATA.device_info || {};
+      const vendorName = info.VendorName || 'Matter Device';
+      const productName = info.ProductName || 'Data Model Dump';
+      const vid = info.VendorID !== undefined ? `0x${Number(info.VendorID).toString(16).toUpperCase().padStart(4, '0')} (${info.VendorID})` : 'N/A';
+      const pid = info.ProductID !== undefined ? `0x${Number(info.ProductID).toString(16).toUpperCase().padStart(4, '0')} (${info.ProductID})` : 'N/A';
+      const swVer = info.SoftwareVersionString ? `${info.SoftwareVersionString} (${info.SoftwareVersion ?? ''})` : (info.SoftwareVersion ?? 'N/A');
+      const dmRev = info.DataModelRevision ?? 'N/A';
+      const specVer = info.SpecificationVersionFormatted || 'N/A';
+
+      const totalEndpoints = DUMP_DATA.endpoints.length;
+      const totalClusters = DUMP_DATA.endpoints.reduce((acc, ep) => acc + ep.clusters.length, 0);
+      const totalAttrs = DUMP_DATA.endpoints.reduce((acc, ep) => acc + ep.clusters.reduce((cAcc, cl) => cAcc + cl.attributes.length, 0), 0);
+
+      return `
+        <div class="card">
+          <div class="header-top">
+            <div>
+              <div class="title-row">
+                <span class="badge-primary">Matter Data Model</span>
+                <h1 style="font-size:20px;font-weight:700">${escapeHtml(vendorName)} — ${escapeHtml(productName)}</h1>
+              </div>
+              <p class="subtitle">
+                Interactive runtime topology &amp; attribute dump across ${totalEndpoints} endpoints, ${totalClusters} cluster instances, and ${totalAttrs} attributes
+              </p>
+            </div>
+            <div class="flex-wrap-gap">
+              <button onclick="expandOrCollapseAll(false)" class="btn">Expand Clusters</button>
+              <button onclick="expandOrCollapseAll(true)" class="btn">Collapse Clusters</button>
+              <label class="btn" style="user-select:none">
+                <input type="checkbox" ${showGlobalAttributes ? 'checked' : ''} onchange="showGlobalAttributes = this.checked; render();">
+                <span>Show Global Attributes</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-box">
+              <div class="info-label">Vendor ID</div>
+              <div class="info-val">${escapeHtml(vid)}</div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Product ID</div>
+              <div class="info-val">${escapeHtml(pid)}</div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Software Version</div>
+              <div class="info-val">${escapeHtml(swVer)}</div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Specification Version</div>
+              <div class="info-val">${escapeHtml(specVer)}</div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Data Model Revision</div>
+              <div class="info-val">${escapeHtml(dmRev)}</div>
+            </div>
+          </div>
+
+          <input
+            id="search-input"
+            type="text"
+            value="${escapeHtml(searchQuery)}"
+            oninput="searchQuery = this.value; renderSidebarAndMain();"
+            placeholder="Filter endpoints, device labels (e.g., Closure, Oven, Chime), clusters, attributes, or commands..."
+            class="search-input"
+          />
+        </div>
+      `;
+    }
+
+    function renderSidebarTreeNode(epId, depth) {
+      const ep = EP_BY_ID[epId];
+      if (!ep || !subtreeMatchesSearch(epId, searchQuery)) return '';
+
+      const isSelected = selectedView === ep.id;
+      const hasChildren = ep.children.length > 0;
+      const isCollapsed = collapsedTreeNodes.has(ep.id) && !searchQuery;
+      const dtNames = ep.device_types.map(dt => dt.name).join(', ') || 'No Device Type';
+      const indentPx = depth * 14;
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div
+            onclick="selectEndpoint(${ep.id})"
+            style="margin-left:${indentPx}px;width:calc(100% - ${indentPx}px)"
+            class="nav-item ${isSelected ? 'selected' : ''}"
+          >
+            <div class="nav-row">
+              <div class="nav-left">
+                ${hasChildren ? `
+                  <button
+                    onclick="toggleTreeNode(event, ${ep.id})"
+                    class="tree-toggle"
+                    title="${isCollapsed ? 'Expand child endpoints' : 'Collapse child endpoints'}"
+                  >${isCollapsed ? '▶' : '▼'}</button>
+                ` : `<span class="mono muted" style="width:14px;text-align:center;font-size:11px">•</span>`}
+                <span class="mono" style="font-weight:700;font-size:12px;flex-shrink:0">EP ${ep.id}</span>
+                <span style="font-size:12px;font-weight:600;flex-shrink:0;margin-left:2px">${escapeHtml(dtNames)}</span>
+                ${ep.label ? `
+                  <span class="${isSelected ? 'pill-count' : 'badge-accent'} truncate" style="font-size:11px;padding:1px 7px;margin-left:6px;min-width:0;display:inline-block" title="${escapeHtml(ep.label)}">
+                    "${escapeHtml(ep.label)}"
+                  </span>
+                ` : ''}
+                ${ep.semantic_tags.map(t => `
+                  <span class="${isSelected ? 'pill-count' : 'badge mono'} truncate" style="font-size:10px;padding:1px 6px;margin-left:6px;min-width:0;display:inline-block" title="${escapeHtml(t.display)}">
+                    🏷 ${escapeHtml(t.tag_name)}
+                  </span>
+                `).join('')}
+              </div>
+              <span class="pill-count">${ep.clusters.length}c</span>
+            </div>
+          </div>
+
+          ${(hasChildren && !isCollapsed) ? `
+            <div style="display:flex;flex-direction:column;gap:5px">
+              ${ep.children.map(childId => renderSidebarTreeNode(childId, depth + 1)).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderSidebar() {
+      const treeSelected = selectedView === 'tree';
+      const allSelected = selectedView === 'all';
+      const rootEndpoints = DUMP_DATA.endpoints.filter(ep => ep.parent_id === null);
+
+      return `
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <span>Endpoint Hierarchy (${DUMP_DATA.endpoints.length})</span>
+            <div class="flex-wrap-gap">
+              <button onclick="expandOrCollapseTree(false)" class="btn" style="padding:2px 8px" title="Expand all tree nodes">+</button>
+              <button onclick="expandOrCollapseTree(true)" class="btn" style="padding:2px 8px" title="Collapse bridged nodes">−</button>
+            </div>
+          </div>
+
+          <button onclick="selectEndpoint('tree')" class="nav-item ${treeSelected ? 'selected' : ''}">
+            <div class="nav-row">
+              <span style="font-weight:600;font-size:13px">Topology Tree Overview</span>
+              <span class="pill-count">Tree</span>
+            </div>
+            <div class="muted" style="font-size:11px;margin-top:2px">
+              Interactive hierarchy of all ${DUMP_DATA.endpoints.length} endpoints
+            </div>
+          </button>
+
+          <button onclick="selectEndpoint('all')" class="nav-item ${allSelected ? 'selected' : ''}">
+            <div class="nav-row">
+              <span style="font-weight:600;font-size:12px">All Endpoints (Full Cluster List)</span>
+              <span class="pill-count">${DUMP_DATA.endpoints.length} EPs</span>
+            </div>
+          </button>
+
+          <div class="tree-scroll">
+            ${rootEndpoints.map(ep => renderSidebarTreeNode(ep.id, 0)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderOverviewTreeNode(epId, depth) {
+      const ep = EP_BY_ID[epId];
+      if (!ep || !subtreeMatchesSearch(epId, searchQuery)) return '';
+
+      const nonDescriptorClusters = ep.clusters.filter(c => c.id !== 29);
+      return `
+        <div class="${depth > 0 ? 'overview-branch' : ''}" style="display:flex;flex-direction:column;gap:10px">
+          <div onclick="selectEndpoint(${ep.id})" class="overview-node">
+            <div class="nav-row" style="flex-wrap:wrap">
+              <div class="flex-wrap-gap">
+                <span class="badge mono" style="font-weight:700">EP ${ep.id}</span>
+                ${ep.device_types.map(dt => `
+                  <span style="font-weight:700;font-size:14px">
+                    ${escapeHtml(dt.name)} <span class="mono muted" style="font-weight:400;font-size:12px">(${dt.hex}, Rev ${dt.revision})</span>
+                  </span>
+                `).join('<span class="muted">+</span>')}
+                ${ep.label ? `
+                  <span class="badge-accent">NodeLabel: "${escapeHtml(ep.label)}"</span>
+                ` : ''}
+                ${ep.semantic_tags.map(t => `
+                  <span class="badge mono">🏷 ${escapeHtml(t.display)}</span>
+                `).join('')}
+              </div>
+
+              <span class="mono muted" style="font-size:12px">
+                ${ep.clusters.length} clusters ${ep.children.length > 0 ? `• ${ep.children.length} direct children` : ''} →
+              </span>
+            </div>
+
+            ${nonDescriptorClusters.length > 0 ? `
+              <div class="flex-wrap-gap" style="margin-top:10px">
+                ${nonDescriptorClusters.map(cl => `
+                  <span
+                    onclick="event.stopPropagation(); jumpToCluster(${ep.id}, ${cl.id});"
+                    class="badge"
+                    style="cursor:pointer"
+                  >
+                    <span>${escapeHtml(cl.name)}</span>
+                    <span class="mono muted">${cl.hex}</span>
+                  </span>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+
+          ${ep.children.length > 0 ? `
+            <div style="display:flex;flex-direction:column;gap:10px">
+              ${ep.children.map(childId => renderOverviewTreeNode(childId, depth + 1)).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderTopologyTreeOverview() {
+      const rootEndpoints = DUMP_DATA.endpoints.filter(ep => ep.parent_id === null);
+      return `
+        <div class="card">
+          <div style="padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:14px">
+            <h2 style="font-size:16px;font-weight:700">Device Endpoint Composition Tree</h2>
+            <p class="subtitle">
+              Reconstructed parent-child hierarchy from Descriptor <code>PartsList</code>, <code>BridgedDeviceBasicInformation::NodeLabel</code>, and <code>TagList</code> semantic tags. Click any endpoint or cluster pill to inspect.
+            </p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${rootEndpoints.map(ep => renderOverviewTreeNode(ep.id, 0)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEndpointSection(ep) {
+      const filteredClusters = ep.clusters.filter(cl => matchesSearch(cl, searchQuery));
+      if (searchQuery && filteredClusters.length === 0 && !endpointMatchesSearch(ep, searchQuery)) {
+        return '';
+      }
+      const clustersToShow = filteredClusters.length > 0 ? filteredClusters : ep.clusters;
+
+      return `
+        <div style="margin-bottom:20px">
+          <div class="card">
+            ${ep.breadcrumbs.length > 1 ? `
+              <div class="flex-wrap-gap" style="padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border);font-size:12px">
+                <span class="muted" style="font-weight:600">Hierarchy Path:</span>
+                ${ep.breadcrumbs.map((b, idx) => {
+                  const isLast = idx === ep.breadcrumbs.length - 1;
+                  return `
+                    <button
+                      onclick="selectEndpoint(${b.id})"
+                      class="btn mono ${isLast ? 'btn-active' : ''}"
+                      style="padding:3px 8px"
+                    >
+                      EP ${b.id}: ${escapeHtml(b.summary)}
+                    </button>
+                    ${isLast ? '' : `<span class="muted">→</span>`}
+                  `;
+                }).join('')}
+              </div>
+            ` : ''}
+
+            <div class="flex-wrap-gap">
+              <span class="badge mono" style="font-size:14px;font-weight:700;padding:4px 12px">Endpoint ${ep.id}</span>
+              ${ep.device_types.map(dt => `
+                <span class="badge" style="font-weight:600">
+                  ${escapeHtml(dt.name)} <span class="mono muted">${dt.hex} (Rev ${dt.revision})</span>
+                </span>
+              `).join('')}
+              ${ep.label ? `
+                <span class="badge-accent">NodeLabel: "${escapeHtml(ep.label)}"</span>
+              ` : ''}
+              ${ep.semantic_tags.map(t => `
+                <span class="badge mono" style="font-weight:600">🏷 ${escapeHtml(t.display)}</span>
+              `).join('')}
+            </div>
+
+            ${ep.children.length > 0 ? `
+              <div class="section-divider">
+                <div class="muted" style="font-size:12px;font-weight:600;margin-bottom:8px">
+                  Direct Child Endpoints (${ep.children.length}) ${ep.parts_list.length !== ep.children.length ? `<span style="font-weight:400">(Descriptor PartsList has ${ep.parts_list.length} total descendants)</span>` : ''}:
+                </div>
+                <div class="flex-wrap-gap">
+                  ${ep.children.map(childId => {
+                    const childEp = EP_BY_ID[childId];
+                    const childDt = childEp ? childEp.device_types.map(d => d.name).join(', ') : '';
+                    const childLbl = childEp?.label ? ` "${childEp.label}"` : '';
+                    const childTags = childEp?.semantic_tags?.length ? ` [${childEp.semantic_tags.map(t => t.tag_name).join(', ')}]` : '';
+                    return `
+                      <button onclick="selectEndpoint(${childId})" class="btn">
+                        <span class="mono" style="font-weight:700">EP ${childId}</span>
+                        <span>${escapeHtml(childDt + childLbl + childTags)} →</span>
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="section-divider">
+              <div class="muted" style="font-size:12px;font-weight:600;margin-bottom:8px">
+                Server Clusters (${ep.server_list.length}) — click to jump:
+              </div>
+              <div class="flex-wrap-gap">
+                ${ep.server_list.map(sc => `
+                  <button onclick="jumpToCluster(${ep.id}, ${sc.id})" class="btn">
+                    <span>${escapeHtml(sc.name)}</span>
+                    <span class="mono muted">${sc.hex}</span>
+                  </button>
+                `).join('')}
+              </div>
+              ${ep.client_list.length > 0 ? `
+                <div class="muted" style="font-size:12px;font-weight:600;margin:10px 0 6px 0">
+                  Client Clusters (${ep.client_list.length}):
+                </div>
+                <div class="flex-wrap-gap">
+                  ${ep.client_list.map(cc => `
+                    <span class="badge">
+                      ${escapeHtml(cc.name)} <span class="mono muted">${cc.hex}</span>
+                    </span>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div>
+            ${clustersToShow.map(cl => renderClusterCard(ep.id, cl)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderClusterCard(epId, cl) {
+      const key = `${epId}-${cl.id}`;
+      const isCollapsed = collapsedClusters.has(key);
+      const visibleAttrs = cl.attributes.filter(a => showGlobalAttributes || !a.is_global);
+
+      return `
+        <div id="cluster-${key}" class="cluster-card">
+          <button onclick="toggleCluster('${key}')" class="cluster-header">
+            <div class="flex-wrap-gap">
+              <span class="mono muted" style="font-size:12px">${isCollapsed ? '▶' : '▼'}</span>
+              <span style="font-weight:700;font-size:15px">${escapeHtml(cl.name)}</span>
+              <span class="badge mono muted">${cl.hex} (${cl.id})</span>
+              ${cl.revision !== null ? `<span class="badge">Rev ${cl.revision}</span>` : ''}
+              ${cl.features.map(f => `
+                <span class="badge-accent mono">Feature: ${escapeHtml(f.code)} (${escapeHtml(f.name)})</span>
+              `).join('')}
+            </div>
+
+            <div class="mono muted" style="font-size:12px">
+              ${visibleAttrs.length} attrs • ${cl.accepted_commands.length} in / ${cl.generated_commands.length} out cmds
+            </div>
+          </button>
+
+          ${isCollapsed ? '' : `
+            <div class="cluster-body">
+              ${(cl.accepted_commands.length > 0 || cl.generated_commands.length > 0) ? `
+                <div class="cmd-grid">
+                  <div>
+                    <div class="muted" style="font-size:12px;font-weight:600;margin-bottom:6px">
+                      Accepted Commands (Client → Server) [${cl.accepted_commands.length}]
+                    </div>
+                    ${cl.accepted_commands.length === 0 ? `<span class="muted" style="font-size:12px;font-style:italic">None</span>` : `
+                      <div class="flex-wrap-gap">
+                        ${cl.accepted_commands.map(cmd => `
+                          <span class="badge">
+                            <span class="mono muted">${cmd.hex}</span> ${escapeHtml(cmd.name)}
+                          </span>
+                        `).join('')}
+                      </div>
+                    `}
+                  </div>
+                  <div>
+                    <div class="muted" style="font-size:12px;font-weight:600;margin-bottom:6px">
+                      Generated Commands (Server → Client) [${cl.generated_commands.length}]
+                    </div>
+                    ${cl.generated_commands.length === 0 ? `<span class="muted" style="font-size:12px;font-style:italic">None</span>` : `
+                      <div class="flex-wrap-gap">
+                        ${cl.generated_commands.map(cmd => `
+                          <span class="badge">
+                            <span class="mono muted">${cmd.hex}</span> ${escapeHtml(cmd.name)}
+                          </span>
+                        `).join('')}
+                      </div>
+                    `}
+                  </div>
+                </div>
+              ` : ''}
+
+              ${visibleAttrs.length === 0 ? `
+                <div class="muted" style="font-size:12px;font-style:italic">
+                  No cluster-specific attributes (enable "Show Global Attributes" above to view global attributes).
+                </div>
+              ` : `
+                <div style="overflow-x:auto">
+                  <table class="attr-table">
+                    <thead>
+                      <tr>
+                        <th style="width:110px">ID</th>
+                        <th style="width:220px">Attribute Name</th>
+                        <th style="width:150px">Type</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${visibleAttrs.map(attr => `
+                        <tr>
+                          <td class="mono muted" style="white-space:nowrap">
+                            ${attr.hex} <span style="opacity:0.75">(${attr.id})</span>
+                          </td>
+                          <td style="font-weight:500">
+                            ${escapeHtml(attr.name)}
+                            ${attr.is_global ? `<span class="badge muted" style="margin-left:6px;font-size:10px">Global</span>` : ''}
+                          </td>
+                          <td class="mono muted" style="white-space:nowrap">
+                            ${escapeHtml(attr.type)}
+                          </td>
+                          <td>
+                            ${renderValue(attr.value)}
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              `}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderMainContent() {
+      if (selectedView === 'tree') {
+        return renderTopologyTreeOverview();
+      }
+      const epsToRender = selectedView === 'all'
+        ? DUMP_DATA.endpoints
+        : DUMP_DATA.endpoints.filter(ep => ep.id === selectedView);
+
+      const content = epsToRender.map(ep => renderEndpointSection(ep)).join('');
+      return content || `
+        <div class="card muted" style="text-align:center;padding:32px;font-size:14px">
+          No endpoints, clusters, attributes, or commands matched "${escapeHtml(searchQuery)}".
+        </div>
+      `;
+    }
+
+    function renderSidebarAndMain() {
+      const sidebarEl = document.getElementById('sidebar-content');
+      const mainEl = document.getElementById('main-content');
+      if (sidebarEl) sidebarEl.innerHTML = renderSidebar();
+      if (mainEl) mainEl.innerHTML = renderMainContent();
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        ${renderHeader()}
+        <div class="main-grid">
+          <div id="sidebar-content">
+            ${renderSidebar()}
+          </div>
+          <div id="main-content">
+            ${renderMainContent()}
+          </div>
+        </div>
+      `;
+    }
+
+    render();
+  </script>
+</body>
+</html>
